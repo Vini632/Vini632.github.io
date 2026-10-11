@@ -5,6 +5,7 @@
  * Preencha após criar o projeto e executar supabase/schema.sql.
  */
 window.WORLDFORGE_CLOUD_CONFIG = {
-  url: '',
-  publishableKey: 'sb_publishable_A_UWfFS6GHU8c_0kiy8Aqg_DcBO6dCb'
+  url: 'https://urvtkpqpguxthjznmtyu.supabase.co',
+  publishableKey: 'sb_publishable_A_UWfFS6GHU8c_0kiy8Aqg_DcBO6dCb',
+  enabled: false
 };
