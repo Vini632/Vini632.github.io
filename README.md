@@ -464,10 +464,10 @@ O site continua estático. A camada opcional usa Supabase Auth e uma tabela Post
 
 1. Crie um projeto Supabase sob controle do mantenedor e configure a autenticação por e-mail.
 2. No SQL Editor do projeto, execute supabase/schema.sql.
-3. Em Authentication → URL Configuration, inclua a URL pública do Pages e a URL local de desenvolvimento nas URLs de redirecionamento.
+3. Em Authentication → URL Configuration, defina Site URL como https://vini632.github.io/ e inclua essa mesma URL em Redirect URLs. O cadastro envia o link de confirmação para esse endereço.
 4. Copie a Project URL e a publishable key (ou a chave legacy anon) para cloud-config.js. Esses identificadores são públicos em aplicações de navegador. Nunca use secret ou service_role no site.
 5. No aplicativo, abra Configurações → Dados & backup. A pessoa pode criar conta/entrar, enviar os mundos locais, mesclar cópias de sua conta ou apagar os mundos remotos.
 
 A conta requer e-mail e senha. Quando a confirmação de e-mail estiver habilitada no Supabase, a pessoa deve confirmar o endereço antes do primeiro login. O token de sessão fica no armazenamento local do navegador. O perfil visual (foto, banner e preferências) permanece local; a cópia remota inclui os mundos da biblioteca.
 
-O recurso fica inativo enquanto cloud-config.js estiver vazio. Para publicar a integração ativa, configure o projeto, confira região/termos do provedor e atualize estes avisos de privacidade com os detalhes específicos do projeto. A chave pública não substitui RLS; não desative as políticas da tabela.
+O projeto está configurado na região us-east-1 (N. Virginia, EUA). A cópia na nuvem já está ativada e os avisos identificam o provedor e a transferência internacional. A chave pública não substitui RLS; não desative as políticas da tabela.
