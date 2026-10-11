@@ -293,6 +293,14 @@ A validação sintática do JSON não garante, por si só, que as referências e
 
 Os testes ajudam a encontrar defeitos antes que novas funcionalidades sejam adicionadas.
 
+Os testes de segurança JavaScript usam apenas módulos nativos do Node.js e não adicionam dependências ao site:
+
+```bash
+node --test tests/world-validation.test.cjs tests/service-worker.test.cjs
+```
+
+Eles cobrem compatibilidade com mundos sem anotações, referências entre entidades, tipos/limites de dados importados e isolamento de cache/rede do service worker. O gerador Python também tem verificações rápidas:
+
 Se a versão instalada implementar a opção `--testar`, execute:
 
 ```bash
@@ -454,6 +462,20 @@ Cookie essencial lembra a escolha por até 180 dias; se bloqueado, a preferênci
 Termos, privacidade, cookies e segurança estão nas Configurações. Contato: [GitHub Issues](https://github.com/Vini632/Vini632.github.io/issues); issues podem ser públicas, não envie dados confidenciais. Consulte [LGPD](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm) e [guia da ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia_orientativo_cookies_e_protecao_de_dados_pessoais).
 
 Pix é voluntário e externo, sem processamento ou registro pelo app. Se novos recursos mudarem o tratamento de dados, revise estes avisos antes de ativá-los.
+
+### Limites e verificações de segurança
+
+O site não tem servidor próprio. A chave publicável do Supabase pode estar no navegador; ela não concede acesso por si só. A proteção dos registros remotos depende das políticas RLS do banco. Nunca publique uma chave `secret` ou `service_role`. Tokens de sessão ficam no armazenamento do navegador e podem ser lidos por código malicioso que já consiga executar na origem do site; a aplicação estática não consegue torná-los secretos do próprio navegador. Use dispositivos confiáveis, proteja backups e encerre a sessão em dispositivos compartilhados.
+
+Antes de ativar ou alterar a nuvem, verifique que:
+
+- RLS está habilitado e cada operação da tabela `worldforge_worlds` restringe `owner_id` a `auth.uid()`.
+- Duas contas de teste não conseguem ler, alterar ou apagar os mundos uma da outra; chamadas não autenticadas não conseguem acessar a tabela.
+- As URLs de site e redirecionamento de autenticação no Supabase correspondem ao domínio publicado.
+- A política CSP não registra violações inesperadas e os arquivos publicados não contêm chaves administrativas.
+- A atualização do service worker funciona em uma instalação PWA e não remove caches pertencentes a outras aplicações no mesmo domínio.
+
+O CSP é definido por uma meta tag porque a hospedagem é estática. `style-src 'unsafe-inline'` permanece necessário para estilos dinâmicos da interface; reduza essa permissão somente após testar banners e elementos dinâmicos em navegadores suportados. Diretivas que só funcionam em cabeçalhos HTTP devem ser configuradas pela plataforma de hospedagem, se ela oferecer esse controle.
 
 
 ## Conta e cópia na nuvem (GitHub Pages)
