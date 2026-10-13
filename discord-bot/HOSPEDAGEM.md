@@ -4,7 +4,7 @@ Consulta de preços: 13/10/2026. O site e o painel continuam no GitHub Pages; s�
 
 | Serviço | Custo anunciado | Limites e escolha |
 | --- | --- | --- |
-| [HostSquare — Python](https://hostsquare.com.br/aplicacoes/bot-python) | **R$ 2,50/mês**, 512 MB; R$ 5/mês, 1 GB | **Escolha do mantenedor: 512 MB; pagamento informado em 13/10/2026.** Acesso ao serviço e implantação ainda pendentes. |
+| [HostSquare — Python](https://hostsquare.com.br/aplicacoes/bot-python) | **R$ 2,50/mês**, 512 MB; R$ 5/mês, 1 GB | **Contratado e implantado em 13/10/2026.** Serviço ativo no Canadá; Python 3.12; conexão ao Discord confirmada. |
 | [Square Cloud Hobby](https://squarecloud.app/pt-br/pricing) | R$ 12,49/mês no mensal; R$ 9,99/mês equivalente no anual | 1 GB no plano, Python e reinício automático. Recomendado dentro do teto de R$ 15. Confirme o valor final no checkout. |
 | [Discloud gratuito](https://discloud.com/plans) | Gratuito | 100 MB. Pode servir para começar, mas o consumo deste bot com imagens e Discord precisa ser acompanhado. Reinício automático é restrito a planos superiores segundo a documentação. |
 | [Oracle Always Free](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm) | Recursos elegíveis gratuitos | Exige administrar uma VM, cadastro e disponibilidade de capacidade; pode recuperar instâncias consideradas ociosas. Menos simples para este projeto. |
@@ -22,7 +22,13 @@ O mantenedor escolheu o plano mensal de **512 MB por R$ 2,50**. O preço, o supo
 7. Pare a instância local com `stop-bot.ps1` **somente quando a configuração hospedada estiver pronta para iniciar**. Inicie a hospedada, confira conexão e logs, depois verifique o painel `/bot/`. Se a implantação falhar, pare a hospedada antes de voltar a iniciar a local.
 8. Acompanhe RAM, reinício automático e persistência após um reinício controlado. Os 512 MB ainda precisam de validação sob uso real; o processo Windows foi observado ativo, mas sua memória em repouso não representa o consumo máximo no Linux.
 
-**Estado:** pagamento confirmado pelo mantenedor em 13/10/2026; pacote preparado sem credenciais. A área financeira abriu a tela de login, deixada para o mantenedor autenticar. Provisionamento do serviço e implantação ainda precisam de verificação no painel. Nenhuma segunda instância foi iniciada.
+**Estado:** implantado em 13/10/2026, com a autorização explícita do mantenedor para enviar ZIP/SQLite e os dois tokens existentes. Área financeira confirmou serviço Python 0.5 GB no Canadá **ativo**, cobrança **mensal de R$ 2,50**. Painel de execução: `painel.hostsquare.com.br`; servidor `worldforgerpg`.
+
+O pacote foi enviado manualmente pelo mantenedor, pois a extensão bloqueou a seleção automatizada de arquivos. Há uma cópia privada em `C:\Users\vpers\Downloads\WorldForge-HostSquare.zip`. Não publicar esse arquivo. A extração, o `.env` privado e a instalação das dependências foram confirmados. Configuração efetiva: **Python 3.12**, **`main.py`**, **`requirements.lock`**.
+
+O console confirmou conexão ao Discord e comandos disponíveis, com cerca de **47 MiB / 512 MiB** no início. O bot local foi encerrado antes do primeiro início hospedado, e a ausência de processos locais foi verificada. **Reinício controlado passou:** nova conexão ao Discord registrada, dependências reutilizadas, configuração privada funcional e SQLite de 52 KiB preservado. Consumo observado após o reinício: cerca de **38 MiB / 512 MiB**. Acompanhar o consumo sob uso real; a medição é inicial.
+
+**O SQLite hospedado agora é a cópia ativa.** Fazer backups a partir da HostSquare. Não reenviar um snapshot local antigo por cima de `.data/settings.sqlite3`, nem iniciar a instância Windows enquanto a hospedada estiver ativa.
 
 ## Square Cloud: alternativa já preparada
 

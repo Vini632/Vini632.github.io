@@ -19,8 +19,8 @@
 | Discord / 2FA / vínculo | Implementados; funcionamento confirmado pelo mantenedor na sessão anterior. |
 | Google | Login completo testado e confirmado pelo mantenedor em 13/10/2026. |
 | Painel do bot | Publicado em [/bot/](https://vini632.github.io/bot/); exige conta, 2FA e identidade Discord verificável. |
-| Bot local | Árvore do PID registrado observada ativa nesta retomada. Não presumir que continuará rodando: consultar `.data/bot.pid` e o processo filho. Nenhuma instância extra foi iniciada. |
-| Hospedagem | **HostSquare, plano mensal de 512 MB por R$ 2,50 escolhido.** Mantenedor informou pagamento em 13/10/2026. Pacote privado preparado; aguardando acesso autenticado ao painel para implantação. Teto original: R$ 15/mês. |
+| Bot local | Encerrado antes de iniciar a hospedagem. Verificação de processos confirmou **zero instâncias locais** e ausência de `bot.pid`. Não iniciar outra instância enquanto a hospedada estiver ativa. |
+| Hospedagem | **Implantado na HostSquare**, serviço Python 512 MB no Canadá, plano mensal de R$ 2,50, em 13/10/2026. Console confirmou conexão ao Discord e comandos disponíveis. Consumo inicial observado: aproximadamente 47 MiB / 512 MiB. Teto original: R$ 15/mês. |
 | E-mails | Investigação Brevo encerrada por decisão do mantenedor. Discord e Google são prioritários. Não retomar testes de e-mail sem novo pedido. |
 
 ### Fichas e catálogo
@@ -56,9 +56,20 @@
 ### Próximas pendências
 
 1. Mantenedor conferir mural/visibilidade de suas guildas e criar/editar/importar/imprimir uma ficha no site atualizado. **Login Google já confirmado por ele.**
-2. Acessar o serviço HostSquare 512 MB após o pagamento informado pelo mantenedor. A área financeira abriu a tela de login; a aba foi deixada aberta para ele entrar. Não solicitar senha pelo chat. A escolha substitui a recomendação anterior de Square Cloud; são provedores diferentes.
-3. Implantar o pacote privado `discord-bot/.data/worldforge-pterodactyl.zip`, com Python 3.12+, dependências fixadas e segredos no painel. **Parar a instância local antes de iniciar a hospedada.** Conferir persistência de SQLite, reinício e memória sob uso real. Consulte [HOSPEDAGEM.md](discord-bot/HOSPEDAGEM.md).
-4. Reconfirmar o processo local sempre que necessário. Os ZIPs privados incluem configuração SQLite: nunca publicar no GitHub. Não sobrescrever um SQLite hospedado mais novo com cópia local antiga.
+2. Acompanhar memória e estabilidade do bot hospedado sob uso real; a medição de aproximadamente 47 MiB é inicial, não o consumo máximo. Consulte [HOSPEDAGEM.md](discord-bot/HOSPEDAGEM.md).
+3. Manter backups do SQLite da **hospedagem**, que agora é a cópia ativa. Não sobrescrever esse banco com o snapshot local antigo. Os ZIPs privados incluem configurações SQLite: nunca publicar no GitHub.
+4. Não executar `start-bot.ps1` com a HostSquare ativa. Para mover de hospedagem ou voltar ao computador, encerrar primeiro a instância atual e obter um backup recente.
+
+### Implantação confirmada na HostSquare — 13/10/2026
+
+- Área financeira e painel de execução têm sessões separadas; ambas foram autenticadas pelo mantenedor. Serviço ativo, ciclo mensal e valor de R$ 2,50 conferidos na área financeira.
+- Mantenedor autorizou explicitamente enviar o ZIP privado/SQLite e configurar `DISCORD_TOKEN` e `WORLDFORGE_BRIDGE_TOKEN` existentes na HostSquare. Valores transferidos diretamente da configuração local para `.env` no gerenciador privado, sem exposição no chat/GitHub.
+- Imagem **Python 3.12**, arquivo inicial **`main.py`**, dependências **`requirements.lock`**. Campos de início tiveram persistência confirmada após recarregar a página. No painel, a entrada por teclado acionou o salvamento; alterar apenas o valor do DOM não gravou as variáveis.
+- O envio automático de arquivos foi bloqueado pelas permissões da extensão; o mantenedor enviou manualmente `WorldForge-HostSquare.zip`, copiado para Downloads. Extração confirmada pelo gerenciador e pelo histórico do serviço.
+- Snapshot SQLite passou em `PRAGMA quick_check` e foi comparado logicamente com a configuração local ativa, sem divergência, antes da troca de instância.
+- Bot local encerrado com `stop-bot.ps1`; nenhum processo `discord-bot/main.py` permaneceu no computador. A instância hospedada instalou as dependências fixadas e registrou **“WorldForge conectado. Comandos disponíveis no servidor configurado.”**
+- **Reinício controlado passou:** o console registrou nova conexão ao Discord; dependências já instaladas foram reutilizadas, `.env` permaneceu funcional e `.data/settings.sqlite3` (52 KiB) continuou presente. Memória observada após o reinício: aproximadamente 38 MiB / 512 MiB, com CPU em repouso próxima de zero. Isso não representa teste de carga nem garantia de disponibilidade do provedor.
+- Segredos permanecem no `.env` local e no `.env` privado da hospedagem. Os pacotes ZIP continuam sem credenciais. A cópia local do SQLite deixou de ser a fonte ativa após a implantação.
 
 ### Decisões e referências que continuam válidas
 
