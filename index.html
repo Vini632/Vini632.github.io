@@ -13,9 +13,48 @@
     <link rel="stylesheet" href="./styles.css?v=12">
     <link rel="stylesheet" href="./animations.css">
     <link rel="stylesheet" href="./theme-black.css?v=12">
+    <link rel="stylesheet" href="./landing.css?v=1">
   </head>
   <body>
-    <div class="app-shell">
+    <main class="landing-screen" id="landing-screen">
+      <header class="landing-header">
+        <a class="brand" href="#" aria-label="WorldForge RPG">
+          <span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7.5 11 24l5-12 5 12 6-16.5"/><path d="M10 7.5h12"/></svg></span>
+          <span class="brand-copy"><strong>worldforge</strong><small>RPG WORLD BUILDER</small></span>
+        </a>
+        <a class="landing-project-link" href="https://github.com/Vini632/Vini632.github.io" target="_blank" rel="noopener noreferrer">Sobre o projeto <span aria-hidden="true">↗</span></a>
+      </header>
+      <section class="landing-hero" aria-labelledby="landing-title">
+        <div class="landing-orbit landing-orbit-one" aria-hidden="true"></div>
+        <div class="landing-orbit landing-orbit-two" aria-hidden="true"></div>
+        <div class="landing-copy">
+          <span class="landing-kicker"><span class="eyebrow-mark">&#9670;</span> FERRAMENTAS PARA CRIAR CAMPANHAS</span>
+          <h1 id="landing-title">Seu próximo mundo começa com uma ideia.</h1>
+          <p>Crie reinos, cidades e personagens. Organize histórias, acompanhe campanhas e compartilhe seus cenários com a comunidade.</p>
+        </div>
+        <section class="landing-auth-card" aria-label="Acessar WorldForge">
+          <div class="landing-auth-heading"><span class="landing-auth-symbol" aria-hidden="true">&#9670;</span><div><h2 id="landing-auth-title">Entre no seu espaço</h2><p id="landing-auth-description">Acesse sua área de trabalho para começar.</p></div></div>
+          <form id="landing-auth-form" class="landing-auth-form" data-mode="login">
+            <label class="field-label" for="landing-email">E-mail<input class="text-field" id="landing-email" name="email" type="email" autocomplete="email" required maxlength="254"></label>
+            <label class="field-label" for="landing-password">Senha<input class="text-field" id="landing-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128"></label>
+            <button class="button button-primary landing-auth-submit" id="landing-auth-submit" type="submit">Entrar</button>
+          </form>
+          <p class="landing-auth-feedback" id="landing-auth-feedback" role="status" aria-live="polite"></p>
+          <div class="landing-auth-switch"><span id="landing-auth-switch-copy">Ainda não tem conta?</span><button type="button" id="landing-auth-switch" data-auth-mode="signup">Criar conta</button></div>
+          <button class="landing-guest-button" type="button" data-action="continue-guest">Continuar sem entrar</button>
+        </section>
+      </section>
+      <section class="landing-features" aria-label="O que você pode fazer no WorldForge">
+        <article class="landing-feature"><span class="landing-feature-icon">&#9670;</span><div><h3>Construa seu universo</h3><p>Gere cenários e desenvolva reinos, cidades, personagens, relações e missões em um só lugar.</p></div></article>
+        <article class="landing-feature"><span class="landing-feature-icon">&#9671;</span><div><h3>Conduza sua campanha</h3><p>Organize eventos e anotações para acompanhar a evolução das suas histórias.</p></div></article>
+        <article class="landing-feature"><span class="landing-feature-icon">&#10022;</span><div><h3>Explore e compartilhe</h3><p>Descubra cenários na Biblioteca e apresente resumos públicos na Vitrine.</p></div></article>
+      </section>
+      <footer class="landing-footer"><span>WORLDforge RPG · FERRAMENTAS PARA QUEM CONTA HISTÓRIAS</span><span><a href="https://github.com/Vini632/Vini632.github.io/issues" target="_blank" rel="noopener noreferrer">Contato</a> · <button type="button" data-consent-action="review-terms">Termos e privacidade</button></span></footer>
+    </main>
+    <main class="landing-screen guest-screen hidden" id="guest-screen">
+      <section class="guest-welcome"><a class="brand" href="#" aria-label="WorldForge RPG"><span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7.5 11 24l5-12 5 12 6-16.5"/><path d="M10 7.5h12"/></svg></span><span class="brand-copy"><strong>worldforge</strong><small>RPG WORLD BUILDER</small></span></a><span class="landing-kicker"><span class="eyebrow-mark">&#9670;</span> SEU PRÓXIMO MUNDO COMEÇA COM UMA IDEIA</span><h1>Bem-vindo ao WorldForge.</h1><p>Um espaço para imaginar mundos, criar campanhas e dar vida às suas histórias.</p><button class="button button-primary" type="button" data-action="guest-login">Entrar ou criar conta</button></section>
+    </main>
+    <div class="app-shell hidden" id="app-shell">
       <aside class="sidebar" id="sidebar">
         <a class="brand" href="#inicio" aria-label="WorldForge, início">
           <span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7.5 11 24l5-12 5 12 6-16.5"/><path d="M10 7.5h12"/></svg></span>
@@ -82,7 +121,7 @@
           <section class="view hidden" id="view-guilda" data-view-panel="guilda"><div id="community-guilda"></div></section>
           <section class="view hidden" id="view-biblioteca-mundos" data-view-panel="biblioteca-mundos"><div id="world-library"><div class="community-loading" role="status">Carregando catálogo de mundos…</div></div></section>
           <section class="view hidden" id="view-configuracoes" data-view-panel="configuracoes"></section>
-          <footer class="app-footer"><span>WorldForge RPG <button id="app-version" class="app-version-trigger" type="button" data-action="show-updates" aria-label="Abrir histórico de atualizações">· 1.3</button></span><span>Seu próximo mundo começa com uma ideia.</span><span class="footer-legal-links"><button type="button" data-view="configuracoes" data-open-settings="privacy">Privacidade</button><button type="button" data-view="configuracoes" data-open-settings="terms">Termos de uso</button></span></footer>
+          <footer class="app-footer"><span>WorldForge RPG <button id="app-version" class="app-version-trigger" type="button" data-action="show-updates" aria-label="Abrir histórico de atualizações">· 1.4</button></span><span>Seu próximo mundo começa com uma ideia.</span><span class="footer-legal-links"><button type="button" data-view="configuracoes" data-open-settings="privacy">Privacidade</button><button type="button" data-view="configuracoes" data-open-settings="terms">Termos de uso</button></span></footer>
         </div>
       </main>
     </div>
@@ -204,7 +243,7 @@
     <script src="./world-validation.js?v=1" defer></script>
     <script src="./community-validation.js?v=1" defer></script>
     <script src="./cloud-config.js?v=6" defer></script>
-    <script src="./app.js?v=32" defer></script>
+    <script src="./app.js?v=34" defer></script>
     <script src="./world-catalog.js?v=1" defer></script>
     <script src="./world-library.js?v=4" defer></script>
     <script src="./community.js?v=3" defer></script>

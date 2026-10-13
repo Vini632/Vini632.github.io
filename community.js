@@ -204,6 +204,7 @@
   }
 
   async function refresh(view = state.view) {
+    if (!app?.hasWorkspaceAccess) return;
     if (view === 'foruns') await renderForum();
     if (view === 'vitrine') await renderShowcase();
     if (view === 'guilda') await renderGuilds();
@@ -288,9 +289,10 @@
     }
     if (type === 'join-guild') {
       const invite = validate.inviteCode(fields.invite);
-      await request('/rest/v1/rpc/worldforge_join_guild', {
+      const joined = await request('/rest/v1/rpc/worldforge_join_guild', {
         requireAuth: true, method: 'POST', body: JSON.stringify({ p_guild_id: invite.guildId, p_token: invite.token })
       });
+      if (joined !== true) throw new Error('Convite inválido, expirado ou indisponível.');
       state.selectedGuild = null;
       window.alert('Convite aceito. Agora você participa desta guilda privada.');
       return refresh('guilda');
@@ -402,12 +404,14 @@
   }
 
   document.addEventListener('click', event => {
+    if (!app?.hasWorkspaceAccess) return;
     const button = event.target.closest('[data-community-action]');
     if (!button) return;
     event.preventDefault();
     handleAction(button).catch(error => window.alert(error.message || 'A ação não foi concluída.'));
   });
   document.addEventListener('submit', event => {
+    if (!app?.hasWorkspaceAccess) return;
     const form = event.target.closest('[data-community-form]');
     if (!form) return;
     event.preventDefault();
@@ -415,6 +419,4 @@
   });
 
   window.WORLDFORGE_COMMUNITY = Object.freeze({ render: refresh });
-  const initialView = window.location.hash.slice(1);
-  if (['foruns', 'vitrine', 'guilda'].includes(initialView)) refresh(initialView);
 })();

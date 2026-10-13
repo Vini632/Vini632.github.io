@@ -12,7 +12,7 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'world-library.js'), '
 const cloudConfigSource = fs.readFileSync(path.join(__dirname, '..', 'cloud-config.js'), 'utf8');
 const PENDING_KEY = 'worldforge.world-library.pending.v1';
 
-function createLibrary({ createCatalogCopy, enabled = true, pending = null } = {}) {
+function createLibrary({ createCatalogCopy, enabled = true, pending = null, workspaceAccess = true } = {}) {
   const handlers = new Map();
   const stored = new Map();
   if (pending) stored.set(PENDING_KEY, JSON.stringify(pending));
@@ -23,6 +23,7 @@ function createLibrary({ createCatalogCopy, enabled = true, pending = null } = {
   };
   const app = {
     user: null,
+    hasWorkspaceAccess: workspaceAccess,
     createCatalogCopy: createCatalogCopy || (async () => {}),
     hasLocalWorld: () => false
   };
@@ -72,6 +73,16 @@ test('catalog page lists the three worlds and filters fields are available', () 
   assert.match(target.innerHTML, /data-library-search/);
   assert.match(target.innerHTML, /data-library-genre/);
   assert.match(target.innerHTML, /data-library-type/);
+});
+
+test('catalog stays untouched before the authenticated workspace opens', () => {
+  const { library, target, stored } = createLibrary({
+    workspaceAccess: false,
+    pending: { slug: 'o-reino-das-cinzas', localId: 'pending-world' }
+  });
+  library.render('biblioteca-mundos');
+  assert.equal(target.innerHTML, '');
+  assert.equal(stored.has(PENDING_KEY), true);
 });
 
 test('disabled catalog is marked coming soon and cancels any pending copy', () => {

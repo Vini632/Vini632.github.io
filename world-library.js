@@ -129,6 +129,7 @@
     return `${heading()}<button class="community-back" type="button" data-library-action="back">← Voltar ao catálogo</button><article class="world-library-detail"><div class="world-library-cover world-library-detail-cover cover-${esc(world.cover)}"><span>${world.type === 'complete' ? 'CENÁRIO COMPLETO' : 'MODELO PERSONALIZÁVEL'}</span><strong>${esc(world.name)}</strong></div><div class="world-library-detail-copy"><div class="world-library-tags"><span class="entity-tag">${esc(world.genre)}</span><span class="entity-tag">${esc(world.development)}</span></div><p class="world-library-lead">${esc(world.longDescription)}</p><p>${esc(world.description)}</p>${needsLogin}${error}<div class="world-library-detail-actions">${action}<span>Uma cópia independente será salva na sua conta.</span></div><div class="world-library-detail-grid">${extraSections}${themes}${customization}</div></div></article>`;
   }
   function render(view) {
+    if (!app?.hasWorkspaceAccess) return;
     if (view !== 'biblioteca-mundos') return;
     const target = root();
     if (!target) return;
@@ -202,6 +203,7 @@
     }
   }
   async function onSessionReady() {
+    if (!app?.hasWorkspaceAccess) return;
     const pending = getPending();
     if (!pending || !app?.user?.id) return;
     state.selected = pending.slug;
@@ -209,6 +211,7 @@
     await useWorld(pending.slug);
   }
   document.addEventListener('click', event => {
+    if (!app?.hasWorkspaceAccess) return;
     const button = event.target.closest('[data-library-action]');
     if (!button) return;
     event.preventDefault();
@@ -230,11 +233,13 @@
     }
   });
   document.addEventListener('input', event => {
+    if (!app?.hasWorkspaceAccess) return;
     if (!event.target.matches('[data-library-search]')) return;
     state.search = event.target.value.trim();
     applyFilters();
   });
   document.addEventListener('change', event => {
+    if (!app?.hasWorkspaceAccess) return;
     if (event.target.matches('[data-library-genre]')) state.genre = event.target.value;
     else if (event.target.matches('[data-library-type]')) state.type = event.target.value;
     else return;
@@ -242,6 +247,4 @@
   });
 
   window.WORLDFORGE_WORLD_LIBRARY = Object.freeze({ render, onSessionReady });
-  if (window.location.hash.slice(1) === 'biblioteca-mundos') render('biblioteca-mundos');
-  if (app?.user?.id) onSessionReady();
 })();

@@ -92,7 +92,7 @@ Para usar a interface, abra `index.html` no navegador. Para instalar o PWA e ati
 
 1. Envie os arquivos do projeto para um repositório GitHub.
 2. Nas configurações do repositório, abra **Pages** e selecione a branch e a pasta que contêm `index.html` (normalmente `main` e `/ (root)`).
-3. Acesse o endereço publicado. A interface não precisa de backend e os caminhos relativos funcionam tanto em páginas de projeto quanto em domínio próprio.
+3. Acesse o endereço publicado. A hospedagem continua sendo estática e os caminhos relativos funcionam tanto em páginas de projeto quanto em domínio próprio; com a configuração atual, login e uso da área de trabalho dependem do Supabase.
 
 Os mundos da interface ficam no armazenamento local do navegador. Use **Configurações → Dados & backup** para exportar um JSON. O botão **Importar** aceita os arquivos gerados pela interface e pelo programa Python.
 
@@ -153,7 +153,7 @@ Abra `index.html` no navegador para explorar a interface. Para testar o modo ins
 python -m http.server 8000
 ```
 
-Depois acesse `http://localhost:8000`. Selecione **Novo mundo** para gerar um universo e navegue pelas seções da barra lateral para abrir reinos, cidades, personagens, missões, eventos e criaturas. Avance os turnos pelos controles no cabeçalho da seção **Eventos**.
+Depois acesse `http://localhost:8000`. A tela inicial apresenta o WorldForge e oferece login, criação de conta ou continuação como visitante; para abrir a área de trabalho e usar os recursos, entre em uma conta configurada no Supabase. Selecione **Novo mundo** para gerar um universo e navegue pelas seções da barra lateral para abrir reinos, cidades, personagens, missões, eventos e criaturas. Avance os turnos pelos controles no cabeçalho da seção **Eventos**.
 
 Em **Configurações**, escolha o tema escuro ou claro, os widgets exibidos, ajuste sons/notificações, renomeie o mundo e gerencie a biblioteca local. A preferência visual e os vários mundos são salvos por navegador e dispositivo. O seletor de mundo na barra lateral abre a biblioteca; nela, você pode alternar, duplicar, exportar ou excluir mundos. Na seção **Relações**, crie vínculos entre dois personagens, classifique o tipo e defina a intensidade de 1 a 5. Um mesmo par só pode ter uma relação, e relações de personagens excluídos são removidas automaticamente. Em cada seção do mundo, use **Adicionar** para criar registros; clique em um registro para abrir detalhes, editar ou excluir. Na seção **Eventos**, a linha do tempo reúne eventos e anotações organizados por turno. Os campos de busca e filtros ajudam a localizar registros. Em **Configurações → Dados & backup**, use **Backup completo** para baixar a biblioteca inteira; ao restaurar, confirme a substituição ou escolha mesclar os mundos. A importação de um mundo individual continua adicionando uma cópia sem substituir os mundos existentes. Se uma versão anterior já tiver salvo um mundo no navegador, ele será migrado automaticamente para a biblioteca na primeira abertura. Para abrir o histórico discreto de atualizações, clique no número da versão no rodapé.
 
@@ -161,7 +161,7 @@ Ao criar um mundo, a tela de forja mostra o progresso por um período aleatório
 
 ### Biblioteca de Mundos
 
-**Biblioteca de Mundos** está disponível na navegação com três cenários para explorar: um mundo completo e dois modelos personalizáveis. Pesquise e filtre por gênero e tipo, consulte os detalhes e escolha **Usar este mundo** para salvar uma cópia independente. A cópia é criada na conta Supabase autenticada e também adicionada à biblioteca local; sem entrar na conta, a escolha fica guardada neste navegador até o login. O catálogo e as cópias podem ser controlados pelo flag público `worldLibraryEnabled` em `cloud-config.js`; o acesso à tabela remota continua protegido por RLS.
+**Biblioteca de Mundos** está disponível na navegação com três cenários para explorar: um mundo completo e dois modelos personalizáveis. Pesquise e filtre por gênero e tipo, consulte os detalhes e escolha **Usar este mundo** para salvar uma cópia independente. O uso da biblioteca requer uma sessão autenticada; a cópia é criada na conta Supabase e também adicionada à biblioteca local. O catálogo e as cópias podem ser controlados pelo flag público `worldLibraryEnabled` em `cloud-config.js`; o acesso à tabela remota continua protegido por RLS.
 
 Os argumentos opcionais devem corresponder aos aceitos pela versão instalada. Use `--help` para consultar as opções efetivamente disponíveis.
 
@@ -455,13 +455,13 @@ As seguintes melhorias são possibilidades futuras, não funcionalidades garanti
 - Integração segura com IA, após existir um serviço de backend para proteger credenciais.
 - Créditos e assinaturas, quando houver infraestrutura de contas e pagamentos.
 
-A interface web &eacute; est&aacute;tica e compat&iacute;vel com GitHub Pages. A cópia opcional na nuvem usa Supabase quando configurada; o envio de mundos é iniciado pela pessoa. Contribui&ccedil;&otilde;es opcionais por Pix s&atilde;o transfer&ecirc;ncias feitas no banco, fora do aplicativo. Mundos e prefer&ecirc;ncias permanecem no armazenamento local, e a cópia remota é separada.
+A interface web &eacute; est&aacute;tica e compat&iacute;vel com GitHub Pages. Na configuração atual, o acesso à área de trabalho requer uma conta Supabase; o envio de mundos à nuvem é opcional e iniciado pela pessoa. Contribui&ccedil;&otilde;es opcionais por Pix s&atilde;o transfer&ecirc;ncias feitas no banco, fora do aplicativo. Mundos e prefer&ecirc;ncias permanecem no armazenamento local, e a cópia remota é separada.
 
 ---
 
 ## 13. Privacidade, segurança e termos da interface web
 
-O WorldForge é estático e compatível com GitHub Pages. A conta e a cópia de mundos na nuvem são opcionais e usam Supabase quando configuradas; os demais dados do perfil continuam locais. Não há analytics, publicidade, IA conectada ou processamento de pagamentos. Backups JSON são legíveis e devem ser protegidos.
+O WorldForge é estático e compatível com GitHub Pages. É necessário autenticar-se pelo Supabase para acessar a área de trabalho; o envio de mundos para a nuvem continua opcional, enquanto o perfil visual e os mundos permanecem locais neste navegador. Não há analytics, publicidade, IA conectada ou processamento de pagamentos. Backups JSON são legíveis e devem ser protegidos.
 
 Cookie essencial lembra a escolha por até 180 dias; se bloqueado, a preferência pode ficar localmente. Service worker guarda arquivos em cache. Não há cookies opcionais. GitHub Pages pode registrar IPs por segurança; veja a [documentação](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages) e a [Declaração de Privacidade](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
@@ -471,9 +471,13 @@ Pix é voluntário e externo, sem processamento ou registro pelo app. Se novos r
 
 ### Recursos comunitários
 
-O Fórum da Forja permite ler tópicos publicamente e, com conta autenticada, publicar, responder, editar, excluir e denunciar conteúdo. A Vitrine mostra apenas resumos compartilhados voluntariamente: nome do mundo, nomes de até 12 reinos e 12 cidades e o resumo/nome público escolhidos. O arquivo completo, personagens, missões, eventos e anotações não são enviados à Vitrine. Guildas são privadas por convite; apenas participantes veem o grupo, a lista de membros e o mural. Convites expiram em sete dias e podem ser usados até 20 vezes. Denúncias são armazenadas para triagem manual no Supabase; ainda não há painel de moderação nem proteção de taxa no aplicativo.
+O Fórum da Forja permite ler tópicos publicamente e, com conta autenticada, publicar, responder, editar, excluir e denunciar conteúdo. A Vitrine mostra apenas resumos compartilhados voluntariamente: nome do mundo, nomes de até 12 reinos e 12 cidades e o resumo/nome público escolhidos. O arquivo completo, personagens, missões, eventos e anotações não são enviados à Vitrine. Guildas são privadas por convite; apenas participantes veem o grupo, a lista de membros e o mural. Convites expiram em sete dias e podem ser usados até 20 vezes. Denúncias são armazenadas no Supabase para triagem manual; ainda não há painel de moderação.
 
-Os recursos comunitários estão disponíveis pelo flag `communityEnabled` em `cloud-config.js`. O esquema está versionado em `supabase/migrations/`; `supabase/schema.sql` permanece como referência completa. As migrations incrementais `20261013000000_guild_message_read_grant.sql` e `20261013001000_forum_reply_read_post_reference.sql` concedem somente as colunas necessárias para membros lerem mensagens de guilda e para visitantes consultarem respostas por tópico, sem liberar identificadores de conta. As projeções públicas de Fórum, respostas e Vitrine foram verificadas no endpoint remoto; os fluxos autenticados e o isolamento por RLS foram exercitados localmente, sem publicar dados de teste em produção. Para desenvolvimento local, instale e inicie o Docker Desktop e execute `npm exec -- supabase start`; conecte a extensão Supabase ao endereço local informado pela CLI. Para aplicar migrations futuras a um projeto remoto, autentique a CLI, vincule explicitamente o projeto correto, confira `npm exec -- supabase migration list` e só então execute `npm exec -- supabase db push`. Não compartilhe tokens ou senhas no chat nem os grave no código. Fórum e respostas são públicos para leitura; publicar, denunciar e participar das Guildas requer autenticação. A Vitrine compartilha apenas resumos confirmados: nome do mundo, nomes de até 12 reinos e 12 cidades e o resumo/nome público escolhidos; o arquivo completo, personagens, missões, eventos e anotações não são enviados. Guildas são privadas por convite; apenas participantes veem grupo, membros e mural. Convites expiram em sete dias e podem ser usados até 20 vezes. Denúncias ficam sujeitas à triagem manual; ainda não há painel de moderação nem proteção de taxa no aplicativo. Não há importação de snapshots comunitários para mundos locais nem compartilhamento de arquivos completos nesta versão.
+Os recursos comunitários estão disponíveis pelo flag `communityEnabled` em `cloud-config.js`. O esquema está versionado em `supabase/migrations/`; `supabase/schema.sql` permanece como referência completa. As migrations incrementais concedem somente as colunas necessárias aos fluxos públicos e privados; os limites de escrita são aplicados no Postgres, não pelo navegador. Para desenvolvimento local, instale e inicie o Docker Desktop e execute `npm exec -- supabase start`; conecte a extensão Supabase ao endereço local informado pela CLI. Para aplicar migrations futuras a um projeto remoto, autentique a CLI, vincule explicitamente o projeto correto, confira `npm exec -- supabase migration list` e só então execute `npm exec -- supabase db push`. Não compartilhe tokens ou senhas no chat nem os grave no código. Fórum e respostas são públicos para leitura; publicar, denunciar e participar das Guildas requer autenticação. A Vitrine compartilha apenas resumos confirmados: nome do mundo, nomes de até 12 reinos e 12 cidades e o resumo/nome público escolhidos; o arquivo completo, personagens, missões, eventos e anotações não são enviados. Guildas são privadas por convite; apenas participantes veem grupo, membros e mural. Convites expiram em sete dias e podem ser usados até 20 vezes. Não há importação de snapshots comunitários para mundos locais nem compartilhamento de arquivos completos nesta versão.
+
+Quotas atuais por conta: 5 tópicos e 30 respostas por hora; 5 denúncias por hora; 3 publicações na Vitrine por hora; 3 guildas por dia; 10 convites por hora; 10 tentativas de entrada em guildas por dia; 30 mensagens de guilda por hora. As tentativas acima do limite recebem HTTP 429. Isso reduz spam básico, mas não é uma defesa abrangente contra abuso por múltiplas contas ou ataques distribuídos. Denúncias continuam sujeitas à triagem manual, sem painel de moderação.
+
+A migration `20261013002000_community_rate_limits.sql` cria os contadores privados e os triggers de quota. `20261013003000_persist_guild_join_rate_limit.sql` registra também tentativas com convites inválidos sem revelar se um convite existe. Aplique ambas em ordem antes de publicar estes recursos.
 
 ### Limites e verificações de segurança
 
@@ -492,16 +496,51 @@ O CSP é definido por uma meta tag porque a hospedagem é estática. `style-src 
 
 ## Conta e cópia na nuvem (GitHub Pages)
 
-O site continua estático. A camada opcional usa Supabase Auth e uma tabela Postgres compartilhada; cada linha tem owner_id, e Row Level Security com auth.uid() restringe leitura e alterações aos dados da própria conta. Isso oferece isolamento individual sem criar um banco físico por usuário. A interface envia uma cópia somente quando a pessoa escolhe Enviar; a restauração é uma mesclagem manual. Ainda não há sincronização automática, e excluir algo localmente não remove sua cópia remota.
+O site continua estático e usa Supabase Auth para as contas e uma tabela Postgres compartilhada para cópias opcionais; cada linha tem `owner_id`, e Row Level Security com `auth.uid()` restringe operações aos dados da própria conta. Não há um banco físico por usuário. A sessão é validada/restaurada ao abrir o site e renovada com o refresh token quando necessário. A interface envia uma cópia somente quando a pessoa escolhe **Enviar**; a restauração é uma mesclagem manual. Ainda não há sincronização automática, e excluir algo localmente não remove sua cópia remota.
+
+Com a configuração atual, entrar ou criar conta é obrigatório para abrir a área de trabalho. **Continuar sem entrar** leva a uma tela de apresentação; não abre ferramentas nem inicia leitura/escrita na comunidade. Os mundos locais antigos permanecem no navegador, mas só voltam a ser acessíveis depois de uma sessão válida. O perfil visual (nome, foto, banner, cor e preferências) continua local. A landing oferece e-mail/senha, alternância entre login/cadastro e mensagens de erro/confirmação; o Supabase pode exigir confirmação do e-mail antes do primeiro login.
 
 ### Ativar o projeto
 
 1. Crie um projeto Supabase sob controle do mantenedor e configure a autenticação por e-mail.
-2. Para aplicar o esquema com histórico versionado, autentique a Supabase CLI, vincule o project ref correto, confira o estado com `npm exec -- supabase migration list` e aplique a migration com `npm exec -- supabase db push`. Se preferir o SQL Editor, revise e execute `supabase/schema.sql` manualmente; não use os dois caminhos sem antes conferir o histórico para evitar divergências.
+2. Para aplicar o esquema com histórico versionado, autentique a Supabase CLI, vincule o project ref correto, confira o estado com `npm exec -- supabase migration list`. No projeto remoto atual, a base foi instalada fora do histórico da CLI: reconcilie esse baseline antes de usar `npm exec -- supabase db push`, conforme o estado registrado abaixo. Se preferir o SQL Editor, confira primeiro o histórico e execute apenas os SQLs incrementais ainda não aplicados; `supabase/schema.sql` é a referência completa para instalações novas, não deve ser reaplicado cegamente sobre um banco existente.
 3. Em Authentication → URL Configuration, defina Site URL como https://vini632.github.io/ e inclua essa mesma URL em Redirect URLs. O cadastro envia o link de confirmação para esse endereço.
 4. Copie a Project URL e a publishable key (ou a chave legacy anon) para cloud-config.js. Esses identificadores são públicos em aplicações de navegador. Nunca use secret ou service_role no site.
-5. No aplicativo, abra Configurações → Dados & backup. A pessoa pode criar conta/entrar, enviar os mundos locais, mesclar cópias de sua conta ou apagar os mundos remotos.
+5. A tela inicial permite criar conta ou entrar com e-mail/senha. A conta é necessária para abrir a área de trabalho; depois, em Configurações → Dados & backup, a pessoa pode enviar mundos locais, mesclar cópias de sua conta ou apagar os mundos remotos.
 
-A conta requer e-mail e senha. Quando a confirmação de e-mail estiver habilitada no Supabase, a pessoa deve confirmar o endereço antes do primeiro login. O token de sessão fica no armazenamento local do navegador. O perfil visual (foto, banner e preferências) permanece local; a cópia remota inclui os mundos da biblioteca.
+A conta requer e-mail e senha. Quando a confirmação de e-mail estiver habilitada no Supabase, a pessoa deve confirmar o endereço antes do primeiro login. Os tokens da sessão ficam no armazenamento local do navegador e, portanto, não são protegidos de código malicioso executado na mesma origem. A cópia remota inclui os mundos da biblioteca quando enviada explicitamente.
 
-O projeto está configurado na região us-east-1 (N. Virginia, EUA). A cópia na nuvem já está ativada e os avisos identificam o provedor e a transferência internacional. A chave pública não substitui RLS; não desative as políticas da tabela.
+O projeto está configurado na região us-east-1 (N. Virginia, EUA). A cópia na nuvem já está ativada e os avisos identificam o provedor e a transferência internacional. A chave publicável é esperada no cliente, mas nunca substitui RLS; não desative as políticas. Não inclua no site chaves `secret`/`service_role`, tokens ou senhas.
+
+### Estado atual — 13/10/2026
+
+- Entrada centralizada e área de trabalho autenticada, configurações expansíveis, Biblioteca, Fórum, Vitrine e Guildas estão implementados no site estático. O perfil visual e as preferências continuam locais; enviar/restaurar mundos da nuvem é uma ação manual.
+- Corrigida a leitura de `author_id` no mural privado das Guildas. As mensagens continuam restritas aos participantes por RLS; a identificação do autor permite mostrar a ação de exclusão correta.
+- Os helpers de participação/propriedade ficam no schema `private`, fora da API pública. A migration `20261013015915_secure_private_guild_helpers.sql` espelha a alteração que já existia no remoto. Os RPCs públicos de criar Guilda, gerar convite e entrar continuam exigindo autenticação e verificações no banco.
+- A migration `20261013050124_align_community_permissions_and_limits.sql` foi aplicada ao projeto remoto `urvtkpqpguxthjznmtyu`: concede a coluna necessária, instala os contadores e gatilhos de limites e mantém a entrada com convite usando o helper privado. Nenhum mundo ou conteúdo existente foi removido.
+- Limites por conta: 5 tópicos/hora, 30 respostas/hora, 5 denúncias/hora, 3 publicações na Vitrine/hora, 3 Guildas/dia, 10 convites/hora, 30 mensagens/hora e 10 tentativas de entrada/dia. Convites inválidos retornam `false` e consomem tentativas; exceder o limite retorna SQLSTATE `PT429`/HTTP 429. Esses limites não eliminam abuso com várias contas.
+- Corrigido o cancelamento da criação de mundos. Adicionar um reino agora também cria uma capital inicial editável, mantendo o mundo válido para exportação e reabertura; falha de armazenamento desfaz ambas as alterações.
+- Service Worker: cache `v35`, `app.js?v=34` e `landing.css?v=1`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
+
+#### Banco remoto e histórico de migrations
+
+O histórico remoto consultado contém `20261013015915` e `20261013050124`. A base e os grants anteriores foram instalados fora desse histórico. Os arquivos locais `20261012235534`, `20261013000000`, `20261013001000`, `20261013002000` e `20261013003000` permanecem como histórico de desenvolvimento; o efeito dos dois últimos está incluído na migration de alinhamento aplicada em produção.
+
+Não execute `db push` cegamente neste projeto existente: os arquivos anteriores aparecerão como pendentes, e reaplicá-los pode recriar helpers públicos ou conflitar com os privados. Antes do próximo deploy de banco via CLI, compare o schema completo e reconcilie o baseline com `supabase migration repair`, registrando apenas versões cujo efeito foi confirmado. Para instalações novas, use a sequência completa de migrations **ou** `supabase/schema.sql`; não combine os dois procedimentos no mesmo banco. Alterações futuras devem usar migrations incrementais geradas com `npm exec -- supabase migration new NOME`.
+
+#### Verificações
+
+```bash
+node --test tests/*.test.cjs
+node --check app.js
+python worldforge_rpg.py --testar
+```
+
+O teste de regressão cruza as colunas pedidas pelo cliente das Guildas com os grants do schema. Há cobertura para renderização/exclusão de mensagens, escape de conteúdo, cancelamento de geração e criação de capital com rollback quando o navegador não consegue salvar.
+
+`supabase/tests/community-access.sql` foi executado no remoto com três identidades sintéticas, dentro de uma transação descartada. Verificou leitura por membro, bloqueio de leitura/escrita por não participante, exclusão pelo autor/proprietário, bloqueio de acesso anônimo, sexto tópico bloqueado e décima primeira tentativa inválida bloqueada. Não cria contas duráveis nem deixa conteúdo de teste.
+
+Os advisors foram consultados após a migration. A tabela de contadores não tem políticas/grants para o cliente por intenção; os três RPCs de Guilda precisam de `SECURITY DEFINER` e autorização interna. A proteção de senhas vazadas ainda aparece desativada na configuração de Auth. Os avisos informativos de índices devem ser avaliados conforme o volume real de uso.
+
+Publicação: repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`, em https://vini632.github.io/. Os arquivos publicados são comparados com o workspace antes da atualização, preservando arquivos remotos não relacionados. A aplicação continua compatível com GitHub Pages, sem servidor de aplicação ou etapa de build JavaScript.
+

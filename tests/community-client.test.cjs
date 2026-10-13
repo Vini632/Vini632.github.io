@@ -9,7 +9,7 @@ const validation = require('../community-validation.js');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'community.js'), 'utf8');
 
-function createClient({ enabled = true, user = null, world = null, activeWorldId = null, response = [] } = {}) {
+function createClient({ enabled = true, workspaceAccess = true, user = null, world = null, activeWorldId = null, response = [] } = {}) {
   const roots = new Map();
   const requests = [];
   const listeners = new Map();
@@ -17,6 +17,7 @@ function createClient({ enabled = true, user = null, world = null, activeWorldId
   let sessionChecks = 0;
   const app = {
     communityEnabled: enabled,
+    hasWorkspaceAccess: workspaceAccess,
     user,
     displayName: 'Explorador',
     activeWorldId,
@@ -87,6 +88,13 @@ test('community feature flag shows an in-development card without backend reques
   assert.equal(requests.length, 0);
 });
 
+test('community cannot render data or make requests before workspace authentication', async () => {
+  const { client, roots, requests } = createClient({ workspaceAccess: false });
+  await client.render('foruns');
+  assert.equal(roots.size, 0);
+  assert.equal(requests.length, 0);
+});
+
 test('anonymous forum rendering requests only public columns', async () => {
   const { client, roots, requests } = createClient();
   await client.render('foruns');
@@ -150,6 +158,17 @@ test('guild creation uses the authenticated RPC rather than direct table inserti
   });
 });
 
+test('guild join rejects a false RPC result instead of reporting success', async () => {
+  const harness = createClient({ user: { id: 'user-id' }, response: false });
+  await harness.client.render('guilda');
+  await harness.submit('join-guild', {
+    invite: '4f6f2f67-b3b6-4e36-93d9-29b26c9f08d2.4f6f2f67-b3b6-4e36-93d9-29b26c9f08d2'
+  });
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.ok(harness.alerts.includes('Convite inválido, expirado ou indisponível.'));
+  assert.equal(harness.alerts.includes('Convite aceito. Agora você participa desta guilda privada.'), false);
+});
+
 test('showcase preview exposes only the approved world snapshot fields', async () => {
   const world = {
     metadata: { nome: 'Arquipélago' },
@@ -178,4 +197,30 @@ test('guild screen requires account and provides private group creation and invi
   await member.client.render('guilda');
   assert.match(member.roots.get('guilda').innerHTML, /Criar guilda/);
   assert.match(member.roots.get('guilda').innerHTML, /Entrar com convite/);
+});
+
+test('opening a private guild loads authors and offers deletion only for own messages', async () => {
+  const harness = createClient({
+    user: { id: 'member-id' },
+    response: path => {
+      if (path.includes('worldforge_guild_messages?')) return [
+        { id: 'own-message', author_id: 'member-id', author_name: 'Me', body: 'Own text' },
+        { id: 'other-message', author_id: 'other-id', author_name: 'Other', body: '<script>alert(1)</script>' }
+      ];
+      if (path.includes('worldforge_guild_members?')) return [{ user_id: 'member-id', role: 'member' }];
+      return [{ id: 'guild-id', owner_id: 'owner-id', name: 'Private guild', description: '' }];
+    }
+  });
+  await harness.client.render('guilda');
+  harness.click('open-guild', 'guild-id');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  const request = harness.requests.find(item => item.path.includes('worldforge_guild_messages?'));
+  assert.ok(request);
+  assert.match(request.path, /select=id,author_id,author_name,body,created_at,updated_at/);
+  assert.match(request.path, /guild_id=eq.guild-id/);
+  const html = harness.roots.get('guilda').innerHTML;
+  assert.match(html, /data-community-action="delete-message" data-record-id="own-message"/);
+  assert.doesNotMatch(html, /data-community-action="delete-message" data-record-id="other-message"/);
+  assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.doesNotMatch(html, /<script>/);
 });
