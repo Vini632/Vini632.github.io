@@ -4,13 +4,13 @@
 
 ## Estado para retomar o trabalho — 13/10/2026
 
-**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v51**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v52**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
 
 ### Entrega desta retomada
 
 | Área | Estado |
 | --- | --- |
-| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v51. |
+| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v52. |
 | Persistência | Mundos, fichas, anotações, perfil/foto/banner e preferências carregados da conta Supabase e salvos automaticamente. O navegador não grava mais mundos/perfil como fonte de dados; sessão, consentimento e pequenos metadados de retomada permanecem locais. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
@@ -41,6 +41,8 @@
 
 - Preferências da conta real conferidas no Supabase: tema alterado temporariamente para claro, confirmação aguardada e preferência carregada corretamente em uma nova aba. Tema escuro original restaurado e confirmado; consulta agregada mostrou 1 estado de conta, revisão 2 e 0 mundos. A restauração de Eldoria continua pendente: ao retomar, as abas anteriores estavam fechadas e nenhum mundo havia sido importado. Novo seletor aberto; mantenedor orientado a escolher o JSON e manter a aba aberta. Não afirmar que o mundo foi recuperado antes de mesclar, salvar e recarregar.
 
+- Automção v52: falhas temporárias de rede, timeout, HTTP 408/429/5xx repetem o salvamento automaticamente com espera progressiva de 1,5 a 30 segundos e o mesmo UUID idempotente. Erros definitivos, permissões e conflitos não repetem pedidos indevidos. RPCs do workspace têm timeout de 30 segundos. Conta atualiza mudanças de outra aba/dispositivo ao voltar ao site e a cada 30 segundos quando visível e sem edição pendente. Consulta primeiro apenas a revisão por REST, protegida pelas políticas existentes; só baixa a biblioteca completa quando mudou. Não substitui formulários em edição, rascunhos, saves em andamento ou dados de outra conta. 28 testes direcionados passaram, incluindo recuperação automática, atualização concorrente e proteção de formulários.
+
 ### Fichas e catálogo
 
 - `character-sheet.js` e `character-sheet.css` são carregados antes de `app.js`, com o validador já disponível. Sistema livre; nenhum cálculo automático de regras de RPG foi acrescentado.
@@ -69,7 +71,7 @@
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v51**, `app.js?v=47`, `account-workspace.js?v=2`, `auth-bundle.js?v=2`, `styles.css?v=16`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v52**, `app.js?v=48`, `account-workspace.js?v=3`, `auth-bundle.js?v=2`, `styles.css?v=16`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
 
 - Correção final v51: acentos do aviso de rascunho pendente e mensagem de importação alinhada ao armazenamento da conta. Checagem de sintaxe e 22 testes direcionados de backups/fila/painel/cache passaram. A repetção da suíte completa foi interrompida por um processo sem progresso em `community-schema.test.cjs`; os 87 testes da entrega anterior permanecem registrados como resultado anterior.
 

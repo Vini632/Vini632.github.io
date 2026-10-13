@@ -115,8 +115,9 @@
   const accountWorkspace=window.WORLDFORGE_WORKSPACE.create({
     getOwner:()=>cloudSession?.user?.id,
     load:()=>workspaceRequest('wf_load_workspace',{}),
+    getRevision:workspaceRevision,
     save:(payload,revision,mutationId,owner)=>workspaceRequest('wf_save_workspace',{p_payload:payload,p_expected_revision:revision,p_mutation_id:mutationId},owner),
-    validate:validateAccountData,apply:applyAccountData,onStatus:renderAccountSaveState
+    validate:validateAccountData,apply:applyAccountData,onStatus:renderAccountSaveState,onRefresh:()=>{renderAll();setView(activeView);}
   });
   function accountPayload(){return {worlds:library.worlds,activeId:activeWorldId,preferences:prefs};}
   function validateAccountData(data){
@@ -140,7 +141,14 @@
     const session=await window.WORLDFORGE_AUTH.session();
     if(!owner||session.user.id!==owner||cloudSession?.user?.id!==owner)throw new Error('A conta mudou. Entre novamente.');
     cloudSession=session;
-    return cloudFetch('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(payload)});
+    return cloudFetch('/rest/v1/rpc/'+name,{method:'POST',body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
+  }
+  async function workspaceRevision(){
+    const owner=cloudSession?.user?.id,session=await window.WORLDFORGE_AUTH.session();
+    if(!owner||session.user.id!==owner||cloudSession?.user?.id!==owner)throw new Error('A conta mudou. Entre novamente.');
+    cloudSession=session;
+    const rows=await cloudFetch('/rest/v1/worldforge_account_state?select=revision&owner_id=eq.'+encodeURIComponent(owner),{signal:AbortSignal.timeout(30000)});
+    return rows?.[0]?.revision??0;
   }
   function queueAccountSave(){
     if(!hasWorkspaceAccess()||!accountWorkspace.state.ready||!hasCurrentLegalConsent()){toast('Entre na conta e aceite os termos atuais antes de salvar.',true);return false;}
@@ -152,7 +160,7 @@
     const bar=$('#account-save-bar'),label=$('#account-save-state');if(!bar||!label)return;
     bar.dataset.state=state.error?'error':state.dirty?'saving':'saved';
     const conflict=state.error?.status===409||state.error?.code==='PT409';
-    label.textContent=conflict?'Outra aba alterou sua conta. Exporte o rascunho e recarregue.':state.error?'Não foi salvo na conta. Confira a conexão e tente novamente.':state.saving||state.dirty?'Salvando na sua conta…':state.ready?'Alterações salvas na conta':'Carregando sua conta…';
+    label.textContent=conflict?'Outra aba alterou sua conta. Exporte o rascunho e recarregue.':state.retrying?'Conexão indisponível. Tentando salvar automaticamente…':state.error?'Não foi salvo na conta. Confira a conexão e tente novamente.':state.saving||state.dirty?'Salvando na sua conta…':state.ready?'Alterações salvas na conta':'Carregando sua conta…';
     $('#account-save-retry').hidden=!state.error||conflict;$('#account-save-export').hidden=!state.error;$('#account-save-reload').hidden=!state.error;
   }
   function exportAccountDraft(){downloadJson({format:'worldforge-account-backup',version:1,exportedAt:new Date().toISOString(),...accountPayload()},'worldforge-conta-rascunho.json');exportLibrary();}
@@ -691,7 +699,7 @@
     world=library.worlds.find(entry=>entry.id===activeWorldId)?.data||null;
     if(backup.accountPreferences)prefs={...defaultPrefs,...backup.accountPreferences,widgets:{...defaultPrefs.widgets,...(backup.accountPreferences.widgets||{})}};
     if(!persistLibrary()){applyAccountData(JSON.parse(previous));renderAll();return false;}
-    renderAll();setView('inicio');toast('Backup importado. Salvando na sua conta?');return true;
+    renderAll();setView('inicio');toast('Backup importado. Salvando na sua conta…');return true;
   }
   async function readImportFile(file){if(file.size>MAX_IMPORT_BYTES)throw new Error('o arquivo excede o limite de 10 MB.');return file.text();}
   async function handleLibraryImport(file){if(!file)return;try{const backup=JSON.parse(await readImportFile(file));importLibraryData(backup);}catch(error){toast(`Não foi possível restaurar o backup: ${error.message}`,true);}finally{$('#library-import-file').value='';}}
@@ -759,6 +767,15 @@
   $$('.nav-link').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();setView(link.dataset.view);}));
   if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
   window.addEventListener('beforeunload',event=>{if(accountWorkspace.state.dirty||accountDraft){event.preventDefault();event.returnValue='';}});
-  window.addEventListener('online',()=>{if(accountWorkspace.state.dirty)accountWorkspace.flush().catch(()=>{});});
+  function refreshAccountWhenIdle(){
+    if(!hasWorkspaceAccess()||document.visibilityState==='hidden'||document.querySelector('dialog[open]')||document.activeElement?.matches('input,textarea,[contenteditable="true"]'))return;
+    const hasDraft=Array.from(document.querySelectorAll('#app-shell input,#app-shell textarea')).some(field=>field.offsetParent!==null&&field.type!=='hidden'&&(['checkbox','radio'].includes(field.type)?field.checked!==field.defaultChecked:field.value!==field.defaultValue));
+    if(hasDraft)return;
+    accountWorkspace.refresh().catch(()=>{});
+  }
+  window.addEventListener('online',()=>{if(accountWorkspace.state.dirty)accountWorkspace.flush().catch(()=>{});else refreshAccountWhenIdle();});
+  window.addEventListener('focus',refreshAccountWhenIdle);
+  document.addEventListener('visibilitychange',refreshAccountWhenIdle);
+  setInterval(refreshAccountWhenIdle,30000);
   window.WORLDFORGE_APP=communityProfile();applyTheme();updateConsentSummary();setLandingAuthMode('login');showLanding();if(hasCurrentLegalConsent())showCookieNotice();else openLegalGate(false);initializeAccountAccess();
 })();

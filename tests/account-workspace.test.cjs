@@ -5,6 +5,65 @@ const fs=require('node:fs'),vm=require('node:vm');
 const empty=()=>({revision:0,worlds:[],activeId:null,preferences:{}});
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
+test('temporary service failures recover automatically with the same mutation ID',async()=>{
+  const ids=[];let done;
+  const saved=new Promise(resolve=>done=resolve);
+  const store=create({getOwner:()=> 'a',load:async()=>empty(),apply(){},delay:100000,retryDelay:10,
+    save:async(data,revision,id)=>{ids.push(id);if(ids.length===1)throw Object.assign(new Error('unavailable'),{status:503});done();return {revision:1};}});
+  await store.open('a');store.queue(empty());await assert.rejects(store.flush());
+  assert.equal(store.state.retrying,true);
+  const deadline=setTimeout(()=>done(),1000);
+  await saved;clearTimeout(deadline);await tick();
+  assert.equal(ids.length,2);assert.equal(ids[0],ids[1]);assert.equal(store.state.dirty,false);store.reset();
+});
+
+test('permission and conflict failures never run automatic retries',async()=>{
+  for(const status of [400,401,403,409,413,422]){
+    const store=create({getOwner:()=> 'a',load:async()=>empty(),apply(){},delay:100000,retryDelay:1,
+      save:async()=>{throw Object.assign(new Error('rejected'),{status});}});
+    await store.open('a');store.queue(empty());await assert.rejects(store.flush());
+    assert.equal(store.state.retrying,false);store.reset();
+  }
+});
+
+test('idle refresh reads a newer account revision without replacing local edits',async()=>{
+  let remote=empty(),applied=[],refreshed=0,resolveLoad;
+  const store=create({getOwner:()=> 'a',load:async()=>resolveLoad?new Promise(resolve=>resolveLoad=resolve):remote,
+    save:async()=>({revision:3}),apply:data=>applied.push(data),onRefresh:()=>refreshed++,delay:100000});
+  await store.open('a');remote={...empty(),revision:1,preferences:{theme:'light'}};
+  assert.equal(await store.refresh(),true);assert.equal(applied.at(-1).preferences.theme,'light');assert.equal(refreshed,1);
+  resolveLoad=true;const refresh=store.refresh();store.queue({...empty(),preferences:{theme:'dark'}});
+  resolveLoad({...empty(),revision:2,preferences:{theme:'light'}});
+  assert.equal(await refresh,false);assert.equal(applied.length,2);assert.equal(store.state.dirty,true);
+  store.reset();
+});
+
+test('late refreshes cannot replace a different account',async()=>{
+  let owner='a',resolveLoad,applied=0;
+  const store=create({getOwner:()=>owner,load:async()=>resolveLoad?new Promise(resolve=>resolveLoad=resolve):empty(),save(){},apply:()=>applied++});
+  await store.open('a');resolveLoad=true;const refresh=store.refresh();owner='b';store.reset();
+  resolveLoad({...empty(),revision:1});await refresh;assert.equal(applied,1);
+});
+
+test('unchanged revision checks do not download the full account workspace',async()=>{
+  let loads=0,latest=0;
+  const store=create({getOwner:()=> 'a',load:async()=>{loads++;return {...empty(),revision:latest};},getRevision:async()=>latest,save(){},apply(){}});
+  await store.open('a');assert.equal(await store.refresh(),false);assert.equal(loads,1);
+  latest=1;assert.equal(await store.refresh(),true);assert.equal(loads,2);
+  store.reset();
+});
+
+test('background synchronization waits for an unfinished form even after focus leaves it',()=>{
+  const source=fs.readFileSync('app.js','utf8');
+  const guard=source.slice(source.indexOf('  function refreshAccountWhenIdle('),source.indexOf("  window.addEventListener('online'"));
+  let refreshed=0;
+  const field={offsetParent:{},type:'text',value:'An unfinished campaign note',defaultValue:''};
+  const context={hasWorkspaceAccess:()=>true,document:{visibilityState:'visible',activeElement:{matches:()=>false},querySelector:()=>null,querySelectorAll:()=>[field]},
+    accountWorkspace:{refresh:()=>{refreshed++;return Promise.resolve();}}};
+  vm.createContext(context);vm.runInContext(guard,context);context.refreshAccountWhenIdle();assert.equal(refreshed,0);
+  field.value='';context.refreshAccountWhenIdle();assert.equal(refreshed,1);
+});
+
 test('saves are serialized and a reload reads the server instead of browser data',async()=>{
   let remote=empty(),owner='account-a',active=0,max=0,calls=[];
   const store=create({getOwner:()=>owner,load:async()=>remote,apply(){},delay:100000,
