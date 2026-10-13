@@ -9,11 +9,11 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8');
 
 test('precache includes current app, community, and world-library assets', () => {
-  assert.match(source, /const CACHE = `\$\{CACHE_PREFIX\}v32`/);
+  assert.match(source, /const CACHE = `\$\{CACHE_PREFIX\}v33`/);
   assert.match(source, /community-validation\.js\?v=1/);
   assert.match(source, /community\.js\?v=3/);
-  assert.match(source, /app\.js\?v=31/);
-  assert.match(source, /cloud-config\.js\?v=5/);
+  assert.match(source, /app\.js\?v=32/);
+  assert.match(source, /cloud-config\.js\?v=6/);
   assert.match(source, /world-catalog\.js\?v=1/);
   assert.match(source, /world-library\.js\?v=4/);
 });

@@ -56,11 +56,11 @@ function createLibrary({ createCatalogCopy, enabled = true, pending = null } = {
   };
 }
 
-test('release config enables the world catalog without enabling community features', () => {
+test('release config enables the world catalog and community features', () => {
   const window = {};
   vm.runInNewContext(cloudConfigSource, { window });
   assert.equal(window.WORLDFORGE_CLOUD_CONFIG.worldLibraryEnabled, true);
-  assert.equal(window.WORLDFORGE_CLOUD_CONFIG.communityEnabled, false);
+  assert.equal(window.WORLDFORGE_CLOUD_CONFIG.communityEnabled, true);
 });
 
 test('catalog page lists the three worlds and filters fields are available', () => {
