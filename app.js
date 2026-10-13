@@ -1,6 +1,9 @@
 (() => {
   'use strict';
 
+  const canonicalPath=location.pathname.replace(/\/{2,}/g,'/');
+  if(canonicalPath!==location.pathname){location.replace(location.origin+canonicalPath+location.search+location.hash);return;}
+
   const STORE_KEY = 'worldforge.world.v1';
   const LIBRARY_KEY = 'worldforge.library.v1';
   const PREF_KEY = 'worldforge.preferences.v1';
@@ -517,6 +520,6 @@
   $('#library-import-file').addEventListener('change',event=>handleLibraryImport(event.target.files[0]));
   $('#menu-toggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
   $$('.nav-link').forEach(link=>link.addEventListener('click',event=>{event.preventDefault();setView(link.dataset.view);}));
-  if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(registration=>registration.update()).catch(()=>{});
   window.WORLDFORGE_APP=communityProfile();applyTheme();updateConsentSummary();setLandingAuthMode('login');showLanding();if(hasCurrentLegalConsent())showCookieNotice();else openLegalGate(false);restoreCloudSession();
 })();

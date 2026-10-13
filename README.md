@@ -520,7 +520,7 @@ O projeto está configurado na região us-east-1 (N. Virginia, EUA). A cópia na
 - A migration `20261013050124_align_community_permissions_and_limits.sql` foi aplicada ao projeto remoto `urvtkpqpguxthjznmtyu`: concede a coluna necessária, instala os contadores e gatilhos de limites e mantém a entrada com convite usando o helper privado. Nenhum mundo ou conteúdo existente foi removido.
 - Limites por conta: 5 tópicos/hora, 30 respostas/hora, 5 denúncias/hora, 3 publicações na Vitrine/hora, 3 Guildas/dia, 10 convites/hora, 30 mensagens/hora e 10 tentativas de entrada/dia. Convites inválidos retornam `false` e consomem tentativas; exceder o limite retorna SQLSTATE `PT429`/HTTP 429. Esses limites não eliminam abuso com várias contas.
 - Corrigido o cancelamento da criação de mundos. Adicionar um reino agora também cria uma capital inicial editável, mantendo o mundo válido para exportação e reabertura; falha de armazenamento desfaz ambas as alterações.
-- Service Worker: cache `v35`, `app.js?v=34` e `landing.css?v=1`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
+- Service Worker: cache `v36`, `app.js?v=35` e `landing.css?v=1`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
 
 #### Banco remoto e histórico de migrations
 
@@ -544,3 +544,7 @@ Os advisors foram consultados após a migration. A tabela de contadores não tem
 
 Publicação: repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`, em https://vini632.github.io/. Os arquivos publicados são comparados com o workspace antes da atualização, preservando arquivos remotos não relacionados. A aplicação continua compatível com GitHub Pages, sem servidor de aplicação ou etapa de build JavaScript.
 
+
+### Atualização do cache no Pages
+
+A navegação agora consulta primeiro a rede e usa HTML do cache apenas em falhas de conexão. A instalação recarrega os assets, ativa o worker novo e assume as abas abertas. A página consulta atualizações sem usar o cache HTTP do worker. Os arquivos da Comunidade e Biblioteca receberam novas versões na URL para evitar reaproveitar código anterior. A atualização não recarrega formulários automaticamente nem apaga mundos, perfil ou sessão no localStorage.
