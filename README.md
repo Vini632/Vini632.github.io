@@ -10,7 +10,7 @@
 
 | Área | Estado |
 | --- | --- |
-| Site | Endereço oficial: [vini632.github.io](https://vini632.github.io/), repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. Assets integrados na versão v44. |
+| Site | Domínio pretendido: [www.worldforge.site](https://www.worldforge.site/), no repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. O DNS da Hostinger ainda precisa apontar para o GitHub Pages; até então use [vini632.github.io](https://vini632.github.io/). Assets integrados na versão v44. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
 | Mural | Grant de leitura de `author_id` preservado. Testes remotos de leitura, autoria, escrita, exclusão e isolamento passaram novamente. Falta conferência do mantenedor com sua conta real na interface. |
@@ -19,10 +19,24 @@
 | Biblioteca | **10 cenários**: os 3 anteriores, mais **3 mundos completos e 4 pontos de partida**. Todas as referências passaram no validador. |
 | Discord / 2FA / vínculo | Implementados; funcionamento confirmado pelo mantenedor na sessão anterior. |
 | Google | Login completo testado e confirmado pelo mantenedor em 13/10/2026. |
-| Painel do bot | Publicado em [/bot/](https://vini632.github.io/bot/); exige conta, 2FA e identidade Discord verificável. |
+| Painel do bot | Publicado em [/bot/](https://www.worldforge.site/bot/); exige conta, 2FA e identidade Discord verificável. Enquanto o DNS propaga, use [vini632.github.io/bot/](https://vini632.github.io/bot/). |
 | Bot local | Encerrado antes de iniciar a hospedagem. Verificação de processos confirmou **zero instâncias locais** e ausência de `bot.pid`. Não iniciar outra instância enquanto a hospedada estiver ativa. |
 | Hospedagem | **Implantado na HostSquare**, serviço Python 512 MB no Canadá, plano mensal de R$ 2,50, em 13/10/2026. Console confirmou conexão ao Discord e comandos disponíveis. Consumo inicial observado: aproximadamente 47 MiB / 512 MiB. Teto original: R$ 15/mês. |
 | E-mails | Investigação Brevo encerrada por decisão do mantenedor. Discord e Google são prioritários. Não retomar testes de e-mail sem novo pedido. |
+
+### Domínio personalizado — `www.worldforge.site`
+
+O `CNAME` do repositório e o domínio personalizado do GitHub Pages estão configurados como `www.worldforge.site`. As Edge Functions `discord-bridge` e `delete-account` também foram publicadas com essa origem no CORS, mantendo os domínios anteriores. Na última verificação, o Pages ainda estava em `building`, HTTPS forçado estava desativado e o DNS da Hostinger ainda não apontava para o Pages: `www` era CNAME do domínio raiz e o A do domínio raiz resolvia para `2.57.91.91`. O DNS e a configuração de URLs do Supabase Auth continuam pendentes; não considere o endereço pronto até concluir os passos abaixo e verificar HTTPS.
+
+Na zona DNS da Hostinger:
+
+1. Altere o registro **CNAME** do host `www` para `vini632.github.io` (sem protocolo, barra ou caminho); remova o CNAME atual de `www` que aponta para `worldforge.site`.
+2. Para que o domínio raiz também redirecione ao `www`, remova os registros A/AAAA conflitantes do host `@` e crie os quatro registros A do GitHub Pages: `185.199.108.153`, `185.199.109.153`, `185.199.110.153` e `185.199.111.153`. O atual `2.57.91.91` deve ser removido/substituído. Os registros AAAA oficiais do GitHub Pages são opcionais; se optar por IPv6, configure todos os quatro: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153` e `2606:50c0:8003::153`.
+3. No GitHub Pages, o domínio personalizado já está definido como `www.worldforge.site`. Depois de corrigir o DNS, aguarde a validação e a emissão do certificado; só então habilite **Enforce HTTPS**. Não configure o proxy de terceiros para o CNAME.
+4. No Supabase: **Authentication → URL Configuration**, defina Site URL como `https://www.worldforge.site/`. Em Redirect URLs, permita `https://www.worldforge.site/**`, `https://worldforge.site/**` e `https://vini632.github.io/**`, mantendo localhost apenas se necessário para desenvolvimento. OAuth, confirmação e recuperação usam o domínio atual com `location.origin`; URLs ausentes nessa lista impedem que o Auth retorne corretamente ao site.
+5. Aguarde a propagação e confira `Resolve-DnsName www.worldforge.site` (CNAME para `vini632.github.io`) e `Resolve-DnsName worldforge.site -Type A` (os quatro IPs do Pages). Teste `https://www.worldforge.site/`, login externo, retorno de Auth e operações das Edge Functions. O certificado/redirect do GitHub Pages pode levar algum tempo após o DNS correto.
+
+Não coloque credenciais da Hostinger, tokens de acesso ou chaves Supabase em arquivos do repositório ou no chat. O endereço `https://vini632.github.io/` continuará como alternativa e está preservado no CORS.
 
 ### Fichas e catálogo
 
@@ -182,7 +196,7 @@ Para usar a interface, abra `index.html` no navegador. Para instalar o PWA e ati
 
 1. Envie os arquivos do projeto para um repositório GitHub.
 2. Nas configurações do repositório, abra **Pages** e selecione a branch e a pasta que contêm `index.html` (normalmente `main` e `/ (root)`).
-3. Acesse o endereço publicado. A hospedagem continua sendo estática e os caminhos relativos funcionam tanto em páginas de projeto quanto em domínio próprio; com a configuração atual, login e uso da área de trabalho dependem do Supabase.
+3. Acesse o domínio configurado em GitHub Pages. A hospedagem continua sendo estática e os caminhos relativos funcionam tanto em páginas de projeto quanto em domínio próprio; com a configuração atual, login e uso da área de trabalho dependem do Supabase. Consulte a seção de domínio personalizado para os registros DNS da Hostinger.
 
 Os mundos da interface ficam no armazenamento local do navegador. Use **Configurações → Dados & backup** para exportar um JSON. O botão **Importar** aceita os arquivos gerados pela interface e pelo programa Python.
 
@@ -594,7 +608,7 @@ Com a configuração atual, entrar ou criar conta é obrigatório para abrir a �
 
 1. Crie um projeto Supabase sob controle do mantenedor e configure a autenticação por e-mail.
 2. Para aplicar o esquema com histórico versionado, autentique a Supabase CLI, vincule o project ref correto, confira o estado com `npm exec -- supabase migration list`. No projeto remoto atual, a base foi instalada fora do histórico da CLI: reconcilie esse baseline antes de usar `npm exec -- supabase db push`, conforme o estado registrado abaixo. Se preferir o SQL Editor, confira primeiro o histórico e execute apenas os SQLs incrementais ainda não aplicados; `supabase/schema.sql` é a referência completa para instalações novas, não deve ser reaplicado cegamente sobre um banco existente.
-3. Em Authentication → URL Configuration, defina Site URL como https://vini632.github.io/ e inclua essa mesma URL em Redirect URLs. O cadastro envia o link de confirmação para esse endereço.
+3. Em Authentication → URL Configuration, defina Site URL como `https://www.worldforge.site/`. Inclua em Redirect URLs `https://www.worldforge.site/**`, `https://worldforge.site/**` e `https://vini632.github.io/**` durante a transição. OAuth, confirmação e recuperação retornam à origem corrente do site. Veja a seção **Domínio personalizado — `www.worldforge.site`** para a configuração DNS pendente.
 4. Copie a Project URL e a publishable key (ou a chave legacy anon) para cloud-config.js. Esses identificadores são públicos em aplicações de navegador. Nunca use secret ou service_role no site.
 5. A tela inicial permite criar conta ou entrar com e-mail/senha. A conta é necessária para abrir a área de trabalho; depois, em Configurações → Dados & backup, a pessoa pode enviar mundos locais, mesclar cópias de sua conta ou apagar os mundos remotos.
 
@@ -632,7 +646,7 @@ O teste de regressão cruza as colunas pedidas pelo cliente das Guildas com os g
 
 Os advisors foram consultados após a migration. A tabela de contadores não tem políticas/grants para o cliente por intenção; os três RPCs de Guilda precisam de `SECURITY DEFINER` e autorização interna. A proteção de senhas vazadas ainda aparece desativada na configuração de Auth. Os avisos informativos de índices devem ser avaliados conforme o volume real de uso.
 
-Publicação: repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`, em https://vini632.github.io/. Os arquivos publicados são comparados com o workspace antes da atualização, preservando arquivos remotos não relacionados. A aplicação continua compatível com GitHub Pages, sem servidor de aplicação ou etapa de build JavaScript.
+Publicação: repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`, com domínio pretendido em https://www.worldforge.site/ e fallback em https://vini632.github.io/. Os arquivos publicados são comparados com o workspace antes da atualização, preservando arquivos remotos não relacionados. A aplicação continua compatível com GitHub Pages, sem servidor de aplicação ou etapa de build JavaScript.
 
 
 ### Atualização do cache no Pages
@@ -647,11 +661,11 @@ O login inclui **Esqueci a senha**. Em **Configurações → Conta e acesso**, h
 
 O link de recuperação retorna à raiz do site, permitida nas URLs de redirecionamento do Auth. O aplicativo valida os tokens com `/auth/v1/user`, remove-os do endereço e abre o formulário de nova senha com confirmação. A sessão de recuperação fica apenas no armazenamento desta aba por até uma hora e não libera a área de trabalho. Ao concluir, solicita o encerramento global de sessões e pede novo login. Links inválidos/expirados permitem solicitar outro. Links de confirmação de cadastro também são processados e validados.
 
-**Envio de e-mails:** o SMTP é o serviço responsável pela entrega. Em 13/10/2026, o SMTP próprio da Brevo foi salvo e conferido como ativo após recarregar o painel do Supabase. Site URL e Redirect URLs foram conferidos com `https://vini632.github.io/`. Um pedido autorizado de recuperação foi aceito pelo Auth (HTTP 200); a entrega na caixa de e-mail ainda precisa ser confirmada. Para manter a recuperação funcionando:
+**Envio de e-mails (registro histórico):** o SMTP é o serviço responsável pela entrega. Em 13/10/2026, o SMTP próprio da Brevo foi salvo e conferido como ativo após recarregar o painel do Supabase. Naquela ocasião, Site URL e Redirect URLs usavam `https://vini632.github.io/`; atualize o Supabase para `https://www.worldforge.site/` e mantenha as origens antigas permitidas durante a migração, conforme as instruções acima. Um pedido autorizado de recuperação foi aceito pelo Auth (HTTP 200); a entrega na caixa de e-mail não foi confirmada. Por decisão do mantenedor, não retomar testes de e-mail sem novo pedido.
 
 1. Escolha um serviço de envio de e-mails e configure o remetente conforme suas instruções.
 2. Configure host, porta, usuário, senha e remetente em [Supabase → Authentication → SMTP](https://supabase.com/dashboard/project/urvtkpqpguxthjznmtyu/auth/smtp). Credenciais ficam nesse painel, nunca no site, GitHub ou chat.
-3. Confira Site URL e Redirect URLs com `https://vini632.github.io/`, os limites de envio e o modelo de e-mail de recuperação. O fluxo implementado usa o link padrão `ConfirmationURL`; também aceita `token_hash` e `type=recovery` em modelos personalizados.
+3. Confira Site URL/Redirect URLs para o domínio atualmente escolhido e revise os limites/modelos de e-mail somente quando o mantenedor solicitar retomar essa integração. O fluxo usa `ConfirmationURL` e também aceita `token_hash` e `type=recovery` em modelos personalizados.
 4. Valide a entrega, inclusive spam, com uma conta controlada pelo mantenedor. Foi enviado um único pedido de recuperação autorizado em 13/10/2026 às 03:37 (America/Sao_Paulo); nenhuma senha foi alterada.
 
 Referência: [documentação oficial de SMTP do Supabase](https://supabase.com/docs/guides/auth/auth-smtp).
