@@ -5,12 +5,12 @@
   <meta name="theme-color" content="#070709"><meta name="robots" content="noindex">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://urvtkpqpguxthjznmtyu.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'none'">
   <title>Central da Forja · WorldForge Bot</title>
-  <link rel="icon" href="../assets/icon.svg"><link rel="stylesheet" href="../auth-ui.css?v=2"><link rel="stylesheet" href="./panel.css?v=2">
-  <script src="../cloud-config.js?v=7" defer></script><script src="../auth-bundle.js?v=1" defer></script><script src="./panel.js?v=1" defer></script>
+  <link rel="icon" href="../../../assets/icon.svg"><link rel="stylesheet" href="../../../auth-ui.css?v=2"><link rel="stylesheet" href="./panel.css?v=3">
+  <script src="../../../cloud-config.js?v=7" defer></script><script src="../../../auth-bundle.js?v=1" defer></script><script src="./panel.js?v=2" defer></script>
 </head>
 <body>
   <aside class="sidebar">
-    <a class="brand" href="../"><span class="brand-symbol">W</span><span>worldforge<small>CENTRAL DA FORJA</small></span></a>
+    <a class="brand" href="../../../"><span class="brand-symbol">W</span><span>worldforge<small>CENTRAL DA FORJA</small></span></a>
     <div class="server-card"><span class="server-avatar">✦</span><div><strong id="server-name">World Forge RPG</strong><small>Seu servidor · seu universo</small></div></div>
     <span class="nav-label">ESPAÇO DA EQUIPE</span>
     <nav aria-label="Painel do bot">
@@ -22,23 +22,23 @@
       <button data-view="tickets"><span>◌</span>Atendimento</button>
       <button data-view="history"><span>↺</span>Histórico de ações</button>
     </nav>
-    <div class="sidebar-bottom"><a href="../">↗ Abrir WorldForge</a><div class="identity"><span class="avatar">W</span><div><strong id="actor-name">Conta WorldForge</strong><small id="connection">Conecte sua conta</small></div></div></div>
+    <div class="sidebar-bottom"><a href="../../../">↗ Abrir WorldForge</a><div class="identity"><span class="avatar">W</span><div><strong id="actor-name">Conta WorldForge</strong><small id="connection">Conecte sua conta</small></div></div></div>
   </aside>
   <main>
-    <header class="topbar"><span>WORLD FORGE RPG <span class="slash">/</span> Administração</span><div><button id="refresh" class="quiet" disabled>↻ Atualizar</button><a href="../">Meu espaço ↗</a></div></header>
+    <header class="topbar"><span>WORLD FORGE RPG <span class="slash">/</span> Administração</span><div><button id="refresh" class="quiet" disabled>↻ Atualizar</button><a href="../../../">Meu espaço ↗</a></div></header>
     <section class="hero"><div class="hero-copy"><span class="eyebrow">ONDE MUNDOS GANHAM VIDA</span><h1>Cuide da sua comunidade.</h1><p>O universo WorldForge começa com as pessoas que fazem parte dele.</p><span class="badge" id="bot-status">Aguardando conexão</span></div></section>
     <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
     <section id="access" class="card access">
       <span class="eyebrow">ACESSO DA EQUIPE</span><h2>Sua forja, sob proteção.</h2><p>Entre na sua conta WorldForge, conecte seu Discord e verifique a autenticação em duas etapas. Seus cargos atuais definem quais ferramentas você pode usar.</p>
-      <div class="actions"><a class="primary" id="login-link" href="../">Entrar no WorldForge</a><button id="discord-login" class="quiet">Entrar pelo Discord</button><button id="enable-mfa" class="quiet" hidden>Ativar 2FA</button><button id="verify-mfa" class="primary" hidden>Verificar e abrir painel</button></div>
+      <div class="actions"><a class="primary" id="login-link" href="../../../">Entrar no WorldForge</a><button id="discord-login" class="quiet">Entrar pelo Discord</button><button id="enable-mfa" class="quiet" hidden>Ativar 2FA</button><button id="verify-mfa" class="primary" hidden>Verificar e abrir painel</button></div>
       <p class="note">Login externo depende da ativação do provedor pelo responsável. Google e e-mail também funcionam após vincular seu Discord nas configurações da conta.</p>
-      <a class="subtle" href="../">Termos de uso e privacidade do WorldForge ↗</a>
+      <a class="subtle" href="../../../">Termos de uso e privacidade do WorldForge ↗</a>
     </section>
     <div id="workspace" hidden>
       <section data-page="overview">
         <div class="page-heading"><div><span class="eyebrow">SUA COMUNIDADE EM UM LUGAR</span><h2>Visão geral</h2></div><span class="badge">Discord + WorldForge</span></div>
         <div id="metrics" class="metrics"></div>
-        <div class="two-column"><article class="card"><span class="eyebrow">CENTRAL DE COMANDO</span><h3>Uma comunidade pronta para crescer.</h3><p>Regras, cargos, fóruns e atendimento seguem o documento oficial. Revise a estrutura antes de fazer qualquer alteração.</p><div class="actions"><button class="primary" data-go="channels">Gerenciar canais</button><button class="quiet" data-go="settings">Ajustar o bot</button></div></article><article class="card security-card"><span class="orb">✦</span><h3>Segurança em cada ação</h3><p>2FA verificado, cargos conferidos no Discord e histórico das solicitações. O acesso acompanha suas permissões atuais.</p><a class="subtle" href="../">Gerenciar minha conta ↗</a></article></div>
+        <div class="two-column"><article class="card"><span class="eyebrow">CENTRAL DE COMANDO</span><h3>Uma comunidade pronta para crescer.</h3><p>Regras, cargos, fóruns e atendimento seguem o documento oficial. Revise a estrutura antes de fazer qualquer alteração.</p><div class="actions"><button class="primary" data-go="channels">Gerenciar canais</button><button class="quiet" data-go="settings">Ajustar o bot</button></div></article><article class="card security-card"><span class="orb">✦</span><h3>Segurança em cada ação</h3><p>2FA verificado, cargos conferidos no Discord e histórico das solicitações. O acesso acompanha suas permissões atuais.</p><a class="subtle" href="../../../">Gerenciar minha conta ↗</a></article></div>
         <article class="card"><h3>Estrutura da comunidade</h3><div id="structure" class="structure"></div><button class="primary admin-only" id="setup">Revisar e montar estrutura</button><p class="note">Reutiliza canais existentes, preserva a Loritta e publica os painéis permanentes. Não inventa novidades.</p></article>
       </section>
       <section data-page="channels" hidden><div class="page-heading"><div><span class="eyebrow">ORGANIZAÇÃO</span><h2>Canais e painéis</h2></div></div><div id="panels" class="panel-grid"></div><article class="card admin-only"><h3>Associar um canal existente</h3><form data-command="associate" class="form-grid"><label>Seção<select name="section" data-options="panels" required></select></label><label>Canal<select name="channel_id" data-options="channels" required></select></label><button class="primary">Revisar associação</button></form></article></section>
@@ -48,7 +48,7 @@
       <section data-page="tickets" hidden><div class="page-heading"><div><span class="eyebrow">SUPORTE DA FORJA</span><h2>Atendimento privado</h2></div></div><article class="card admin-only"><h3>Equipe de atendimento</h3><form data-command="ticket-config" class="form-grid"><label>Cargo exclusivo da equipe<select name="role_id" data-options="roles" required></select></label><button class="primary">Revisar configuração</button></form><p class="note">Tickets ficam visíveis ao solicitante, à equipe e ao bot. Administradores do Discord possuem acesso por definição da plataforma.</p></article><article class="card"><h3>Tickets abertos</h3><div id="tickets-list" class="empty">Conecte o painel para consultar o atendimento.</div></article></section>
       <section data-page="history" hidden><div class="page-heading"><div><span class="eyebrow">TRANSPARÊNCIA</span><h2>Suas ações recentes</h2></div><button id="history-refresh" class="quiet">Atualizar histórico</button></div><article class="card"><p class="note">Exibe suas últimas 20 solicitações administrativas, conservadas por até 14 dias. Ações interrompidas não são repetidas automaticamente.</p><div id="history-list"></div></article></section>
     </div>
-    <footer>✦ WORLD FORGE RPG · Onde mundos ganham vida <a href="../">Termos e privacidade</a></footer>
+    <footer>✦ WORLD FORGE RPG · Onde mundos ganham vida <a href="../../../">Termos e privacidade</a></footer>
   </main>
   <dialog id="confirm-dialog"><span class="eyebrow">REVISE ANTES DE CONTINUAR</span><h2 id="confirm-title">Confirmar ação</h2><div id="confirm-preview"></div><p id="confirm-note">A operação será executada no servidor World Forge RPG com suas permissões atuais.</p><div class="actions"><button class="primary" id="confirm-yes">Confirmar ação</button><button class="quiet" id="confirm-no">Cancelar</button></div></dialog>
 </body></html>

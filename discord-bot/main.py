@@ -241,7 +241,7 @@ async def help_command(interaction: discord.Interaction):
     embed.add_field(name='Sua conta', value='`/vincular` · `/mundos` · `/perfil` · `/desvincular`', inline=False)
     embed.add_field(name='Comunidade',value='`/comunidade bug` · `/comunidade sugestao` · `/comunidade duvida`',inline=False)
     embed.add_field(name='Atendimento',value='Painel Abrir ticket · `/tickets abrir` · `/tickets encerrar`',inline=False)
-    embed.add_field(name='Equipe',value=f'Configurações, montagem, publicações e moderação: {bot.site_url.rstrip("/")}/bot/',inline=False)
+    embed.add_field(name='Equipe',value='Painel administrativo disponível para a equipe autorizada.',inline=False)
     embed.set_footer(text='A configuração e moderação exigem as permissões correspondentes.')
     await answer(interaction, embed=embed)
 

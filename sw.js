@@ -1,7 +1,7 @@
 const APP_PATH = new URL('./', self.registration.scope).pathname;
 const CACHE_PREFIX = `worldforge-static:${encodeURIComponent(APP_PATH)}:`;
-const CACHE = `${CACHE_PREFIX}v44`;
-const FILES = ['./', './index.html', './styles.css?v=14', './landing.css?v=2', './animations.css', './theme-black.css?v=13', './character-sheet.css?v=1', './character-sheet.js?v=1', './world-validation.js?v=2', './community-validation.js?v=1', './cloud-config.js?v=7', './account-api.js?v=3', './auth-bundle.js?v=1', './auth-ui.css?v=2', './app.js?v=42', './community.js?v=5', './world-catalog.js?v=2', './world-library.js?v=5', './manifest.webmanifest', './assets/icon.svg', './bot/', './bot/index.html', './bot/panel.js?v=1', './bot/panel.css?v=2'];
+const CACHE = `${CACHE_PREFIX}v45`;
+const FILES = ['./', './index.html', './styles.css?v=14', './landing.css?v=2', './animations.css', './theme-black.css?v=13', './character-sheet.css?v=1', './character-sheet.js?v=1', './world-validation.js?v=2', './community-validation.js?v=1', './cloud-config.js?v=7', './account-api.js?v=3', './auth-bundle.js?v=1', './auth-ui.css?v=2', './app.js?v=43', './community.js?v=5', './world-catalog.js?v=2', './world-library.js?v=5', './manifest.webmanifest', './assets/icon.svg', './bot/admin/botp/', './bot/admin/botp/index.html', './bot/admin/botp/panel.js?v=2', './bot/admin/botp/panel.css?v=3'];
 self.addEventListener('install', event => event.waitUntil(
   caches.open(CACHE)
     .then(cache => cache.addAll(FILES.map(path => new Request(new URL(path, self.registration.scope), { cache: 'reload' }))))
@@ -24,7 +24,7 @@ self.addEventListener('fetch', event => {
       try {
         return remember(await fetch(event.request, { cache: 'no-cache' }));
       } catch (error) {
-        const fallback = new URL(event.request.url).pathname.startsWith(APP_PATH+'bot/') ? 'bot/index.html' : 'index.html';
+        const fallback = new URL(event.request.url).pathname.startsWith(APP_PATH+'bot/admin/botp/') ? 'bot/admin/botp/index.html' : 'index.html';
         const cached = await cache.match(event.request) || await cache.match(new URL(fallback, self.registration.scope).href);
         if (cached) return cached;
         throw error;

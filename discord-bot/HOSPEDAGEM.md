@@ -19,7 +19,7 @@ O mantenedor escolheu o plano mensal de **512 MB por R$ 2,50**. O preço, o supo
 4. Instale as dependências com `python -m pip install -r requirements.lock`. Configure o comando de início como `python main.py` se o painel permitir um comando completo; quando ele já usa `python` e pede só o arquivo, use `main.py`.
 5. Configure os valores de `.env.example` como variáveis privadas do processo; se o painel não exportar essas variáveis para o Python, crie `.env` no gerenciador privado do servidor. Copie os valores diretamente do `.env` local para o painel, sem enviar ao chat, GitHub ou ZIP. Os dois tokens permanecem fora do pacote.
 6. Preserve `.data/settings.sqlite3` no disco persistente do servidor. O ZIP contém um snapshot das associações atuais; não substitua um banco hospedado mais recente por um snapshot antigo.
-7. Pare a instância local com `stop-bot.ps1` **somente quando a configuração hospedada estiver pronta para iniciar**. Inicie a hospedada, confira conexão e logs, depois verifique o painel `/bot/`. Se a implantação falhar, pare a hospedada antes de voltar a iniciar a local.
+7. Pare a instância local com `stop-bot.ps1` **somente quando a configuração hospedada estiver pronta para iniciar**. Inicie a hospedada, confira conexão e logs, depois verifique o painel pelo endereço compartilhado com a equipe. Se a implantação falhar, pare a hospedada antes de voltar a iniciar a local.
 8. Acompanhe RAM, reinício automático e persistência após um reinício controlado. Os 512 MB ainda precisam de validação sob uso real; o processo Windows foi observado ativo, mas sua memória em repouso não representa o consumo máximo no Linux.
 
 **Estado:** implantado em 13/10/2026, com a autorização explícita do mantenedor para enviar ZIP/SQLite e os dois tokens existentes. Área financeira confirmou serviço Python 0.5 GB no Canadá **ativo**, cobrança **mensal de R$ 2,50**. Painel de execução: `painel.hostsquare.com.br`; servidor `worldforgerpg`.
@@ -37,7 +37,7 @@ O console confirmou conexão ao Discord e comandos disponíveis, com cerca de **
 3. Envie `.data/worldforge-squarecloud.zip` ao painel da Square Cloud. A raiz do ZIP já contém `squarecloud.app` e `main.py`.
 4. Antes de iniciar, configure as variáveis de `.env.example` como segredos privados na hospedagem. Copie DISCORD_TOKEN e WORLDFORGE_BRIDGE_TOKEN diretamente do seu `.env` local, sem postar no chat ou no GitHub. O pacote não contém essas chaves.
 5. Pare o bot local com `stop-bot.ps1`, depois inicie a versão hospedada. Evite duas instâncias simultâneas, pois elas compartilham os mesmos canais e banco.
-6. Confira os logs: conexão com Discord e ausência de falhas do painel. Em `https://vini632.github.io/bot/`, use Atualizar para conferir o acesso da sua conta.
+6. Confira os logs: conexão com Discord e ausência de falhas do painel. Abra o endereço compartilhado com a equipe e use Atualizar para conferir o acesso da sua conta.
 
 O pacote inclui uma cópia consistente do SQLite local para preservar associações de painéis, cargos e atendimento. Esse ZIP é privado e não deve ser publicado no repositório. Se já houver uma instalação na host, não sobrescreva seu SQLite com uma cópia local antiga. Guarde backups e confira a política de persistência do serviço antes de reinstalar.
 

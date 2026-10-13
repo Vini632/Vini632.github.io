@@ -79,6 +79,8 @@ test('installation reloads HTTP assets and activates without waiting for tabs to
   assert.ok(worker.calls.precache.length > 10);
   assert.ok(worker.calls.precache.every(request => request.cache === 'reload'));
   assert.ok(worker.calls.precache.every(request => request.url.startsWith('https://example.test/worldforge/')));
+  assert.ok(worker.calls.precache.some(request => request.url === 'https://example.test/worldforge/bot/admin/botp/index.html'));
+  assert.ok(!worker.calls.precache.some(request => request.url.endsWith('/bot/index.html')));
   assert.equal(worker.calls.activated, 1);
 });
 
@@ -112,6 +114,15 @@ test('offline navigation falls back to this app cached entry page including link
     matchResponse: request => request === 'https://example.test/worldforge/index.html' ? fallback : null
   });
   assert.equal(await requestFrom(worker, { method: 'GET', mode: 'navigate', url: 'https://example.test/worldforge/?update=1' }), fallback);
+});
+
+test('offline navigation to the team panel falls back to its nested cached page', async () => {
+  const fallback = { offline: true };
+  const worker = loadWorker('https://example.test/worldforge/', [], {
+    fetchResponse: () => { throw new Error('Offline'); },
+    matchResponse: request => request === 'https://example.test/worldforge/bot/admin/botp/index.html' ? fallback : null
+  });
+  assert.equal(await requestFrom(worker, { method: 'GET', mode: 'navigate', url: 'https://example.test/worldforge/bot/admin/botp/?view=history' }), fallback);
 });
 
 test('versioned assets use this app cache without a network request', async () => {

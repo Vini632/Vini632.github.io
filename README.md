@@ -19,7 +19,7 @@
 | Biblioteca | **10 cenários**: os 3 anteriores, mais **3 mundos completos e 4 pontos de partida**. Todas as referências passaram no validador. |
 | Discord / 2FA / vínculo | Implementados; funcionamento confirmado pelo mantenedor na sessão anterior. |
 | Google | Login completo testado e confirmado pelo mantenedor em 13/10/2026. |
-| Painel do bot | Publicado em [/bot/](https://www.worldforge.site/bot/); exige conta, 2FA e identidade Discord verificável. Enquanto o DNS propaga, use [vini632.github.io/bot/](https://vini632.github.io/bot/). |
+| Painel do bot | Endereço compartilhado separadamente com a equipe; exige conta, 2FA e identidade Discord verificável. O caminho menos óbvio não é uma medida de segurança; o backend continua verificando permissões. |
 | Bot local | Encerrado antes de iniciar a hospedagem. Verificação de processos confirmou **zero instâncias locais** e ausência de `bot.pid`. Não iniciar outra instância enquanto a hospedada estiver ativa. |
 | Hospedagem | **Implantado na HostSquare**, serviço Python 512 MB no Canadá, plano mensal de R$ 2,50, em 13/10/2026. Console confirmou conexão ao Discord e comandos disponíveis. Consumo inicial observado: aproximadamente 47 MiB / 512 MiB. Teto original: R$ 15/mês. |
 | E-mails | Investigação Brevo encerrada por decisão do mantenedor. Discord e Google são prioritários. Não retomar testes de e-mail sem novo pedido. |
@@ -66,7 +66,7 @@ Não coloque credenciais da Hostinger, tokens de acesso ou chaves Supabase em ar
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v44**, `app.js?v=42`, `styles.css?v=14`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v45**, `app.js?v=43`, `styles.css?v=14`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
 
 ### Próximas pendências
 
@@ -93,7 +93,7 @@ Não coloque credenciais da Hostinger, tokens de acesso ou chaves Supabase em ar
 - `mailDeliveryAvailable: false`: cadastro, recuperação e reenvio por e-mail suspensos na interface; e-mail/senha continuam para contas já confirmadas. Confirmação de e-mail no Supabase permanece ativa. HTTP 200 não prova entrega. Brevo `#5613937` foi encerrado como investigação por escolha do mantenedor; último teste sem entrega às 09:28 BRT de 13/10/2026.
 - Supabase: projeto `urvtkpqpguxthjznmtyu`, região `us-east-1`; URL `https://urvtkpqpguxthjznmtyu.supabase.co`; callback OAuth `/auth/v1/callback`.
 - Discord: aplicação `1559439222308601897`, servidor `1559443784255803464` (IDs públicos). Comandos públicos: `/ajuda`, `/ping`, `/vincular`, `/mundos`, `/perfil`, `/desvincular`, `/tickets` e `/comunidade`.
-- Administração em `bot/`, fila privada Supabase e execução Python; `DASHBOARD_STAFF=true`. Bot verifica permissões e hierarquia reais. Jobs incertos não são repetidos automaticamente; histórico por até 14 dias.
+- Administração em caminho não anunciado na interface principal, fila privada Supabase e execução Python; `DASHBOARD_STAFF=true`. Bot verifica permissões e hierarquia reais. Jobs incertos não são repetidos automaticamente; histórico por até 14 dias.
 - Edge Functions confirmadas anteriormente: `discord-bridge` v4 e `delete-account` v3. `verify_jwt=false` no gateway depende da autenticação e validação de sessão dentro dos handlers; não removê-las. Usar `import_map_path: "deno.json"` quando requerido no deploy.
 - Exclusão de conta: senha para contas com senha; 2FA recente para contas exclusivamente OAuth; revogação de sessões e cascatas do banco. Nenhuma conta real foi excluída nesta retomada.
 - Não havia Git nem Docker no PATH. Publicação usa `gh api` com blobs/tree/commit e atualização de ref **sem force**, preservando arquivos remotos não relacionados. Base anterior desta entrega: `8aab4f4b9de0a59cbdf7eb76e2bbbf038e78bf57`; não tratá-la como HEAD depois de novos commits.
@@ -725,7 +725,7 @@ executar, parar, mover e configurar as permissões estão no README do bot.
 
 ## Login externo, 2FA e Central da Forja (13/10/2026)
 
-- [Painel do bot](bot/README.md): `/bot/`, com montagem, configurações, cargos, moderação, publicações, atendimento e histórico. As ferramentas da staff saem dos slash commands quando `DASHBOARD_STAFF=true`, padrão da nova versão.
+- [Painel do bot](bot/README.md): interface de montagem, configurações, cargos, moderação, publicações, atendimento e histórico, acessível pelo endereço compartilhado separadamente com a equipe. As ferramentas da staff saem dos slash commands quando `DASHBOARD_STAFF=true`, padrão da nova versão.
 - OAuth Discord/Google via Supabase, PKCE e SDK local versionado. Os provedores só aparecem como disponíveis quando ativados no Auth. Discord e Google foram confirmados ativos no Auth. Ambos são compatíveis com Pages. Client Secrets ficam exclusivamente no Supabase.
 - TOTP: ativar, verificar e desativar em Conta e acesso. Login com um fator confirmado exige AAL2; políticas restritivas no banco também protegem os dados de contas com 2FA, e as RPCs comunitárias recebem a mesma exigência. Guarde a chave de configuração: não existem códigos de recuperação próprios.
 - Staff: JWT verificado, sessão ativa, fator confirmado e vínculo com Discord. A fila é privada, o bot verifica cargos/hierarquia reais a cada operação, e os resultados ficam disponíveis apenas à conta solicitante por até 14 dias. Operações não confirmadas nunca são repetidas automaticamente.

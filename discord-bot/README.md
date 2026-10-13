@@ -12,7 +12,7 @@ mover o bot ou voltar a executá-lo localmente.
 
 ## Painel web: administração padrão
 
-Abra **https://vini632.github.io/bot/**. Montagem, publicação de painéis, configurações,
+Abra o endereço do painel compartilhado separadamente com a equipe. Montagem, publicação de painéis, configurações,
 permissões, cargos, moderação e publicações oficiais foram transferidos para o painel.
 Entre na conta WorldForge, conecte seu Discord e ative/verifique o 2FA. As permissões
 são conferidas no servidor a cada ação. Consulte [o painel](../bot/README.md) e

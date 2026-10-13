@@ -103,7 +103,7 @@
     const dialog=$('#confirm-dialog');$('#confirm-title').textContent=labels[command]||command;
     const preview=$('#confirm-preview');preview.replaceChildren();
     if(command==='publish-official'){
-      const card=document.createElement('article');card.className='publication-preview';const img=document.createElement('img');img.src='../discord-bot/assets/banner.png';img.alt='Arte oficial WorldForge';
+      const card=document.createElement('article');card.className='publication-preview';const img=document.createElement('img');img.src='../../../discord-bot/assets/banner.png';img.alt='Arte oficial WorldForge';
       const body=document.createElement('div'),title=document.createElement('h3'),state=document.createElement('small'),content=document.createElement('p'),link=document.createElement('small');title.textContent=payload.title;state.textContent=payload.state+' · '+payload.section;content.textContent=payload.details;link.textContent=payload.link||'';body.append(title,state,content,link);card.append(img,body);preview.append(card);
     }else preview.textContent=describe(command,payload);
     $('#confirm-note').textContent=command==='permissions'?'Essa alteração restringe a publicação dos outros cargos nos canais oficiais. Revise o cargo da equipe.':command==='clear'?'Mensagens recentes serão excluídas permanentemente. Esta ação não pode ser desfeita.':'Esta ação será executada no servidor World Forge RPG e registrada no histórico.';
@@ -146,8 +146,8 @@
   $('#moderation-form').elements.command.onchange=event=>{const timeout=event.target.value==='timeout';$('#timeout-field').hidden=!timeout;$('#moderation-form').elements.minutes.required=timeout;};
   $('#setup').onclick=()=>confirmAction('setup',{}).catch(error=>feedback(error.message,true));$('#refresh').onclick=connect;
   $('#history-refresh').onclick=()=>history().catch(error=>feedback(error.message,true));
-  $('#login-link').onclick=()=>sessionStorage.setItem('worldforge.auth-return','/bot/');
-  $('#discord-login').onclick=async()=>{try{sessionStorage.setItem('worldforge.auth-return','/bot/');await auth.oauth('discord');}catch(error){feedback(error.message,true);}};
+  $('#login-link').onclick=()=>sessionStorage.setItem('worldforge.auth-return','/bot/admin/botp/');
+  $('#discord-login').onclick=async()=>{try{sessionStorage.setItem('worldforge.auth-return','/bot/admin/botp/');await auth.oauth('discord');}catch(error){feedback(error.message,true);}};
   $('#enable-mfa').onclick=async()=>{try{await auth.mfa({enroll:true});await connect();}catch(error){feedback(error.message,true);}};
   $('#verify-mfa').onclick=async()=>{try{await auth.mfa({force:true});await connect();}catch(error){feedback(error.message,true);}};
   window.addEventListener('worldforge-auth-session',event=>{if(event.detail.event==='SIGNED_OUT'){connected=false;snapshot=null;$('#workspace').hidden=true;$('#access').hidden=false;$('#refresh').disabled=true;$('#login-link').hidden=false;feedback('Sessão encerrada. Entre novamente.',true);}});
