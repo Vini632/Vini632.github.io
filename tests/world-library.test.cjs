@@ -9,6 +9,7 @@ const catalog = require('../world-catalog.js');
 const validateWorld = require('../world-validation.js');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'world-library.js'), 'utf8');
+const cloudConfigSource = fs.readFileSync(path.join(__dirname, '..', 'cloud-config.js'), 'utf8');
 const PENDING_KEY = 'worldforge.world-library.pending.v1';
 
 function createLibrary({ createCatalogCopy, enabled = true, pending = null } = {}) {
@@ -29,7 +30,7 @@ function createLibrary({ createCatalogCopy, enabled = true, pending = null } = {
     WORLDFORGE_APP: app,
     WORLDFORGE_WORLD_CATALOG: catalog,
     WORLDFORGE_VALIDATE_WORLD: validateWorld,
-    WORLDFORGE_WORLD_LIBRARY_ENABLED: enabled,
+    WORLDFORGE_CLOUD_CONFIG: { worldLibraryEnabled: enabled },
     location: { hash: '' }
   };
   const document = {
@@ -54,6 +55,13 @@ function createLibrary({ createCatalogCopy, enabled = true, pending = null } = {
     }
   };
 }
+
+test('release config enables the world catalog without enabling community features', () => {
+  const window = {};
+  vm.runInNewContext(cloudConfigSource, { window });
+  assert.equal(window.WORLDFORGE_CLOUD_CONFIG.worldLibraryEnabled, true);
+  assert.equal(window.WORLDFORGE_CLOUD_CONFIG.communityEnabled, false);
+});
 
 test('catalog page lists the three worlds and filters fields are available', () => {
   const { library, target } = createLibrary();

@@ -5,7 +5,7 @@
   const catalog = window.WORLDFORGE_WORLD_CATALOG;
   const validateWorld = window.WORLDFORGE_VALIDATE_WORLD;
   const PENDING_KEY = 'worldforge.world-library.pending.v1';
-  const enabled = window.WORLDFORGE_WORLD_LIBRARY_ENABLED === true;
+  const enabled = window.WORLDFORGE_CLOUD_CONFIG?.worldLibraryEnabled === true;
   const state = { selected: null, search: '', genre: '', type: '', busySlug: '', error: '' };
   const $ = (selector, root = document) => root.querySelector(selector);
 

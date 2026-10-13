@@ -195,6 +195,8 @@ grant insert (owner_id, local_world_id, creator_name, world_name, summary, realm
 grant update (name, description), delete on public.worldforge_guilds to authenticated;
 grant select on public.worldforge_guilds to authenticated;
 grant select, delete on public.worldforge_guild_members to authenticated;
+grant select (id, guild_id, author_name, body, created_at, updated_at)
+  on public.worldforge_guild_messages to authenticated;
 grant insert (guild_id, author_id, author_name, body),
   update (author_name, body), delete
   on public.worldforge_guild_messages to authenticated;

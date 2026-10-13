@@ -42,3 +42,14 @@ test('authenticated guild members can query guild rows, protected by row-level s
   assert.match(schema, /grant select on public\.worldforge_guilds to authenticated/i);
   assert.match(schema, /create policy "Guilds are visible only to members"[\s\S]*?for select to authenticated[\s\S]*?worldforge_is_guild_member\(id\)/i);
 });
+
+test('authenticated guild members can read only message fields protected by membership RLS', () => {
+  assert.match(
+    schema,
+    /grant select \(id, guild_id, author_name, body, created_at, updated_at\)\s+on public\.worldforge_guild_messages to authenticated/i
+  );
+  assert.match(
+    schema,
+    /create policy "Guild members can read messages"[\s\S]*?for select to authenticated[\s\S]*?worldforge_is_guild_member\(guild_id\)/i
+  );
+});

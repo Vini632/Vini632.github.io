@@ -47,7 +47,7 @@ O WorldForge RPG reúne os seguintes sistemas:
 - **Relações entre personagens:** busque e filtre vínculos, crie e edite relações e ajuste sua intensidade, sem permitir pares duplicados.
 - **Backup completo:** exporte ou restaure a biblioteca inteira em um arquivo JSON.
 - **Seed de geração:** permite reproduzir mundos e simulações com os mesmos parâmetros.
-- **Biblioteca de Mundos:** seção planejada, atualmente marcada como **Em Breve**.
+- **Biblioteca de Mundos:** catálogo disponível com três cenários iniciais, filtros, detalhes e cópia independente para a conta da pessoa.
 - **Atualizações:** abra o histórico pela versão exibida no rodapé; as notas fazem parte do app, sem baixar scripts de um endereço arbitrário.
 
 O projeto funciona como uma base para campanhas de RPG, ferramentas de criação de cenários ou futuros sistemas de simulação.
@@ -161,7 +161,7 @@ Ao criar um mundo, a tela de forja mostra o progresso por um período aleatório
 
 ### Biblioteca de Mundos
 
-**Biblioteca de Mundos** aparece na navegação como **Em Breve**. O catálogo demonstrativo e a criação de cópias estão temporariamente desativados; entrar na seção não envia nem salva dados.
+**Biblioteca de Mundos** está disponível na navegação com três cenários para explorar: um mundo completo e dois modelos personalizáveis. Pesquise e filtre por gênero e tipo, consulte os detalhes e escolha **Usar este mundo** para salvar uma cópia independente. A cópia é criada na conta Supabase autenticada e também adicionada à biblioteca local; sem entrar na conta, a escolha fica guardada neste navegador até o login. O catálogo e as cópias podem ser controlados pelo flag público `worldLibraryEnabled` em `cloud-config.js`; o acesso à tabela remota continua protegido por RLS.
 
 Os argumentos opcionais devem corresponder aos aceitos pela versão instalada. Use `--help` para consultar as opções efetivamente disponíveis.
 
