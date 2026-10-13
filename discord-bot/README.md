@@ -4,13 +4,19 @@ Bot Python para o servidor `1559443784255803464`, aplicação `15594392223086018
 O site continua no GitHub Pages. O processo do bot roda separadamente no Windows
 ou em uma máquina com Python e conexão contínua ao Discord.
 
+**Estado em 13/10/2026:** bot implantado e conectado na **HostSquare**, plano mensal
+de 512 MB por R$ 2,50. Python 3.12; reconexão após reinício confirmada. A instância
+Windows foi encerrada. Não inicie outra enquanto a hospedagem estiver ativa.
+O SQLite da hospedagem é agora a cópia ativa; obtenha um backup recente antes de
+mover o bot ou voltar a executá-lo localmente.
+
 ## Painel web: administração padrão
 
 Abra **https://vini632.github.io/bot/**. Montagem, publicação de painéis, configurações,
 permissões, cargos, moderação e publicações oficiais foram transferidos para o painel.
 Entre na conta WorldForge, conecte seu Discord e ative/verifique o 2FA. As permissões
 são conferidas no servidor a cada ação. Consulte [o painel](../bot/README.md) e
-[a hospedagem](HOSPEDAGEM.md) para usar a Square Cloud dentro do teto de R$ 15.
+[a hospedagem](HOSPEDAGEM.md) para manter a implantação atual na HostSquare.
 
 No Discord permanecem `/ajuda`, `/ping`, `/vincular`, `/mundos`, `/perfil`,
 `/desvincular`, `/comunidade bug|sugestao|duvida` e `/tickets abrir|encerrar`,
