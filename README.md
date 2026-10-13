@@ -4,13 +4,13 @@
 
 ## Estado para retomar o trabalho — 13/10/2026
 
-**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v50**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v51**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
 
 ### Entrega desta retomada
 
 | Área | Estado |
 | --- | --- |
-| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v50. |
+| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v51. |
 | Persistência | Mundos, fichas, anotações, perfil/foto/banner e preferências carregados da conta Supabase e salvos automaticamente. O navegador não grava mais mundos/perfil como fonte de dados; sessão, consentimento e pequenos metadados de retomada permanecem locais. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
@@ -33,11 +33,11 @@
 - Migration **`20261013220630_online_account_workspace.sql`** aplicada. `worldforge_account_state` guarda preferências, mundo ativo e revisão. `worldforge_worlds` continua sendo a biblioteca da conta e mantém compatibilidade de leitura com o bot. Saves passam por `wf_save_workspace`, em uma transação com controle de revisão e UUID idempotente; `wf_load_workspace` devolve a biblioteca/perfil. Escrita direta de clientes antigos na tabela foi revogada para impedir contornar o controle de revisão. Helper privilegiado fica no schema privado, deriva o proprietário da sessão e exige MFA quando ativo. RLS permanece habilitado.
 - `account-workspace.js` serializa/coalesce saves; confirmação visual só mostra “salvas” após resposta do servidor. Falha preserva o rascunho em memória e oferece nova tentativa, exportação e recarga. Conflitos entre abas não sobrescrevem uma versão mais nova. Fechar a página com alterações pendentes dispara aviso. Sem rede, o rascunho precisa ser salvo/exportado antes de fechar; não há biblioteca offline persistida.
 - A biblioteca e o perfil são carregados **antes** de liberar o espaço de trabalho. Troca de conta descarta respostas antigas e não mostra os dados de outra pessoa. Dados locais antigos são oferecidos para importação explícita, sem substituição silenciosa; um backup JSON antigo pode ser importado para a conta. Backups de rascunho da conta também incluem preferências/perfil e podem ser restaurados. Limites de envio: 100 mundos, 20 MB por workspace e 4 MB para preferências/fotos/banner.
-- Termos/privacidade e interface atualizados para o salvamento automático. Novas versões de consentimento: termos `2026-10-13.11`, privacidade `2026-10-13.14`. O mantenedor precisa aceitar os avisos atualizados na interface; o agente não aceita termos por ele.
+- Termos/privacidade e interface atualizados para o salvamento automático. Novas versões de consentimento: termos `2026-10-13.11`, privacidade `2026-10-13.14`. O mantenedor informou que concluiu os avisos atualizados e o login; o agente não aceitou termos por ele.
 - Configurações SQLite do bot permanecem na HostSquare por escolha explícita do mantenedor (**só dados do site migrados**). Não iniciar o bot local nem sobrescrever o SQLite ativo com snapshot antigo.
 - Testes SQL sintéticos, com rollback, passaram antes e depois da migration: recarga, replay sem duplicação, conflito de revisão, validação de entrada, exclusão atômica, isolamento, bloqueio de escrita direta, MFA AAL1/AAL2 e acesso anônimo negado. Advisors sem novos avisos; permanecem os avisos previamente documentados.
 
-- Navegador com conta/servidor sintéticos: perfil e nome do mundo alterados pela interface real, confirmação de salvamento aguardada e recarga conferida. Nenhum erro de console. A conferência com a conta real do mantenedor ainda exige seu login/2FA e aceite dos avisos atualizados.
+- Navegador com conta/servidor sintéticos: perfil e nome do mundo alterados pela interface real, confirmação de salvamento aguardada e recarga conferida. Nenhum erro de console. O mantenedor concluiu seu login/2FA e os avisos; espaço de trabalho real carregado. Painel real conferido com nova consulta: Bot conectado, permissões atualizadas, 3 membros, 40 canais, 12 painéis e nenhum ticket aberto. A biblioteca real estava vazia; restauração do backup antigo aguarda seleção manual de `C:\Users\vpers\Downloads\worldforge-biblioteca.json`, pois a extensão bloqueou o upload automatizado. Não alterar permissões para contornar o bloqueio. Mesclar, aguardar confirmação do servidor e conferir após recarga.
 
 ### Fichas e catálogo
 
@@ -67,7 +67,9 @@
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v50**, `app.js?v=46`, `account-workspace.js?v=2`, `auth-bundle.js?v=2`, `styles.css?v=16`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v51**, `app.js?v=47`, `account-workspace.js?v=2`, `auth-bundle.js?v=2`, `styles.css?v=16`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+
+- Correção final v51: acentos do aviso de rascunho pendente e mensagem de importação alinhada ao armazenamento da conta. Checagem de sintaxe e 22 testes direcionados de backups/fila/painel/cache passaram. A repetção da suíte completa foi interrompida por um processo sem progresso em `community-schema.test.cjs`; os 87 testes da entrega anterior permanecem registrados como resultado anterior.
 
 ### Próximas pendências
 
