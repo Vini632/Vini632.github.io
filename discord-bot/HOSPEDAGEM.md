@@ -4,7 +4,7 @@ Consulta de preços: 13/10/2026. O site e o painel continuam no GitHub Pages; s�
 
 | Serviço | Custo anunciado | Limites e escolha |
 | --- | --- | --- |
-| [HostSquare — Python](https://hostsquare.com.br/aplicacoes/bot-python) | **R$ 2,50/mês**, 512 MB; R$ 5/mês, 1 GB | **Escolha do mantenedor: 512 MB.** Painel Pterodactyl, Python e reinício automático anunciados. Ainda não contratado nem testado nesta hospedagem. |
+| [HostSquare — Python](https://hostsquare.com.br/aplicacoes/bot-python) | **R$ 2,50/mês**, 512 MB; R$ 5/mês, 1 GB | **Escolha do mantenedor: 512 MB; pagamento informado em 13/10/2026.** Acesso ao serviço e implantação ainda pendentes. |
 | [Square Cloud Hobby](https://squarecloud.app/pt-br/pricing) | R$ 12,49/mês no mensal; R$ 9,99/mês equivalente no anual | 1 GB no plano, Python e reinício automático. Recomendado dentro do teto de R$ 15. Confirme o valor final no checkout. |
 | [Discloud gratuito](https://discloud.com/plans) | Gratuito | 100 MB. Pode servir para começar, mas o consumo deste bot com imagens e Discord precisa ser acompanhado. Reinício automático é restrito a planos superiores segundo a documentação. |
 | [Oracle Always Free](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm) | Recursos elegíveis gratuitos | Exige administrar uma VM, cadastro e disponibilidade de capacidade; pode recuperar instâncias consideradas ociosas. Menos simples para este projeto. |
@@ -22,7 +22,7 @@ O mantenedor escolheu o plano mensal de **512 MB por R$ 2,50**. O preço, o supo
 7. Pare a instância local com `stop-bot.ps1` **somente quando a configuração hospedada estiver pronta para iniciar**. Inicie a hospedada, confira conexão e logs, depois verifique o painel `/bot/`. Se a implantação falhar, pare a hospedada antes de voltar a iniciar a local.
 8. Acompanhe RAM, reinício automático e persistência após um reinício controlado. Os 512 MB ainda precisam de validação sob uso real; o processo Windows foi observado ativo, mas sua memória em repouso não representa o consumo máximo no Linux.
 
-**Estado:** pacote preparado sem credenciais; contratação e implantação pendentes. Nenhuma segunda instância foi iniciada.
+**Estado:** pagamento confirmado pelo mantenedor em 13/10/2026; pacote preparado sem credenciais. A área financeira abriu a tela de login, deixada para o mantenedor autenticar. Provisionamento do serviço e implantação ainda precisam de verificação no painel. Nenhuma segunda instância foi iniciada.
 
 ## Square Cloud: alternativa já preparada
 

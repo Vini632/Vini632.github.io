@@ -17,10 +17,10 @@
 | Fichas | Editor livre integrado ao HTML e ao precache: salvar, importar/exportar JSON, imprimir/PDF pelo navegador e avisar sobre alterações não salvas. Ficha acompanha `npc.ficha` nos backups do mundo. |
 | Biblioteca | **10 cenários**: os 3 anteriores, mais **3 mundos completos e 4 pontos de partida**. Todas as referências passaram no validador. |
 | Discord / 2FA / vínculo | Implementados; funcionamento confirmado pelo mantenedor na sessão anterior. |
-| Google | Provedor implementado e ativo; teste completo pelo mantenedor ainda pendente. |
+| Google | Login completo testado e confirmado pelo mantenedor em 13/10/2026. |
 | Painel do bot | Publicado em [/bot/](https://vini632.github.io/bot/); exige conta, 2FA e identidade Discord verificável. |
 | Bot local | Árvore do PID registrado observada ativa nesta retomada. Não presumir que continuará rodando: consultar `.data/bot.pid` e o processo filho. Nenhuma instância extra foi iniciada. |
-| Hospedagem | **Escolhida: HostSquare, plano mensal de 512 MB por R$ 2,50 anunciado.** Pacote privado preparado; contratação e implantação ainda pendentes. Teto original: R$ 15/mês. |
+| Hospedagem | **HostSquare, plano mensal de 512 MB por R$ 2,50 escolhido.** Mantenedor informou pagamento em 13/10/2026. Pacote privado preparado; aguardando acesso autenticado ao painel para implantação. Teto original: R$ 15/mês. |
 | E-mails | Investigação Brevo encerrada por decisão do mantenedor. Discord e Google são prioritários. Não retomar testes de e-mail sem novo pedido. |
 
 ### Fichas e catálogo
@@ -55,8 +55,8 @@
 
 ### Próximas pendências
 
-1. Mantenedor conferir login Google, mural/visibilidade de suas guildas e criar/editar/importar/imprimir uma ficha no site atualizado.
-2. Concluir a contratação **mensal** da HostSquare 512 MB, confirmar preço de R$ 2,50 no checkout e obter acesso ao painel. A escolha substitui a recomendação anterior de Square Cloud; são provedores diferentes.
+1. Mantenedor conferir mural/visibilidade de suas guildas e criar/editar/importar/imprimir uma ficha no site atualizado. **Login Google já confirmado por ele.**
+2. Acessar o serviço HostSquare 512 MB após o pagamento informado pelo mantenedor. A área financeira abriu a tela de login; a aba foi deixada aberta para ele entrar. Não solicitar senha pelo chat. A escolha substitui a recomendação anterior de Square Cloud; são provedores diferentes.
 3. Implantar o pacote privado `discord-bot/.data/worldforge-pterodactyl.zip`, com Python 3.12+, dependências fixadas e segredos no painel. **Parar a instância local antes de iniciar a hospedada.** Conferir persistência de SQLite, reinício e memória sob uso real. Consulte [HOSPEDAGEM.md](discord-bot/HOSPEDAGEM.md).
 4. Reconfirmar o processo local sempre que necessário. Os ZIPs privados incluem configuração SQLite: nunca publicar no GitHub. Não sobrescrever um SQLite hospedado mais novo com cópia local antiga.
 
