@@ -520,7 +520,7 @@ O projeto está configurado na região us-east-1 (N. Virginia, EUA). A cópia na
 - A migration `20261013050124_align_community_permissions_and_limits.sql` foi aplicada ao projeto remoto `urvtkpqpguxthjznmtyu`: concede a coluna necessária, instala os contadores e gatilhos de limites e mantém a entrada com convite usando o helper privado. Nenhum mundo ou conteúdo existente foi removido.
 - Limites por conta: 5 tópicos/hora, 30 respostas/hora, 5 denúncias/hora, 3 publicações na Vitrine/hora, 3 Guildas/dia, 10 convites/hora, 30 mensagens/hora e 10 tentativas de entrada/dia. Convites inválidos retornam `false` e consomem tentativas; exceder o limite retorna SQLSTATE `PT429`/HTTP 429. Esses limites não eliminam abuso com várias contas.
 - Corrigido o cancelamento da criação de mundos. Adicionar um reino agora também cria uma capital inicial editável, mantendo o mundo válido para exportação e reabertura; falha de armazenamento desfaz ambas as alterações.
-- Service Worker: cache `v36`, `app.js?v=35` e `landing.css?v=1`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
+- Service Worker: cache `v37`, `app.js?v=36` e `landing.css?v=2`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
 
 #### Banco remoto e histórico de migrations
 
@@ -548,3 +548,24 @@ Publicação: repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`,
 ### Atualização do cache no Pages
 
 A navegação agora consulta primeiro a rede e usa HTML do cache apenas em falhas de conexão. A instalação recarrega os assets, ativa o worker novo e assume as abas abertas. A página consulta atualizações sem usar o cache HTTP do worker. Os arquivos da Comunidade e Biblioteca receberam novas versões na URL para evitar reaproveitar código anterior. A atualização não recarrega formulários automaticamente nem apaga mundos, perfil ou sessão no localStorage.
+
+### Recuperação de senha e exclusão de conta
+
+O login inclui **Esqueci a senha**. Em **Configurações → Conta e acesso**, há **Resetar senha** (envia o mesmo link ao e-mail da conta) e **Deletar conta**. Erros de cadastro/login são apresentados em português; o erro de chave duplicada do banco não é exibido diretamente.
+
+O link de recuperação retorna à raiz do site, permitida nas URLs de redirecionamento do Auth. O aplicativo valida os tokens com `/auth/v1/user`, remove-os do endereço e abre o formulário de nova senha com confirmação. A sessão de recuperação fica apenas no armazenamento desta aba por até uma hora e não libera a área de trabalho. Ao concluir, solicita o encerramento global de sessões e pede novo login. Links inválidos/expirados permitem solicitar outro. Links de confirmação de cadastro também são processados e validados.
+
+**Envio de e-mails:** o SMTP é o serviço responsável pela entrega. O mantenedor ainda não confirmou uma configuração própria. O envio padrão do Supabase é limitado aos endereços da equipe e não atende ao público geral. Para liberar a recuperação a todos:
+
+1. Escolha um serviço de envio de e-mails e configure o remetente conforme suas instruções.
+2. Configure host, porta, usuário, senha e remetente em [Supabase → Authentication → SMTP](https://supabase.com/dashboard/project/urvtkpqpguxthjznmtyu/auth/smtp). Credenciais ficam nesse painel, nunca no site, GitHub ou chat.
+3. Confira Site URL e Redirect URLs com `https://vini632.github.io/`, os limites de envio e o modelo de e-mail de recuperação. O fluxo implementado usa o link padrão `ConfirmationURL`; também aceita `token_hash` e `type=recovery` em modelos personalizados.
+4. Valide a entrega, inclusive spam, com uma conta controlada pelo mantenedor. Não foi disparado um e-mail nem alterada a senha de uma conta real nesta implementação.
+
+Referência: [documentação oficial de SMTP do Supabase](https://supabase.com/docs/guides/auth/auth-smtp).
+
+A Edge Function `delete-account` está instalada no Supabase e usa credenciais administrativas apenas no ambiente do servidor. Ela verifica o bearer token com o Auth, confirma a senha atual com o e-mail obtido da sessão, exige a palavra `DELETAR`, encerra as sessões e só então exclui o usuário autenticado. Não aceita um ID de usuário escolhido pelo cliente. O verificador JWT do gateway fica desativado porque a autenticação é feita explicitamente pelo handler; não remova essa verificação interna. O CORS permite o Pages atual e os endereços locais de desenvolvimento.
+
+As chaves estrangeiras remotas foram conferidas: os registros ativos do WorldForge ligados à conta são removidos por `ON DELETE CASCADE`. Isso inclui tópicos e Guildas criados pela pessoa, com suas respostas/murais. O diálogo explica esse alcance. Há uma opção explícita para remover também mundos e perfil deste navegador. Backups baixados, dados de outros dispositivos e retenções técnicas do provedor não são removidos por esse controle. Tokens de acesso já emitidos podem permanecer válidos até expirar; refresh sessions são revogadas, a sessão local é removida e as demais abas são avisadas.
+
+O endpoint remoto foi verificado para preflight permitido, método inválido, ausência de sessão, token inválido e origem não permitida. Nenhuma conta real foi excluída. O frontend continua estático e compatível com GitHub Pages; somente a operação administrativa é executada no Supabase. Cache atual: `v37`, `app.js?v=36`, `account-api.js?v=1` e `landing.css?v=2`.

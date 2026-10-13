@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="./styles.css?v=12">
     <link rel="stylesheet" href="./animations.css">
     <link rel="stylesheet" href="./theme-black.css?v=12">
-    <link rel="stylesheet" href="./landing.css?v=1">
+    <link rel="stylesheet" href="./landing.css?v=2">
   </head>
   <body>
     <main class="landing-screen" id="landing-screen">
@@ -35,12 +35,15 @@
         <section class="landing-auth-card" aria-label="Acessar WorldForge">
           <div class="landing-auth-heading"><span class="landing-auth-symbol" aria-hidden="true">&#9670;</span><div><h2 id="landing-auth-title">Entre no seu espaço</h2><p id="landing-auth-description">Acesse sua área de trabalho para começar.</p></div></div>
           <form id="landing-auth-form" class="landing-auth-form" data-mode="login">
-            <label class="field-label" for="landing-email">E-mail<input class="text-field" id="landing-email" name="email" type="email" autocomplete="email" required maxlength="254"></label>
-            <label class="field-label" for="landing-password">Senha<input class="text-field" id="landing-password" name="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128"></label>
+            <label class="field-label" id="landing-email-field" for="landing-email">E-mail<input class="text-field" id="landing-email" name="email" type="email" autocomplete="email" required maxlength="254"></label>
+            <label class="field-label" id="landing-password-field" for="landing-password"><span id="landing-password-label">Senha</span><input class="text-field" id="landing-password" name="password" type="password" autocomplete="current-password" required minlength="1" maxlength="128"></label>
+            <label class="field-label hidden" id="landing-confirm-field" for="landing-password-confirm">Confirme a nova senha<input class="text-field" id="landing-password-confirm" name="password_confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="128"></label>
+            <button class="landing-text-button landing-forgot-button" id="landing-forgot-password" type="button">Esqueci a senha</button>
             <button class="button button-primary landing-auth-submit" id="landing-auth-submit" type="submit">Entrar</button>
           </form>
           <p class="landing-auth-feedback" id="landing-auth-feedback" role="status" aria-live="polite"></p>
           <div class="landing-auth-switch"><span id="landing-auth-switch-copy">Ainda não tem conta?</span><button type="button" id="landing-auth-switch" data-auth-mode="signup">Criar conta</button></div>
+          <button class="landing-text-button hidden" id="landing-auth-back" type="button">Voltar para entrar</button>
           <button class="landing-guest-button" type="button" data-action="continue-guest">Continuar sem entrar</button>
         </section>
       </section>
@@ -163,6 +166,19 @@
       </div>
     </dialog>
 
+    <dialog class="modal" id="account-delete-modal" aria-labelledby="account-delete-title">
+      <form class="modal-card" id="account-delete-form">
+        <button type="button" class="modal-close icon-button" id="account-delete-close" aria-label="Cancelar exclusão"><span data-icon="close"></span></button>
+        <div class="eyebrow">SUA CONTA</div><h2 id="account-delete-title">Deletar conta</h2>
+        <p class="modal-intro">Esta ação é permanente. Remove sua conta, mundos da nuvem, publicações, respostas e mensagens. Tópicos e Guildas criados por você também serão removidos, incluindo suas respostas e murais. As sessões serão encerradas.</p>
+        <p class="cloud-note">Exporte seus backups antes de continuar. Mundos e perfil deste navegador serão preservados, a menos que você selecione a opção abaixo. Cópias em outros dispositivos e backups baixados não são apagados por este botão.</p>
+        <label class="field-label">Senha atual<input class="text-field" name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+        <label class="field-label">Digite DELETAR para confirmar<input class="text-field" name="confirmation" autocomplete="off" required pattern="DELETAR" maxlength="7" placeholder="DELETAR"></label>
+        <label class="account-delete-local"><input type="checkbox" name="clear_local">Apagar também mundos e perfil deste navegador</label>
+        <p id="account-delete-feedback" class="account-feedback" role="status" aria-live="polite"></p>
+        <div class="modal-actions"><button type="button" class="button button-quiet" id="account-delete-cancel">Cancelar</button><button type="submit" class="button button-danger" id="account-delete-submit">Deletar minha conta</button></div>
+      </form>
+    </dialog>
     <dialog class="modal" id="world-modal">
       <form method="dialog" class="modal-card" id="world-form">
         <button class="modal-close icon-button" value="cancel" aria-label="Fechar"><span data-icon="close"></span></button>
@@ -243,7 +259,8 @@
     <script src="./world-validation.js?v=1" defer></script>
     <script src="./community-validation.js?v=1" defer></script>
     <script src="./cloud-config.js?v=6" defer></script>
-    <script src="./app.js?v=35" defer></script>
+    <script src="./account-api.js?v=1" defer></script>
+    <script src="./app.js?v=36" defer></script>
     <script src="./world-catalog.js?v=1" defer></script>
     <script src="./world-library.js?v=5" defer></script>
     <script src="./community.js?v=4" defer></script>

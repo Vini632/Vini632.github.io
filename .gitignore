@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 supabase/.temp/
 supabase/.branches/
+
+.env
+.env.*
+supabase/functions/.env*

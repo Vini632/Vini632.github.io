@@ -82,6 +82,20 @@ html[data-theme="light"] .landing-auth-heading p,html[data-theme="light"] .landi
 html[data-theme="light"] .landing-auth-form .field-label { color: #4d5348; }
 html[data-theme="light"] .landing-auth-form .text-field { border-color: #d5d9ce; background: #fff; color: #272b24; }
 
+.landing-text-button { padding: 0; border: 0; background: none; color: #cbd7b8; font: inherit; font-size: 12px; cursor: pointer; }
+.landing-text-button:hover { color: #edf5df; text-decoration: underline; }
+.landing-text-button:focus-visible { outline: 2px solid #cbd7b8; outline-offset: 5px; border-radius: 3px; }
+.landing-forgot-button { justify-self: end; margin-top: -2px; }
+#landing-auth-back { display: block; margin: 18px auto 0; }
+.landing-auth-feedback { overflow-wrap: anywhere; }
+.landing-auth-heading p { overflow-wrap: anywhere; }
+.account-feedback { min-height: 1.4em; margin: 12px 0; color: var(--muted, #93988b); font-size: 12px; overflow-wrap: anywhere; }
+.account-feedback.is-error { color: #e5a0a0; }
+.account-delete-local { display: flex; align-items: flex-start; gap: 9px; margin-top: 16px; font-size: 12px; line-height: 1.6; }
+#account-delete-form .field-label { margin-top: 14px; }
+html[data-theme="light"] .landing-text-button { color: #44562f; }
+html[data-theme="light"] .account-feedback.is-error { color: #a63030; }
+
 @media (max-width: 860px) {
   .landing-hero { grid-template-columns: minmax(0, 1fr) minmax(280px, 340px); gap: 28px; }
   .landing-copy h1 { font-size: clamp(40px, 6vw, 58px); }
