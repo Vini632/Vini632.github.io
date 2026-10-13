@@ -10,7 +10,7 @@
 
 | Área | Estado |
 | --- | --- |
-| Site | Domínio pretendido: [www.worldforge.site](https://www.worldforge.site/), no repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. O DNS da Hostinger ainda precisa apontar para o GitHub Pages; até então use [vini632.github.io](https://vini632.github.io/). Assets integrados na versão v44. |
+| Site | Domínio configurado: [www.worldforge.site](https://www.worldforge.site/), no repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. O DNS da Hostinger ainda precisa apontar para o GitHub Pages; até então use [vini632.github.io](https://vini632.github.io/). Assets integrados na versão v44. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
 | Mural | Grant de leitura de `author_id` preservado. Testes remotos de leitura, autoria, escrita, exclusão e isolamento passaram novamente. Falta conferência do mantenedor com sua conta real na interface. |
@@ -26,7 +26,7 @@
 
 ### Domínio personalizado — `www.worldforge.site`
 
-O `CNAME` do repositório e o domínio personalizado do GitHub Pages estão configurados como `www.worldforge.site`. As Edge Functions `discord-bridge` e `delete-account` também foram publicadas com essa origem no CORS, mantendo os domínios anteriores. Na última verificação, o Pages ainda estava em `building`, HTTPS forçado estava desativado e o DNS da Hostinger ainda não apontava para o Pages: `www` era CNAME do domínio raiz e o A do domínio raiz resolvia para `2.57.91.91`. O DNS e a configuração de URLs do Supabase Auth continuam pendentes; não considere o endereço pronto até concluir os passos abaixo e verificar HTTPS.
+O `CNAME` do repositório e o domínio personalizado do GitHub Pages estão configurados como `www.worldforge.site`. As Edge Functions `discord-bridge` e `delete-account` também foram publicadas com essa origem no CORS, mantendo os domínios anteriores. O build do Pages concluiu (`built`), mas HTTPS forçado continua desativado e o DNS da Hostinger ainda não aponta para o Pages: `www` é CNAME do domínio raiz e o A do domínio raiz resolve para `2.57.91.91` (verificado em 13/10/2026). O DNS e a configuração de URLs do Supabase Auth continuam pendentes; não considere o endereço pronto até concluir os passos abaixo e verificar HTTPS.
 
 Na zona DNS da Hostinger:
 
