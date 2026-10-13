@@ -10,6 +10,9 @@ window.WORLDFORGE_CLOUD_CONFIG = {
   url: 'https://urvtkpqpguxthjznmtyu.supabase.co',
   publishableKey: 'sb_publishable_A_UWfFS6GHU8c_0kiy8Aqg_DcBO6dCb',
   enabled: true,
+  // A entrega pela Brevo não foi confirmada. Login por senha continua disponível
+  // para contas confirmadas; novos envios ficam suspensos na interface.
+  mailDeliveryAvailable: false,
   communityEnabled: true,
   worldLibraryEnabled: true
 };

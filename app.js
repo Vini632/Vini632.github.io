@@ -108,6 +108,7 @@
   const cloudReady=cloudConfigured&&cloudConfig.enabled===true;
   const accountApi=window.WORLDFORGE_ACCOUNT_API.createClient({url:cloudConfig.url,publishableKey:cloudConfig.publishableKey});
   const RECOVERY_SESSION_KEY='worldforge.password-recovery.v1';
+  let emailAlternativeOpen=false;
   let recoverySession=null,landingAuthBusy=false,accountEmailBusy=false,accountDeleteBusy=false,lastRecoveryRequest=0;
 
   function loadJson(key,fallback){try{const value=JSON.parse(localStorage.getItem(key));return value??fallback;}catch{return fallback;}}
@@ -119,9 +120,9 @@
   function goBotPanel(){try{if(hasCurrentLegalConsent()&&sessionStorage.getItem('worldforge.auth-return')==='/bot/'){sessionStorage.removeItem('worldforge.auth-return');location.assign('./bot/');}}catch{}}
   function setLandingAuthMode(mode){
     if(!['login','signup','recover','reset'].includes(mode))mode='login';
-    const form=$('#landing-auth-form'),signup=mode==='signup',recover=mode==='recover',reset=mode==='reset';form.dataset.mode=mode;
-    $('#social-auth').classList.toggle('hidden',recover||reset);$('#resend-confirmation').classList.toggle('hidden',!signup);$('#landing-auth-title').textContent=signup?'Crie sua conta':recover?'Esqueceu a senha?':reset?'Crie uma nova senha':'Entre no seu espaço';
-    $('#landing-auth-description').textContent=signup?'Use seu e-mail para começar a criar.':recover?'Informe seu e-mail para receber o link de recuperação.':reset?'Use de 8 a 128 caracteres e confirme a nova senha.':'Acesse sua área de trabalho para começar.';
+    const form=$('#landing-auth-form'),signup=mode==='signup',recover=mode==='recover',reset=mode==='reset',mailReady=cloudConfig.mailDeliveryAvailable!==false;form.dataset.mode=mode;form.classList.toggle('hidden',(!recover&&!reset&&!emailAlternativeOpen)||(signup&&!mailReady));$('#email-auth-toggle').classList.toggle('hidden',recover||reset);$('#email-auth-toggle').setAttribute('aria-expanded',String(!form.classList.contains('hidden')));$('#email-auth-toggle').textContent=emailAlternativeOpen&&!signup?'Ocultar e-mail e senha':'Entrar com e-mail e senha';$('#email-access-note').classList.toggle('hidden',!emailAlternativeOpen||mailReady||reset);$('#landing-forgot-password').disabled=!mailReady;$('#landing-forgot-password').title=mailReady?'':'Envio de recuperação temporariamente indisponível';$('#landing-auth-submit').disabled=(signup||recover)&&!mailReady;
+    $('#social-auth').classList.toggle('hidden',recover||reset);$('#resend-confirmation').classList.toggle('hidden',!signup||!mailReady);$('#landing-auth-title').textContent=signup?'Crie sua conta':recover?'Esqueceu a senha?':reset?'Crie uma nova senha':'Entre no seu espaço';
+    $('#landing-auth-description').textContent=signup?'Crie sua conta com Discord ou Google.':recover?'Informe seu e-mail para receber o link de recuperação.':reset?'Use de 8 a 128 caracteres e confirme a nova senha.':'Continue com Discord ou Google para acessar seu espaço.';
     if(reset&&recoverySession?.user?.email)$('#landing-auth-description').textContent=`Defina uma nova senha para ${recoverySession.user.email}.`;
     $('#landing-password-label').textContent=reset?'Nova senha':'Senha';
     $('#landing-auth-submit').textContent=signup?'Criar conta':recover?'Enviar link de recuperação':reset?'Salvar nova senha':'Entrar';
@@ -423,6 +424,7 @@
   function cloudUrl(path){return cloudConfig.url.replace(/\/$/,'')+path;}
   async function cloudFetch(path,options={}){if(!cloudReady)throw new Error('A conexão com o banco ainda não foi configurada.');const headers={apikey:cloudConfig.publishableKey,'Content-Type':'application/json',...(options.headers||{})};if(options.auth!==false&&cloudSession?.access_token)headers.Authorization=`Bearer ${cloudSession.access_token}`;const response=await fetch(cloudUrl(path),{...options,headers});const body=await response.json().catch(()=>null);if(!response.ok){const error=new Error(body?.msg||body?.message||body?.error_description||body?.error||'Não foi possível conectar ao serviço de nuvem.');error.status=response.status;error.code=body?.error_code||body?.code;throw error;}return body;}
   async function cloudAuth(mode,email,password){
+    if(mode==='signup'&&cloudConfig.mailDeliveryAvailable===false)throw new Error('O cadastro por e-mail está temporariamente indisponível. Crie sua conta com Discord ou Google.');
     const auth=window.WORLDFORGE_AUTH, result=auth.checked(await (mode==='signup'?auth.client.auth.signUp({email,password,options:{emailRedirectTo:location.origin+'/'}}):auth.client.auth.signInWithPassword({email,password})));
     if(result?.session){cloudSession=result.session;saveCloudSession();await enterWorkspace();window.WORLDFORGE_WORLD_LIBRARY?.onSessionReady();return;}
     $('#resend-confirmation').classList.remove('hidden');
@@ -458,7 +460,7 @@
   function scrollToSettings(id){const section=$('#settings-'+id);if(section instanceof HTMLDetailsElement)section.open=true;section?.scrollIntoView({behavior:'smooth',block:'start'});}
   function mfaAccountPanel(){return `<div class="setting-row"><span class="setting-row-copy"><strong>Autenticação em duas etapas</strong><small>Use um aplicativo autenticador para proteger sua conta. Obrigatória no painel da staff.</small></span><div class="cloud-actions"><button class="button button-quiet button-small" data-action="mfa-enable">Ativar 2FA</button><button class="button button-quiet button-small" data-action="mfa-check">Verificar acesso</button><button class="button button-danger button-small" data-action="mfa-disable">Desativar</button></div></div><p id="mfa-feedback" class="account-feedback" role="status"></p><div class="setting-row"><span class="setting-row-copy"><strong>Painel do bot</strong><small>Administre o servidor com sua conta e seus cargos do Discord.</small></span><a class="button button-quiet button-small" href="./bot/">Abrir painel</a></div>`;}
   async function mfaAction(action){const feedback=$('#mfa-feedback');if(!feedback)return;try{await cloudEnsureSession();feedback.textContent='';cloudSession=await window.WORLDFORGE_AUTH.mfa({enroll:action==='enable',remove:action==='disable',force:action==='check'||action==='disable'});saveCloudSession();feedback.textContent=action==='enable'?'2FA ativada.':action==='disable'?'2FA desativada.':'Acesso verificado.';}catch(error){feedback.textContent=error.message||'Não foi possível alterar a autenticação.';}}
-  function accountPanel(){return`<section class="settings-panel" id="settings-account"><h3>Conta e acesso</h3><p>Gerencie o acesso à sua conta ${escapeHtml(cloudSession?.user?.email||'')}.</p><div class="setting-row"><span class="setting-row-copy"><strong>Resetar senha</strong><small>Receba um link no e-mail da conta e escolha uma nova senha.</small></span><button class="button button-quiet button-small" type="button" data-action="account-reset-password">Resetar senha</button></div><p class="account-feedback" id="account-reset-feedback" role="status" aria-live="polite"></p>${mfaAccountPanel()}${discordAccountPanel()}<div class="setting-row"><span class="setting-row-copy"><strong>Deletar conta</strong><small>Remova sua conta e dados ativos na nuvem. Confirmação por senha ou 2FA para login externo.</small></span><button class="button button-danger button-small" type="button" data-action="account-delete">Deletar conta</button></div></section>`;}
+  function accountPanel(){return`<section class="settings-panel" id="settings-account"><h3>Conta e acesso</h3><p>Gerencie o acesso à sua conta ${escapeHtml(cloudSession?.user?.email||'')}.</p><div class="setting-row"><span class="setting-row-copy"><strong>Resetar senha</strong><small>${cloudConfig.mailDeliveryAvailable===false?'Envio temporariamente indisponível. Gerencie sua senha no provedor externo quando aplicável.':'Receba um link no e-mail da conta e escolha uma nova senha.'}</small></span><button class="button button-quiet button-small" type="button" data-action="account-reset-password" ${cloudConfig.mailDeliveryAvailable===false?'disabled':''}>Resetar senha</button></div><p class="account-feedback" id="account-reset-feedback" role="status" aria-live="polite"></p>${mfaAccountPanel()}${discordAccountPanel()}<div class="setting-row"><span class="setting-row-copy"><strong>Deletar conta</strong><small>Remova sua conta e dados ativos na nuvem. Confirmação por senha ou 2FA para login externo.</small></span><button class="button button-danger button-small" type="button" data-action="account-delete">Deletar conta</button></div></section>`;}
 
   function discordAccountPanel(){
     const ownerId=cloudSession?.user?.id||null;
@@ -511,6 +513,7 @@
   function forgetRecoverySession(){recoverySession=null;try{sessionStorage.removeItem(RECOVERY_SESSION_KEY);}catch{}}
   function saveRecoverySession(){if(!recoverySession)return;recoverySession.saved_at=recoverySession.saved_at||Date.now();try{sessionStorage.setItem(RECOVERY_SESSION_KEY,JSON.stringify(recoverySession));}catch{}}
   async function requestAccountReset(email){
+    if(cloudConfig.mailDeliveryAvailable===false)throw new Error('A recuperação por e-mail está temporariamente indisponível. Use um provedor já vinculado à sua conta.');
     if(!cloudReady)throw new Error('O serviço de conta não está disponível.');
     if(accountEmailBusy)throw new Error('Aguarde o pedido em andamento.');
     if(Date.now()-lastRecoveryRequest<60000)throw new Error('Aguarde um minuto antes de solicitar outro link.');
@@ -523,7 +526,7 @@
     try{await cloudEnsureSession();feedback.textContent=await requestAccountReset(cloudSession.user.email);}catch(error){feedback.classList.add('is-error');feedback.textContent=error.status?window.WORLDFORGE_ACCOUNT_API.authMessage(error,'recover'):error.message;}finally{button.disabled=false;}
   }
   async function submitLandingAuth(event){
-    event.preventDefault();if(landingAuthBusy)return;const form=event.currentTarget,mode=form.dataset.mode,button=$('#landing-auth-submit');landingAuthBusy=true;button.disabled=true;setLandingFeedback('Aguarde...');
+    event.preventDefault();if(landingAuthBusy)return;const form=event.currentTarget,mode=form.dataset.mode,button=$('#landing-auth-submit');if((mode==='signup'||mode==='recover')&&cloudConfig.mailDeliveryAvailable===false){setLandingFeedback('O envio de e-mails está temporariamente indisponível. Use Discord ou Google para criar sua conta.',true);return;}landingAuthBusy=true;button.disabled=true;setLandingFeedback('Aguarde...');
     try{
       if(mode==='recover'){setLandingFeedback(await requestAccountReset(form.elements.email.value.trim()));return;}
       if(mode==='reset'){
@@ -535,8 +538,8 @@
         setLandingFeedback(result.signedOut?'Senha alterada. Entre com sua nova senha.':'Senha alterada. Entre novamente. Não foi possível confirmar o encerramento das outras sessões.');return;
       }
       await cloudAuth(mode,form.elements.email.value.trim(),form.elements.password.value);
-    }catch(error){if(error.code==='email_not_confirmed')$('#resend-confirmation').classList.remove('hidden');const localError=!error.status&&error.name!=='TypeError'&&(mode==='recover'||mode==='reset');setLandingFeedback(localError?error.message:window.WORLDFORGE_ACCOUNT_API.authMessage(error,mode),true);}
-    finally{form.elements.password.value='';form.elements.password_confirmation.value='';landingAuthBusy=false;button.disabled=false;}
+    }catch(error){if(error.code==='email_not_confirmed'&&cloudConfig.mailDeliveryAvailable!==false)$('#resend-confirmation').classList.remove('hidden');const localError=!error.status&&error.name!=='TypeError'&&(mode==='recover'||mode==='reset');setLandingFeedback(localError?error.message:window.WORLDFORGE_ACCOUNT_API.authMessage(error,mode),true);}
+    finally{form.elements.password.value='';form.elements.password_confirmation.value='';landingAuthBusy=false;button.disabled=['signup','recover'].includes(form.dataset.mode)&&cloudConfig.mailDeliveryAvailable===false;}
   }
   async function leaveAccountRecovery(){
     if(landingAuthBusy)return;const previous=recoverySession;forgetRecoverySession();setLandingAuthMode('login');
@@ -648,10 +651,11 @@
   document.addEventListener('submit',event=>{if(!hasWorkspaceAccess()&&event.target.closest('#app-shell')){event.preventDefault();event.stopImmediatePropagation();}},true);
   $('#landing-auth-switch').addEventListener('click',event=>setLandingAuthMode(event.currentTarget.dataset.authMode));
   $('#landing-auth-form').addEventListener('submit',submitLandingAuth);
+  $('#email-auth-toggle').addEventListener('click',()=>{if(landingAuthBusy)return;emailAlternativeOpen=!emailAlternativeOpen;setLandingAuthMode('login');if(emailAlternativeOpen)$('#landing-email').focus();});
   document.querySelectorAll('[data-oauth]').forEach(button=>button.addEventListener('click',async()=>{button.disabled=true;try{await window.WORLDFORGE_AUTH.oauth(button.dataset.oauth);}catch(error){setLandingFeedback(error.message,true);button.disabled=false;}}));
   window.WORLDFORGE_AUTH.settings().then(providers=>{const unavailable=[];document.querySelectorAll('[data-oauth]').forEach(button=>{button.disabled=!providers[button.dataset.oauth];if(button.disabled)unavailable.push(button.textContent.trim());});$('#social-auth-note').textContent=unavailable.length?'Aguardando ativação: '+unavailable.join(' e ')+'.':'Entre com sua conta externa de forma segura.';}).catch(()=>{$('#social-auth-note').textContent='Não foi possível consultar o login externo. Recarregue a página.';});
   let lastResend=0;
-  $('#resend-confirmation').addEventListener('click',async event=>{const email=$('#landing-email').value.trim();if(!$('#landing-email').reportValidity())return;if(Date.now()-lastResend<60000){setLandingFeedback('Aguarde um minuto antes de reenviar.',true);return;}event.currentTarget.disabled=true;lastResend=Date.now();try{window.WORLDFORGE_AUTH.checked(await window.WORLDFORGE_AUTH.client.auth.resend({type:'signup',email,options:{emailRedirectTo:location.origin+'/'}}));setLandingFeedback('Reenvio solicitado. A entrega ainda depende do provedor de e-mail; confira Spam.');}catch(error){setLandingFeedback(window.WORLDFORGE_ACCOUNT_API.authMessage(error,'signup'),true);}finally{$('#resend-confirmation').disabled=false;}});
+  $('#resend-confirmation').addEventListener('click',async event=>{if(cloudConfig.mailDeliveryAvailable===false){setLandingFeedback('O reenvio está temporariamente indisponível. Use Discord ou Google.',true);return;}const email=$('#landing-email').value.trim();if(!$('#landing-email').reportValidity())return;if(Date.now()-lastResend<60000){setLandingFeedback('Aguarde um minuto antes de reenviar.',true);return;}event.currentTarget.disabled=true;lastResend=Date.now();try{window.WORLDFORGE_AUTH.checked(await window.WORLDFORGE_AUTH.client.auth.resend({type:'signup',email,options:{emailRedirectTo:location.origin+'/'}}));setLandingFeedback('Reenvio solicitado. A entrega ainda depende do provedor de e-mail; confira Spam.');}catch(error){setLandingFeedback(window.WORLDFORGE_ACCOUNT_API.authMessage(error,'signup'),true);}finally{$('#resend-confirmation').disabled=false;}});
   window.addEventListener('worldforge-auth-session',event=>{if(event.detail.event==='SIGNED_OUT'){cloudSession=null;showLanding();}else if(event.detail.session){cloudSession=event.detail.session;}});
   $('#landing-forgot-password').addEventListener('click',()=>{if(!landingAuthBusy)setLandingAuthMode('recover');});
   $('#landing-auth-back').addEventListener('click',leaveAccountRecovery);
