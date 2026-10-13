@@ -193,7 +193,7 @@
       setLandingFeedback('Carregando seus mundos e perfil…');
       await accountWorkspace.open(owner);
       if(cloudSession?.user?.id!==owner||!accountWorkspace.state.ready)return;
-    }catch(error){showLanding();setLandingFeedback(error.message||'Não foi possível carregar sua conta. Tente novamente.',true);return;}
+    }catch(error){if(cloudSession?.user?.id!==owner)return;showLanding();setLandingFeedback(error.message||'Não foi possível carregar sua conta. Tente novamente.',true);return;}
     workspaceAccess='authenticated';$('#landing-screen').classList.add('hidden');$('#guest-screen').classList.add('hidden');$('#app-shell').classList.remove('hidden');$('#app-shell').inert=false;renderAll();setView('inicio');goBotPanel();
   }
   function goBotPanel(){try{if(hasCurrentLegalConsent()&&sessionStorage.getItem('worldforge.auth-return')==='/bot/admin/botp/'){sessionStorage.removeItem('worldforge.auth-return');location.assign('./bot/admin/botp/');}}catch{}}

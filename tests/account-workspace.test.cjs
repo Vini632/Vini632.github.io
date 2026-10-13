@@ -1,6 +1,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const {create}=require('../account-workspace.js');
+const fs=require('node:fs'),vm=require('node:vm');
 const empty=()=>({revision:0,worlds:[],activeId:null,preferences:{}});
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
@@ -40,4 +41,18 @@ test('late account responses cannot replace another account or flush its data',a
 test('changes made while loading do not mutate the server and validation failures stay visible',async()=>{
   const store=create({getOwner:()=> 'a',load:async()=>empty(),apply(){},save(){},validate:data=>{if(data.preferences.bad)throw new Error('bad data');},delay:100000});
   assert.equal(store.queue(empty()),false);await store.open('a');assert.equal(store.queue({...empty(),preferences:{bad:true}}),false);assert.equal(store.state.error.message,'bad data');
+});
+
+test('a failed load for the previous account cannot close the next account workspace',async()=>{
+  const source=fs.readFileSync('app.js','utf8');
+  const enter=source.slice(source.indexOf('  async function enterWorkspace('),source.indexOf('  function goBotPanel('));
+  let fail,started,closed=0;
+  const began=new Promise(resolve=>started=resolve);
+  const context={cloudSession:{user:{id:'a'}},window:{WORLDFORGE_AUTH:{mfa:async()=>({user:{id:'a'}})}},
+    saveCloudSession(){},setLandingFeedback(){},showLanding(){closed++;},
+    accountWorkspace:{open(){started();return new Promise((_,reject)=>fail=reject);},state:{ready:true}}};
+  vm.createContext(context);vm.runInContext(enter,context);
+  const pending=context.enterWorkspace();await began;
+  context.cloudSession={user:{id:'b'}};fail(new Error('old load failed'));await pending;
+  assert.equal(closed,0);
 });

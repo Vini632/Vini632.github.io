@@ -4,13 +4,13 @@
 
 ## Estado para retomar o trabalho — 13/10/2026
 
-**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v47**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v48**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
 
 ### Entrega desta retomada
 
 | Área | Estado |
 | --- | --- |
-| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v47. |
+| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v48. |
 | Persistência | Mundos, fichas, anotações, perfil/foto/banner e preferências carregados da conta Supabase e salvos automaticamente. O navegador não grava mais mundos/perfil como fonte de dados; sessão, consentimento e pequenos metadados de retomada permanecem locais. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
@@ -65,7 +65,7 @@
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v47**, `app.js?v=44`, `account-workspace.js?v=1`, `auth-bundle.js?v=2`, `styles.css?v=15`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v48**, `app.js?v=45`, `account-workspace.js?v=1`, `auth-bundle.js?v=2`, `styles.css?v=15`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
 
 ### Próximas pendências
 
@@ -93,7 +93,7 @@
 - Supabase: projeto `urvtkpqpguxthjznmtyu`, região `us-east-1`; URL `https://urvtkpqpguxthjznmtyu.supabase.co`; callback OAuth `/auth/v1/callback`.
 - Discord: aplicação `1559439222308601897`, servidor `1559443784255803464` (IDs públicos). Comandos públicos: `/ajuda`, `/ping`, `/vincular`, `/mundos`, `/perfil`, `/desvincular`, `/tickets` e `/comunidade`.
 - Administração em caminho não anunciado na interface principal, fila privada Supabase e execução Python; `DASHBOARD_STAFF=true`. Bot verifica permissões e hierarquia reais. Jobs incertos não são repetidos automaticamente; histórico por até 14 dias.
-- Edge Functions confirmadas anteriormente: `discord-bridge` v4 e `delete-account` v3. `verify_jwt=false` no gateway depende da autenticação e validação de sessão dentro dos handlers; não removê-las. Usar `import_map_path: "deno.json"` quando requerido no deploy.
+- Edge Functions confirmadas anteriormente: `discord-bridge` v9 e `delete-account` v8. `verify_jwt=false` no gateway depende da autenticação e validação de sessão dentro dos handlers; não removê-las. Usar `import_map_path: "deno.json"` quando requerido no deploy.
 - Exclusão de conta: senha para contas com senha; 2FA recente para contas exclusivamente OAuth; revogação de sessões e cascatas do banco. Nenhuma conta real foi excluída nesta retomada.
 - Não havia Git nem Docker no PATH. Publicação usa `gh api` com blobs/tree/commit e atualização de ref **sem force**, preservando arquivos remotos não relacionados. Base anterior desta entrega: `8aab4f4b9de0a59cbdf7eb76e2bbbf038e78bf57`; não tratá-la como HEAD depois de novos commits.
 - Token do bot e chave da ponte somente em `discord-bot/.env`; segredos OAuth/SMTP somente nos serviços. Nunca imprimir seus valores nem incluí-los em documentação, GitHub ou ZIP. `.env.example` deve continuar sem tokens. A rotação mencionada na sessão anterior não foi executada.
