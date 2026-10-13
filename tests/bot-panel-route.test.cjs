@@ -12,6 +12,7 @@ test('team panel is available only at the nested static route', () => {
   assert.ok(fs.existsSync(path.join(route, 'index.html')));
   assert.ok(fs.existsSync(path.join(route, 'panel.js')));
   assert.ok(fs.existsSync(path.join(route, 'panel.css')));
+  assert.ok(fs.existsSync(path.join(route, 'request-id.js')));
   assert.ok(!fs.existsSync(path.join(root, 'bot', 'index.html')));
   assert.ok(!fs.existsSync(path.join(root, 'bot', 'panel.js')));
   assert.ok(!fs.existsSync(path.join(root, 'bot', 'panel.css')));

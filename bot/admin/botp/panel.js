@@ -20,6 +20,7 @@
   }
   function pending(){try{const value=JSON.parse(sessionStorage.getItem(pendingKey));return value?.owner===currentOwner?value:null;}catch{return null;}}
   function savePending(value){sessionStorage.setItem(pendingKey,JSON.stringify(value));}
+  function createRequestId(){return window.WORLDFORGE_REQUEST_ID();}
   async function waitFor(id){
     const end=Date.now()+110000;
     while(Date.now()<end){
@@ -35,7 +36,7 @@
   async function request(command,payload={},resume=false){
     let stored=resume?pending():null;
     if(command!=='status'&&!resume&&pending())throw new Error('Existe uma ação aguardando resultado. Retome a consulta antes de enviar outra.');
-    const job=stored||{owner:currentOwner,command,payload,request_id:crypto.randomUUID(),createdAt:Date.now()};
+    const job=stored||{owner:currentOwner,command,payload,request_id:command==='status'?undefined:createRequestId(),createdAt:Date.now()};
     if(command!=='status')savePending(job);
     if(!job.id){
       if(resume && Date.now()-job.createdAt>120000)throw new Error('A conexão caiu antes de confirmar o pedido. Confira o histórico antes de iniciar outra ação.');

@@ -80,6 +80,7 @@ test('installation reloads HTTP assets and activates without waiting for tabs to
   assert.ok(worker.calls.precache.every(request => request.cache === 'reload'));
   assert.ok(worker.calls.precache.every(request => request.url.startsWith('https://example.test/worldforge/')));
   assert.ok(worker.calls.precache.some(request => request.url === 'https://example.test/worldforge/bot/admin/botp/index.html'));
+  assert.ok(worker.calls.precache.some(request => request.url === 'https://example.test/worldforge/bot/admin/botp/request-id.js?v=1'));
   assert.ok(!worker.calls.precache.some(request => request.url.endsWith('/bot/index.html')));
   assert.equal(worker.calls.activated, 1);
 });
