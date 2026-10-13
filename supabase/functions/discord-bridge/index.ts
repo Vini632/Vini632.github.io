@@ -93,6 +93,7 @@ Deno.serve(async req => {
     if(!user.id || !user.email_confirmed_at) return reply(403,{error:'Confirme sua conta antes de vincular o Discord.'});
     let validatedClaims;
     try{validatedClaims=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));}catch{return reply(401,{error:'Sessão inválida.'});}
+    if(validatedClaims.sub!==user.id || !/^[a-f0-9-]{36}$/.test(validatedClaims.session_id||'') || await rpc('wf_active_auth_session',{p_owner:user.id,p_session:validatedClaims.session_id})!==true) return reply(401,{error:'Sua sessão foi encerrada. Entre novamente.'});
     if(user.factors?.some((f:{status:string})=>f.status==='verified') && validatedClaims.aal!=='aal2') return reply(403,{error:'Verifique seu 2FA para continuar.'});
     if(typeof body.action==='string' && body.action.startsWith('panel-')) {
       // Auth validated the signature above. Decode only this validated JWT, never browser-supplied claims.
