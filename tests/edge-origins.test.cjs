@@ -18,7 +18,7 @@ async function handlers() {
 
 test('edge functions accept exact production origins and preserve development preflight', async () => {
   for (const handler of await handlers()) {
-    for (const origin of ['https://worldforge.site', 'https://vini632.github.io', 'http://localhost:3000', 'http://127.0.0.1:8000']) {
+    for (const origin of ['https://www.worldforge.site', 'https://worldforge.site', 'https://vini632.github.io', 'http://localhost:3000', 'http://127.0.0.1:8000']) {
       const response = await handler(new Request('https://example.invalid', { method: 'OPTIONS', headers: { Origin: origin } }));
       assert.equal(response.status, 204);
       assert.equal(response.headers.get('Access-Control-Allow-Origin'), origin);
@@ -28,12 +28,12 @@ test('edge functions accept exact production origins and preserve development pr
 
 test('edge functions reject lookalike domains and keep authentication required', async () => {
   for (const handler of await handlers()) {
-    for (const origin of ['http://worldforge.site', 'https://worldforge.site.evil.invalid', 'https://evil-worldforge.site', 'https://other.invalid']) {
+    for (const origin of ['http://www.worldforge.site', 'http://worldforge.site', 'https://www.worldforge.site.evil.invalid', 'https://worldforge.site.evil.invalid', 'https://evil-worldforge.site', 'https://other.invalid']) {
       const response = await handler(new Request('https://example.invalid', { method: 'OPTIONS', headers: { Origin: origin } }));
       assert.equal(response.status, 403);
       assert.equal(response.headers.get('Access-Control-Allow-Origin'), null);
     }
-    const response = await handler(new Request('https://example.invalid', { method: 'POST', headers: { Origin: 'https://worldforge.site' }, body: '{}' }));
+    const response = await handler(new Request('https://example.invalid', { method: 'POST', headers: { Origin: 'https://www.worldforge.site' }, body: '{}' }));
     assert.equal(response.status, 401);
   }
 });

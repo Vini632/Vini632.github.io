@@ -4,7 +4,7 @@ export function createDeletionHandler({ url, anonKey, serviceKey, fetchImpl = fe
   const base = String(url || '').replace(/\/$/, '');
   return async function handle(request) {
     const origin = request.headers.get('Origin');
-    const allowedOrigin = origin === 'https://worldforge.site' || origin === 'https://vini632.github.io' || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin || '');
+    const allowedOrigin = origin === 'https://www.worldforge.site' || origin === 'https://worldforge.site' || origin === 'https://vini632.github.io' || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin || '');
     const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', Vary: 'Origin', ...(allowedOrigin ? { 'Access-Control-Allow-Origin': origin } : {}) };
     const reply = (status, body) => new Response(JSON.stringify(body), { status, headers });
     if (origin && !allowedOrigin) return reply(403, { error: 'Origem não permitida.' });
