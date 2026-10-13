@@ -4,13 +4,13 @@
 
 ## Estado para retomar o trabalho — 13/10/2026
 
-**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v49**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v50**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
 
 ### Entrega desta retomada
 
 | Área | Estado |
 | --- | --- |
-| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v49. |
+| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v50. |
 | Persistência | Mundos, fichas, anotações, perfil/foto/banner e preferências carregados da conta Supabase e salvos automaticamente. O navegador não grava mais mundos/perfil como fonte de dados; sessão, consentimento e pequenos metadados de retomada permanecem locais. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
@@ -62,12 +62,12 @@
 
 ### Verificações e limites da conferência
 
-- `node --test tests/*.test.cjs`: **86 testes passaram** (incluindo fila de salvamento online, conflitos, recuperação de erros e backups de perfil). Incluem catálogo completo, compatibilidade com mundos antigos, validação das fichas, salvamento/rollback, proteção contra troca de mundo/conta, duplicação de pedidos, escape do diretório e alinhamento dos assets entre HTML/Service Worker.
+- `node --test tests/*.test.cjs`: **87 testes passaram** (incluindo fila de salvamento online, conflitos, recuperação de erros e backups de perfil). Incluem catálogo completo, compatibilidade com mundos antigos, validação das fichas, salvamento/rollback, proteção contra troca de mundo/conta, duplicação de pedidos, escape do diretório e alinhamento dos assets entre HTML/Service Worker.
 - Checagem de sintaxe dos JavaScripts alterados passou. `python worldforge_rpg.py --testar` passou.
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v49**, `app.js?v=45`, `account-workspace.js?v=2`, `auth-bundle.js?v=2`, `styles.css?v=16`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v50**, `app.js?v=46`, `account-workspace.js?v=2`, `auth-bundle.js?v=2`, `styles.css?v=16`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
 
 ### Próximas pendências
 

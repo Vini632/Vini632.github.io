@@ -37,3 +37,12 @@ test('a rejected backup save restores worlds, selection and profile together',()
   ctx.importLibraryData({format:'worldforge-account-backup',version:1,activeId:null,worlds:[],preferences:{profileName:'After'}});
   assert.equal(ctx.applyLibraryBackup('replace'),false);assert.equal(ctx.prefs.profileName,'Before');
 });
+test('legacy profile preferences can migrate even when there were no local worlds',async()=>{
+  const ctx=context();let saved;
+  Object.assign(ctx,{legacyLibrary:{worlds:[]},legacyPrefs:{profileName:'Recuperado'},legacyImported:false,
+    prefs:{profileName:'Explorador',widgets:{}},defaultPrefs:{profileName:'Explorador',widgets:{}},
+    accountWorkspace:{flush:async()=>{}},persistLibrary:()=>{saved=ctx.accountPayload();return true;}});
+  const migration=source.slice(source.indexOf('  async function migrateLegacyData('),source.indexOf("  const RECOVERY_SESSION_KEY="));
+  vm.runInContext(migration,ctx);await ctx.migrateLegacyData();
+  assert.equal(saved.preferences.profileName,'Recuperado');assert.equal(saved.worlds.length,0);assert.equal(ctx.legacyImported,true);
+});
