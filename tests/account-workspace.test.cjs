@@ -31,6 +31,14 @@ test('a conflict cannot silently overwrite another device',async()=>{
   assert.equal(calls,1);assert.equal(store.state.dirty,true);await assert.rejects(store.reload());store.reset();
 });
 
+test('a definite rejected save can be corrected without replaying the rejected payload forever',async()=>{
+  let sent=[];
+  const store=create({getOwner:()=> 'a',load:async()=>empty(),apply(){},delay:100000,
+    save:async data=>{sent.push(data.preferences.profileName);if(sent.length===1)throw Object.assign(new Error('invalid payload'),{status:400});return {revision:1};}});
+  await store.open('a');store.queue({...empty(),preferences:{profileName:'Rejected'}});await assert.rejects(store.flush());
+  store.queue({...empty(),preferences:{profileName:'Corrected'}});await store.flush();assert.deepEqual(sent,['Rejected','Corrected']);assert.equal(store.state.dirty,false);
+});
+
 test('late account responses cannot replace another account or flush its data',async()=>{
   let owner='a',resolveLoad,applied=[];
   const store=create({getOwner:()=>owner,load:()=>new Promise(resolve=>resolveLoad=resolve),save(){},apply:data=>applied.push(data),delay:100000});

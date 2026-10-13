@@ -25,7 +25,7 @@
     }
     function queue(data){
       if(!ready||!current())return false;
-      try{validate(data);next=clone(data);error=null;cancelTimer();timer=setTimeout(()=>flush().catch(()=>{}),delay);notify();return true;}
+      try{validate(data);next=clone(data);cancelTimer();if(error?.status!==409&&error?.code!=='PT409'){error=null;timer=setTimeout(()=>flush().catch(()=>{}),delay);}notify();return true;}
       catch(cause){error=cause;notify();return false;}
     }
     async function flush(){
@@ -47,7 +47,7 @@
       })();
       running=work;notify();
       try{await work;}
-      catch(cause){if(generation===epoch){error=cause;notify();}throw cause;}
+      catch(cause){if(generation===epoch){if([400,413,422].includes(cause.status)&&attempt){if(!next)next=attempt.data;attempt=null;}error=cause;notify();}throw cause;}
       finally{if(generation===epoch){running=null;if(!dirty())cancelTimer();notify();}}
     }
     async function reload(){if(dirty())throw new Error('Exporte seu rascunho antes de recarregar a conta.');const id=owner;reset();await open(id);}
