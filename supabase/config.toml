@@ -418,3 +418,6 @@ enabled = true
 # The handler verifies the bearer token with Auth and reauthenticates the current password.
 verify_jwt = false
 entrypoint = "./functions/delete-account/index.ts"
+[functions.discord-bridge]
+verify_jwt = false
+# The handler validates Auth users and the bot's dedicated hashed credential.

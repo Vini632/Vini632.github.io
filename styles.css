@@ -161,3 +161,8 @@ html[data-theme="light"] .world-library-toolbar,html[data-theme="light"] .world-
 @media(max-width:560px){.world-library-grid,.world-library-detail-grid,.world-library-toolbar{grid-template-columns:1fr}.world-library-toolbar .field-label:first-child{grid-column:auto}.world-library-detail-copy{padding:19px 16px}.world-library-detail-cover{height:200px;padding:20px}.world-library-cover{height:150px}}
 @media(max-width:820px){.community-list,.community-grid{grid-template-columns:1fr}.community-guild-layout{grid-template-columns:1fr}.community-inline-form{grid-template-columns:1fr}.community-record-meta time{margin-left:0}.community-section-heading{align-items:flex-start}}
 @media(max-width:560px){.profile-card{padding:22px 18px}.profile-banner-preview{height:112px}.profile-banner-actions{gap:4px}.profile-banner-actions .button{padding:0 8px}.profile-accent-section{align-items:flex-start;flex-direction:column}.profile-visual-row{gap:10px}.profile-photo-actions .button{padding:0 8px}}
+.discord-account{margin:20px 0;padding:18px 0;border-block:1px solid var(--line,#242428)}
+.discord-account .text-field{width:100%;max-width:430px;margin:10px 0;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.04em}
+.discord-link-consent{display:flex;gap:10px;align-items:flex-start;margin:12px 0 16px;font-size:12px;line-height:1.7;max-width:600px}
+.discord-link-consent input{margin-top:4px;flex-shrink:0;accent-color:#8b5cf6}
+.discord-account>.cloud-note{display:block;margin-top:12px}

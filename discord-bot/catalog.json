@@ -1,0 +1,181 @@
+{
+  "boas-vindas": {
+    "category": "Portal de Entrada",
+    "kind": "preserved",
+    "title": "Boas-vindas da Loritta",
+    "body": "Automação existente preservada. O bot WorldForge não duplica boas-vindas nem o autorole Aventureiro."
+  },
+  "regras": {
+    "category": "Portal de Entrada",
+    "kind": "text",
+    "title": "📜 CÓDIGO DOS AVENTUREIROS",
+    "author": "✦ WORLD FORGE RPG • CÓDIGO DA COMUNIDADE",
+    "footer": "✦ WORLD FORGE RPG • Respeite a comunidade, construa sua lenda.",
+    "body": "✦ **BEM-VINDO À FORJA**\n\nO **World Forge RPG** é uma comunidade de jogadores, mestres e criadores que compartilham aventuras e constroem universos.\n\nA imaginação é livre; o respeito às pessoas é obrigatório. Ao participar, siga as diretrizes abaixo.",
+    "parts": [
+      {
+        "heading": "🛡️ I • RESPEITO E CONVIVÊNCIA",
+        "text": "**01. Respeite os membros.** Assédio, preconceito, ameaças, perseguição, ataques pessoais e discurso de ódio são proibidos.\n\n**02. Debata com civilidade.** Discordar é permitido; hostilizar pessoas, não. Evite provocações repetidas e conflitos deliberados.\n\n**03. Preserve a privacidade.** Não compartilhe dados pessoais, prints privados ou mensagens de terceiros sem autorização."
+      },
+      {
+        "heading": "📜 II • ORGANIZAÇÃO E CONTEÚDO",
+        "text": "**04. Use o canal adequado.** Respeite os temas, as orientações fixadas e a organização do servidor.\n\n**05. Não faça spam ou publicidade indevida.** Proibidos flood, convites não autorizados, golpes, links maliciosos e divulgação fora dos espaços apropriados.\n\n**06. Publique conteúdo seguro.** Não são permitidos conteúdo sexual explícito, violência gráfica extrema, material ilegal ou conteúdo que viole as políticas do Discord."
+      },
+      {
+        "heading": "⚔️ III • RPG E CRIAÇÃO",
+        "text": "**07. Respeite os acordos das mesas.** Não sabote sessões, não controle personagens alheios sem consentimento e respeite os limites definidos pelo grupo.\n\n**08. Separe personagem e jogador.** Rivalidades fictícias não justificam ofensas ou perseguições reais.\n\n**09. Respeite autoria e créditos.** Não apresente mundos, artes, textos ou personagens de terceiros como se fossem seus. Credite fontes e observe licenças."
+      },
+      {
+        "heading": "⚖️ IV • SEGURANÇA E MODERAÇÃO",
+        "text": "**10. Coopere com a moderação.** Siga instruções legítimas da equipe. Contestações devem ser feitas respeitosamente, preferencialmente por ticket privado.\n\n**11. Não burle medidas disciplinares.** Contas alternativas para escapar de restrições podem ser removidas.\n\n**12. Respeite as regras da plataforma.** Os Termos de Serviço e as Diretrizes da Comunidade do Discord também se aplicam aqui."
+      },
+      {
+        "heading": "⚖️ V • MEDIDAS DISCIPLINARES",
+        "text": "Conforme a gravidade, o contexto e a reincidência, a equipe poderá aplicar **advertência, restrição temporária, expulsão ou banimento**. Infrações graves podem levar a medidas imediatas.\n\n**✦ Toda grande lenda começa com respeito.**"
+      }
+    ],
+    "template": "",
+    "tags": []
+  },
+  "anúncios": {
+    "category": "Portal de Entrada",
+    "kind": "text",
+    "title": "📢 MURAL DA FORJA",
+    "author": "✦ WORLD FORGE RPG • COMUNICADOS OFICIAIS",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "Este é o espaço dos **comunicados oficiais do World Forge RPG**.\n\nAqui a equipe informará acontecimentos importantes: novidades da comunidade, disponibilidade de recursos, eventos, manutenção e avisos de segurança.\n\n**Atenção:** uma ideia em estudo não é uma funcionalidade lançada. Toda publicação deverá indicar claramente se o assunto está **planejado**, **em testes** ou **disponível**.\n\nPara conversar sobre os comunicados, use os canais apropriados da comunidade. Evite responder aqui para que os avisos permaneçam fáceis de encontrar.",
+    "parts": [],
+    "template": "**📢 [ASSUNTO]**\n\n**Situação:** [Informativo / Em testes / Disponível / Manutenção]\n\n**O que aconteceu:** [Informação confirmada]\n\n**Quem é afetado:** [Público impactado]\n\n**Quando:** [Data e horário, com fuso, se aplicável]\n\n**Onde saber mais:** [Link real]",
+    "tags": []
+  },
+  "escolha-seus-cargos": {
+    "category": "Portal de Entrada",
+    "kind": "text",
+    "title": "🎭 ESCOLHA SEUS CAMINHOS",
+    "author": "✦ WORLD FORGE RPG • IDENTIDADE DO AVENTUREIRO",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "Na Forja, cada pessoa participa à sua maneira. Escolha os cargos que representam seus interesses:\n\n**⚔️ Mestre de RPG** — Para quem narra campanhas, organiza mesas e conduz histórias.\n\n**🌌 Criador de Mundos** — Para quem desenvolve universos, cenários, mapas e personagens.\n\n**🛡️ Aventureiro** — Cargo inicial da comunidade, atribuído automaticamente na entrada.\n\nOs cargos de interesse podem ser combinados. Eles identificam suas atividades, mas **não concedem poderes de moderação**.\n\nUse os botões ou o menu abaixo para adicionar ou remover seus cargos de interesse.",
+    "parts": [],
+    "template": "",
+    "tags": []
+  },
+  "sobre-o-world-forge": {
+    "category": "Central World Forge",
+    "kind": "text",
+    "title": "🌐 O QUE É O WORLD FORGE RPG?",
+    "author": "✦ WORLD FORGE RPG • SOBRE A PLATAFORMA",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "**World Forge RPG** é um projeto em desenvolvimento dedicado a ajudar jogadores e criadores a construir, organizar e explorar experiências de RPG.\n\nNosso objetivo é reunir **mundos com identidades próprias**, modelos personalizáveis e recursos que facilitem a criação de histórias e aventuras.\n\n**O que você encontrará nesta comunidade:**\n\n🌌 **Biblioteca de Mundos** — Informações sobre universos e seus formatos.\n\n🛠️ **Desenvolvimento** — Atualizações sobre a evolução da plataforma.\n\n🧪 **Testes** — Espaço para acompanhar e, quando disponível, participar de avaliações.\n\n💡 **Colaboração** — Sugestões, dúvidas e relatórios de problemas.\n\n**Status:** projeto em desenvolvimento. As funcionalidades disponíveis podem mudar conforme os testes.\n\n**Acesse:** https://vini632.github.io/\n\n**✦ Onde mundos ganham vida.**",
+    "parts": [],
+    "template": "",
+    "tags": []
+  },
+  "atualizações": {
+    "category": "Central World Forge",
+    "kind": "text",
+    "title": "📰 REGISTROS DA FORJA",
+    "author": "✦ WORLD FORGE RPG • HISTÓRICO DE ATUALIZAÇÕES",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "Este canal reúne as **alterações confirmadas** no World Forge RPG.\n\nAs publicações poderão apresentar novidades, melhorias, correções e mudanças de comportamento. Cada atualização terá uma data, um status e uma descrição objetiva.\n\n**Planejado** não significa **lançado**. Recursos experimentais serão identificados como **Em testes**.",
+    "parts": [],
+    "template": "**🛠️ WORLD FORGE — [VERSÃO OU NOME DA ATUALIZAÇÃO]**\n\n**Data:** [DD/MM/AAAA]\n\n**Status:** [Disponível / Em testes]\n\n**Novidades:** [O que entrou]\n\n**Melhorias:** [O que mudou]\n\n**Correções:** [Problemas corrigidos]\n\n**Problemas conhecidos:** [Se houver]\n\n**Mais informações:** [Link]",
+    "tags": []
+  },
+  "biblioteca-de-mundos": {
+    "category": "Central World Forge",
+    "kind": "text",
+    "title": "🗺️ ARQUIVO DOS UNIVERSOS",
+    "author": "✦ WORLD FORGE RPG • BIBLIOTECA DE MUNDOS",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "Alguns mundos são construídos para serem explorados; outros nascem para ser transformados por seus criadores.\n\nAqui você encontrará os mundos apresentados oficialmente pelo World Forge RPG, incluindo **mundos completos** e **modelos personalizáveis**, cada um com seu próprio formato.\n\nAs fichas indicarão o tipo de mundo, uma sinopse, seu estado de disponibilidade e onde acessá-lo. Não considere uma apresentação como confirmação de que o mundo já está jogável.\n\nCompartilhe comentários e sugestões nos canais apropriados.",
+    "parts": [],
+    "template": "**🌌 [NOME DO MUNDO]**\n\n**Tipo:** [Mundo completo / Modelo personalizável]\n\n**Estado:** [Disponível / Em testes / Em desenvolvimento]\n\n**Gênero e atmosfera:** [Descrição]\n\n**Sinopse:** [2–4 frases]\n\n**Diferenciais:** [O que o torna único]\n\n**Autor/créditos:** [Informação verificada]\n\n**Acesso:** [URL real ou “Ainda não disponível”]",
+    "tags": []
+  },
+  "testes-e-beta": {
+    "category": "Central World Forge",
+    "kind": "text",
+    "title": "🧪 TESTES E ACESSO BETA",
+    "author": "✦ WORLD FORGE RPG • LABORATÓRIO DA FORJA",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "O desenvolvimento do World Forge depende de testes cuidadosos e de feedback claro.\n\nQuando houver uma fase de testes aberta, a equipe informará **quem pode participar**, **qual recurso será avaliado**, **como obter acesso** e **quais limitações são conhecidas**.\n\n**Durante um teste:**\n\n• Considere que recursos experimentais podem apresentar falhas ou alterações.\n• Relate problemas no fórum de bugs, com passos para reprodução.\n• Não divulgue senhas, tokens ou informações privadas em capturas de tela.\n• Não presuma que materiais de teste sejam versões finais.\n\n**Atenção:** nenhuma inscrição ou acesso beta está sendo prometido nesta mensagem. Aguarde uma convocação oficial.",
+    "parts": [],
+    "template": "**🧪 [NOME DO TESTE]**\n\n**Status:** Inscrições abertas / Teste iniciado\n\n**Objetivo:** [O que será testado]\n\n**Elegibilidade:** [Quem pode participar]\n\n**Período:** [Datas e horários]\n\n**Como participar:** [Instruções/link real]\n\n**Como enviar feedback:** [Canal ou formulário]\n\n**Limitações conhecidas:** [Informações relevantes]",
+    "tags": []
+  },
+  "roadmap": {
+    "category": "Central World Forge",
+    "kind": "text",
+    "title": "🛣️ ROADMAP DE DESENVOLVIMENTO",
+    "author": "✦ WORLD FORGE RPG • CAMINHOS DA FORJA",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "O roadmap apresenta a direção do desenvolvimento do World Forge RPG. Ele serve como **visão de prioridades**, não como promessa de lançamento.\n\n**Estados usados:**\n\n**💡 Em avaliação** — Ideia ainda não aprovada.\n\n**📋 Planejado** — Funcionalidade aprovada para planejamento, mas sem prazo garantido.\n\n**🛠️ Em desenvolvimento** — Trabalho em execução.\n\n**🧪 Em testes** — Recurso sendo validado.\n\n**✅ Disponível** — Recurso liberado para o público indicado.\n\nPrioridades e prazos podem mudar. Mudanças relevantes serão explicadas em **atualizações** e **anúncios**.",
+    "parts": [],
+    "template": "**[FUNCIONALIDADE]**\n\n**Status:** [Um estado da legenda]\n\n**Objetivo:** [Problema que resolve]\n\n**Escopo atual:** [O que está incluído]\n\n**Última atualização:** [Data]\n\n**Dependências ou riscos:** [Se aplicável]\n\n**Prazo público:** [Somente se aprovado para divulgação]",
+    "tags": []
+  },
+  "reportar-bugs": {
+    "category": "Central de Suporte",
+    "kind": "forum",
+    "title": "🐛 LEIA ANTES DE REPORTAR UM BUG",
+    "author": "✦ WORLD FORGE RPG • CENTRAL DE SUPORTE",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "Encontrou algo que não funciona no World Forge RPG? Obrigado por ajudar a melhorar a plataforma.\n\nAntes de criar um tópico, procure relatos semelhantes. Se for um novo problema, use o modelo abaixo.\n\n**Um bom relatório explica o que aconteceu e como reproduzir.** Não compartilhe senha, token, código de autenticação, dados pessoais nem capturas com informações sensíveis.\n\nProblemas de segurança, acesso indevido ou exposição de dados **não devem ser detalhados publicamente**: use um ticket privado.\n\nA equipe analisará os relatos conforme prioridade e disponibilidade; uma postagem não garante correção imediata.",
+    "parts": [],
+    "template": "**Título:** [Área] Resumo curto do problema\n\n**O que aconteceu:** [Comportamento observado]\n\n**O que deveria acontecer:** [Comportamento esperado]\n\n**Como reproduzir:** 1. [...] 2. [...] 3. [...]\n\n**Ambiente:** [Dispositivo, navegador, sistema e versão se souber]\n\n**Frequência:** [Sempre / Às vezes / Uma vez]\n\n**Evidências:** [Prints ou vídeo sem informações privadas]\n\n**Solução temporária:** [Se houver]",
+    "tags": [
+      "Novo",
+      "Em análise",
+      "Reproduzido",
+      "Corrigido",
+      "Duplicado",
+      "Não reproduzido"
+    ]
+  },
+  "sugestões": {
+    "category": "Central de Suporte",
+    "kind": "forum",
+    "title": "💡 COMO SUGERIR UMA MELHORIA",
+    "author": "✦ WORLD FORGE RPG • CENTRAL DE SUPORTE",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "O World Forge é construído para uma comunidade criativa. Suas ideias podem ajudar a definir novas possibilidades.\n\nAntes de publicar, pesquise sugestões semelhantes. Apresente o problema que deseja resolver e o benefício esperado — não apenas o nome de uma funcionalidade.\n\nComentários e discordâncias são bem-vindos, desde que respeitosos. Uma sugestão bem recebida não representa compromisso de implementação.",
+    "parts": [],
+    "template": "**Título da ideia:** [Proposta em poucas palavras]\n\n**Problema atual:** [O que dificulta a experiência]\n\n**Solução proposta:** [Como funcionaria]\n\n**Benefício para a comunidade:** [Quem ganha e por quê]\n\n**Exemplo de uso:** [Cenário real ou hipotético]\n\n**Alternativas:** [Se houver]",
+    "tags": [
+      "Nova ideia",
+      "Em avaliação",
+      "Planejada",
+      "Implementada",
+      "Não planejada"
+    ]
+  },
+  "dúvidas": {
+    "category": "Central de Suporte",
+    "kind": "forum",
+    "title": "❓ CENTRAL DE DÚVIDAS — COMECE AQUI",
+    "author": "✦ WORLD FORGE RPG • CENTRAL DE SUPORTE",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "Precisa de ajuda para entender o World Forge RPG ou encontrar algum recurso? Crie um tópico com sua pergunta.\n\nPara receber respostas melhores, explique o que você estava tentando fazer e o que já tentou. Evite títulos genéricos como “ajuda” ou “não funciona”.\n\n**Nunca compartilhe senha, códigos de autenticação ou dados privados.** Questões de conta, denúncias e assuntos pessoais devem seguir pelo canal de tickets.\n\nQuando sua dúvida for resolvida, sinalize a solução para ajudar outros aventureiros.",
+    "parts": [],
+    "template": "**Título:** [Pergunta específica]\n\n**Assunto:** [Plataforma / Contas / Biblioteca / RPG / Outro]\n\n**Minha dúvida:** [O que precisa saber]\n\n**O que já tentei:** [Passos realizados]\n\n**Referências:** [Links ou imagens seguras, se necessários]",
+    "tags": [
+      "Plataforma",
+      "Contas",
+      "Biblioteca",
+      "RPG",
+      "Resolvido"
+    ]
+  },
+  "abrir-ticket": {
+    "category": "Central de Suporte",
+    "kind": "text",
+    "title": "🎫 PORTAL DE SUPORTE",
+    "author": "✦ WORLD FORGE RPG • CENTRAL DE ATENDIMENTO",
+    "footer": "✦ WORLD FORGE RPG • Onde mundos ganham vida",
+    "body": "**🎫 SUPORTE PRIVADO EM PREPARAÇÃO**\n\nEstamos organizando o atendimento por tickets. Enquanto o sistema não estiver disponível, utilize os fóruns **dúvidas** e **reportar-bugs** apenas para temas que possam ser compartilhados publicamente.\n\n**Não publique senhas, códigos ou dados privados nesses fóruns.** Aguarde a disponibilização de um meio oficial de contato para casos sensíveis.",
+    "parts": [],
+    "template": "",
+    "tags": [],
+    "active_body": "Algumas questões merecem atendimento reservado.\n\nAbra um ticket para **ajuda com sua conta, denúncias, problemas de acesso ou assuntos que envolvam privacidade**.\n\n**Como funciona:**\n\n**1.** Clique no botão **Abrir Ticket**.\n\n**2.** Selecione a categoria que melhor descreve seu pedido.\n\n**3.** Explique o problema no canal privado criado pelo sistema.\n\n**4.** Aguarde o retorno da equipe. O atendimento depende da disponibilidade dos responsáveis.\n\n**Segurança:** a equipe nunca deve pedir sua senha ou código de autenticação."
+  }
+}

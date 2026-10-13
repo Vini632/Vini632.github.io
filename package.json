@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "build:auth": "esbuild auth-client.js --bundle --minify --format=iife --outfile=auth-bundle.js --target=es2020"
+  },
   "devDependencies": {
+    "esbuild": "0.28.2",
     "supabase": "^2.120.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.3"
   }
 }

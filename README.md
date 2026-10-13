@@ -570,7 +570,7 @@ A Edge Function `delete-account` está instalada no Supabase e usa credenciais a
 
 As chaves estrangeiras remotas foram conferidas: os registros ativos do WorldForge ligados à conta são removidos por `ON DELETE CASCADE`. Isso inclui tópicos e Guildas criados pela pessoa, com suas respostas/murais. O diálogo explica esse alcance. Há uma opção explícita para remover também mundos e perfil deste navegador. Backups baixados, dados de outros dispositivos e retenções técnicas do provedor não são removidos por esse controle. Tokens de acesso já emitidos podem permanecer válidos até expirar; refresh sessions são revogadas, a sessão local é removida e as demais abas são avisadas.
 
-O endpoint remoto foi verificado para preflight permitido, método inválido, ausência de sessão, token inválido e origem não permitida. Nenhuma conta real foi excluída. O frontend continua estático e compatível com GitHub Pages; somente a operação administrativa é executada no Supabase. Cache atual: `v39`, `app.js?v=37`, `account-api.js?v=2` e `landing.css?v=2`.
+O endpoint remoto foi verificado para preflight permitido, método inválido, ausência de sessão, token inválido e origem não permitida. Nenhuma conta real foi excluída. O frontend continua estático e compatível com GitHub Pages; somente a operação administrativa é executada no Supabase. Cache atual: `v41`, `app.js?v=39`, `styles.css?v=13`, `account-api.js?v=3`, `auth-bundle.js?v=1` e `landing.css?v=2`.
 
 #### Configuração SMTP salva (entrega pendente de verificação)
 
@@ -583,3 +583,49 @@ O mantenedor informou que o e-mail não chegou. A Brevo registrou utilização d
 O campo Username deve usar o valor apresentado em Fazer login na aba SMTP da Brevo, e não o nome do projeto. Não use uma chave de API no campo de senha SMTP. O site pode continuar em `vini632.github.io`; o domínio de envio é separado da hospedagem. Para remetentes de provedores gratuitos, a Brevo informa que pode substituir o domínio do remetente por `brevosend.com`; a autenticação de um domínio próprio permanece recomendada.
 
 Referências: [integração Brevo/Supabase](https://developers.brevo.com/docs/supabase-smtp-integration), [remetentes sem domínio autenticado](https://help.brevo.com/hc/en-us/articles/16045394674066-Troubleshooting-Domain-authentication), [problemas de SMTP e ativação transacional](https://help.brevo.com/hc/en-us/articles/115000188150-Troubleshooting-Issues-with-Brevo-SMTP).
+
+### Bot oficial do Discord
+
+O código está em [`discord-bot`](discord-bot/README.md). A aplicação
+`1559439222308601897` atende ao servidor `1559443784255803464`.
+O bot foi iniciado no Windows, separadamente do GitHub Pages, e confirmou a
+conexão com o Discord. Comandos de barra registrados: ajuda, ping, moderação,
+cargos, montagem do servidor, publicação oficial, tickets e vínculo com o site.
+
+O documento de referência foi incluído em
+`discord-bot/docs/world_forge_discord_canais.md`. Os 13 canais são reconhecidos
+mesmo com emojis/separadores. A montagem exige revisão dentro do Discord,
+reutiliza canais existentes e preserva a Loritta, o autorole Aventureiro e seu
+comando personalizado worldforge. Guias equivalentes de outros autores não são
+substituídos. Painéis do próprio bot são atualizados no lugar.
+
+O visual usa Components V2 com as três artes fornecidas: monograma, banner e
+logo animado, enviados como anexos. Fóruns têm guias fixados, etiquetas e
+formulários com Labels e anexo opcional. A pessoa revisa o post antes de publicá-lo.
+Tickets recebem canais privados explícitos para solicitante e equipe; o
+fechamento preserva o histórico para a equipe. As regras da plataforma permitem
+que proprietário e administradores também tenham acesso.
+
+Em Conta e acesso, a seção Discord aceita o código temporário de `/vincular`,
+com autorização explícita. O backend `discord-bridge` está instalado no Supabase;
+as migrações Discord foram aplicadas e o hash da chave exclusiva do bot foi
+registrado. O código é aleatório, expira em 10 minutos e só pode ser usado uma vez.
+O vínculo é individual, revogável e removido ao excluir a conta. O bot consulta
+somente os nomes e resumos dos mundos sincronizados em respostas privadas.
+Nenhum token do Discord ou chave administrativa foi incluído no frontend ou GitHub.
+
+O processo depende deste computador e de sua conexão. Não há inicialização
+automática com o Windows nem hospedagem externa contratada. Os passos para
+executar, parar, mover e configurar as permissões estão no README do bot.
+
+
+## Login externo, 2FA e Central da Forja (13/10/2026)
+
+- [Painel do bot](bot/README.md): `/bot/`, com montagem, configurações, cargos, moderação, publicações, atendimento e histórico. As ferramentas da staff saem dos slash commands quando `DASHBOARD_STAFF=true`, padrão da nova versão.
+- OAuth Discord/Google via Supabase, PKCE e SDK local versionado. Os provedores só aparecem como disponíveis quando ativados no Auth. Discord foi confirmado ativo; Google aguarda credenciais do responsável. Ambos são compatíveis com Pages. Client Secrets ficam exclusivamente no Supabase.
+- TOTP: ativar, verificar e desativar em Conta e acesso. Login com um fator confirmado exige AAL2; políticas restritivas no banco também protegem os dados de contas com 2FA, e as RPCs comunitárias recebem a mesma exigência. Guarde a chave de configuração: não existem códigos de recuperação próprios.
+- Staff: JWT verificado, sessão ativa, fator confirmado e vínculo com Discord. A fila é privada, o bot verifica cargos/hierarquia reais a cada operação, e os resultados ficam disponíveis apenas à conta solicitante por até 14 dias. Operações não confirmadas nunca são repetidas automaticamente.
+- Recuperação/cadastro: botão Reenviar confirmação com espera de um minuto e mensagens que distinguem pedido aceito de entrega efetiva. A Brevo respondeu ao chamado #5613937 que SMTP está ativo e não recebeu pedidos transacionais nesta conta; ativação pendente foi descartada pelo suporte. A entrega permanece sem comprovação. É necessário conferir o login SMTP e a chave salvos no Supabase e reenviar uma confirmação; o HTTP 200 isolado não confirma entrega.
+- [Hospedagem do bot](discord-bot/HOSPEDAGEM.md): Square Cloud Hobby anunciado por R$ 12,49/mês, dentro do teto de R$ 15; Discloud gratuita com 100 MB como alternativa limitada. ZIP preparado sem credenciais e com snapshot privado das configurações. Hospedagem ainda não contratada.
+
+Nenhuma senha de usuário foi alterada e nenhuma conta foi excluída nesta implementação. Não foi possível conferir as abas administrativas pelo navegador desta sessão devido a uma falha do runtime de automação.

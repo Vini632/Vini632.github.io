@@ -82,7 +82,7 @@
       },
       async deleteAccount(session, password, confirmation) {
         if (confirmation !== 'DELETAR') throw new Error('Digite DELETAR para confirmar a exclusão.');
-        if (!password || password.length > 128) throw new Error('Informe sua senha atual.');
+        if (typeof password !== 'string' || password.length > 128 || (!password && session.user?.identities?.some(identity=>identity.provider==='email'))) throw new Error('Informe sua senha atual.');
         return request('/functions/v1/delete-account', { token: session.access_token, method: 'POST', body: { password, confirmation } });
       }
     };

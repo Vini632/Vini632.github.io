@@ -10,10 +10,11 @@
     <title>WorldForge RPG — seu mundo, em construção</title>
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="stylesheet" href="./styles.css?v=12">
+    <link rel="stylesheet" href="./styles.css?v=13">
     <link rel="stylesheet" href="./animations.css">
     <link rel="stylesheet" href="./theme-black.css?v=12">
     <link rel="stylesheet" href="./landing.css?v=2">
+    <link rel="stylesheet" href="./auth-ui.css?v=1">
   </head>
   <body>
     <main class="landing-screen" id="landing-screen">
@@ -41,6 +42,8 @@
             <button class="landing-text-button landing-forgot-button" id="landing-forgot-password" type="button">Esqueci a senha</button>
             <button class="button button-primary landing-auth-submit" id="landing-auth-submit" type="submit">Entrar</button>
           </form>
+          <div class="social-auth" id="social-auth"><button type="button" data-oauth="discord"><span class="social-icon" aria-hidden="true">◈</span>Discord</button><button type="button" data-oauth="google"><span class="social-icon" aria-hidden="true">G</span>Google</button><small id="social-auth-note">Você também pode usar uma conta externa.</small></div>
+          <button class="landing-text-button hidden" type="button" id="resend-confirmation">Reenviar confirmação de e-mail</button>
           <p class="landing-auth-feedback" id="landing-auth-feedback" role="status" aria-live="polite"></p>
           <div class="landing-auth-switch"><span id="landing-auth-switch-copy">Ainda não tem conta?</span><button type="button" id="landing-auth-switch" data-auth-mode="signup">Criar conta</button></div>
           <button class="landing-text-button hidden" id="landing-auth-back" type="button">Voltar para entrar</button>
@@ -172,7 +175,8 @@
         <div class="eyebrow">SUA CONTA</div><h2 id="account-delete-title">Deletar conta</h2>
         <p class="modal-intro">Esta ação é permanente. Remove sua conta, mundos da nuvem, publicações, respostas e mensagens. Tópicos e Guildas criados por você também serão removidos, incluindo suas respostas e murais. As sessões serão encerradas.</p>
         <p class="cloud-note">Exporte seus backups antes de continuar. Mundos e perfil deste navegador serão preservados, a menos que você selecione a opção abaixo. Cópias em outros dispositivos e backups baixados não são apagados por este botão.</p>
-        <label class="field-label">Senha atual<input class="text-field" name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
+        <p id="account-delete-oauth-note" class="cloud-note hidden">Contas com login externo exigem 2FA ativo e um código recente para confirmar a exclusão.</p>
+        <label class="field-label" id="account-delete-password-field">Senha atual<input class="text-field" name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
         <label class="field-label">Digite DELETAR para confirmar<input class="text-field" name="confirmation" autocomplete="off" required pattern="DELETAR" maxlength="7" placeholder="DELETAR"></label>
         <label class="account-delete-local"><input type="checkbox" name="clear_local">Apagar também mundos e perfil deste navegador</label>
         <p id="account-delete-feedback" class="account-feedback" role="status" aria-live="polite"></p>
@@ -259,8 +263,9 @@
     <script src="./world-validation.js?v=1" defer></script>
     <script src="./community-validation.js?v=1" defer></script>
     <script src="./cloud-config.js?v=6" defer></script>
-    <script src="./account-api.js?v=2" defer></script>
-    <script src="./app.js?v=37" defer></script>
+    <script src="./auth-bundle.js?v=1" defer></script>
+    <script src="./account-api.js?v=3" defer></script>
+    <script src="./app.js?v=39" defer></script>
     <script src="./world-catalog.js?v=1" defer></script>
     <script src="./world-library.js?v=5" defer></script>
     <script src="./community.js?v=4" defer></script>
