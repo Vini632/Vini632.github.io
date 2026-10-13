@@ -6,6 +6,14 @@ const path = require('node:path');
 const test = require('node:test');
 
 const schema = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
+const guildMessageGrantMigration = fs.readFileSync(
+  path.join(__dirname, '..', 'supabase', 'migrations', '20261013000000_guild_message_read_grant.sql'),
+  'utf8'
+);
+const forumReplyFilterGrantMigration = fs.readFileSync(
+  path.join(__dirname, '..', 'supabase', 'migrations', '20261013001000_forum_reply_read_post_reference.sql'),
+  'utf8'
+);
 
 test('community tables enable row-level security and server-side membership checks', () => {
   for (const table of [
@@ -26,7 +34,7 @@ test('community tables enable row-level security and server-side membership chec
 
 test('anonymous reads omit account and local-world identifiers', () => {
   assert.match(schema, /grant select \(id, author_name, category, title, body, created_at, updated_at\)\s+on public\.worldforge_forum_posts to anon/i);
-  assert.match(schema, /grant select \(id, author_name, body, created_at, updated_at\)\s+on public\.worldforge_forum_replies to anon/i);
+  assert.match(schema, /grant select \(id, post_id, author_name, body, created_at, updated_at\)\s+on public\.worldforge_forum_replies to anon/i);
   assert.match(schema, /grant select \(id, creator_name, world_name, summary, realm_names, city_names, published, updated_at\)\s+on public\.worldforge_showcase to anon/i);
   assert.doesNotMatch(schema, /grant select on public\.worldforge_forum_posts, public\.worldforge_forum_replies,[\s\S]*?to anon/i);
 });
@@ -51,5 +59,31 @@ test('authenticated guild members can read only message fields protected by memb
   assert.match(
     schema,
     /create policy "Guild members can read messages"[\s\S]*?for select to authenticated[\s\S]*?worldforge_is_guild_member\(guild_id\)/i
+  );
+});
+
+test('forum reply readers can filter by public topic id without exposing author ids', () => {
+  assert.match(
+    schema,
+    /grant select \(id, post_id, author_name, body, created_at, updated_at\)\s+on public\.worldforge_forum_replies to anon/i
+  );
+  assert.match(
+    schema,
+    /grant select \(id, post_id, author_id, author_name, body, created_at, updated_at\)\s+on public\.worldforge_forum_replies to authenticated/i
+  );
+});
+
+test('incremental migrations grant only the extra public lookup fields required by PostgREST', () => {
+  assert.match(
+    guildMessageGrantMigration,
+    /grant select \(id, guild_id, author_name, body, created_at, updated_at\)\s+on public\.worldforge_guild_messages to authenticated/i
+  );
+  assert.match(
+    forumReplyFilterGrantMigration,
+    /grant select \(post_id\)\s+on public\.worldforge_forum_replies to anon, authenticated/i
+  );
+  assert.doesNotMatch(
+    `${guildMessageGrantMigration}\n${forumReplyFilterGrantMigration}`,
+    /grant select on public\.worldforge_(?:guild_messages|forum_replies) to anon/i
   );
 });

@@ -173,9 +173,9 @@ grant select (id, author_name, category, title, body, created_at, updated_at)
   on public.worldforge_forum_posts to anon;
 grant select (id, author_id, author_name, category, title, body, created_at, updated_at)
   on public.worldforge_forum_posts to authenticated;
-grant select (id, author_name, body, created_at, updated_at)
+grant select (id, post_id, author_name, body, created_at, updated_at)
   on public.worldforge_forum_replies to anon;
-grant select (id, author_id, author_name, body, created_at, updated_at)
+grant select (id, post_id, author_id, author_name, body, created_at, updated_at)
   on public.worldforge_forum_replies to authenticated;
 grant select (id, creator_name, world_name, summary, realm_names, city_names, published, updated_at)
   on public.worldforge_showcase to anon;
