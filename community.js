@@ -11,6 +11,7 @@
     editing: null,
     showcase: [],
     guilds: [],
+    directory: [], directorySearch: '', directoryOffset: 0, directoryError: '',
     selectedGuild: null,
     members: [],
     messages: [],
@@ -18,6 +19,7 @@
   };
   const $ = (selector, root = document) => root.querySelector(selector);
   const limit = 50;
+  let guildRenderSequence = 0;
   const categories = {
     geral: 'Conversa geral',
     criacao: 'Criação de mundos',
@@ -160,6 +162,8 @@
   async function renderGuilds() {
     const root = rootFor('guilda');
     if (!root || !ensureEnabled(root)) return;
+    const sequence = ++guildRenderSequence, userId = app.user?.id;
+    const current = () => sequence === guildRenderSequence && app.hasWorkspaceAccess && app.user?.id === userId;
     if (!signedIn()) {
       setRoot('guilda', heading('JORNADA EM EQUIPE', 'Guilda de Criadores', 'Espaços privados para organizar campanhas e ideias em grupo.') + authNotice('As guildas e seus murais só podem ser acessados por participantes convidados.'));
       return;
@@ -167,29 +171,48 @@
     root.innerHTML = heading('JORNADA EM EQUIPE', 'Guilda de Criadores', 'Espaços privados para organizar campanhas e ideias em grupo.')
       + '<div class="community-loading" role="status">Carregando suas guildas…</div>';
     try {
-      state.guilds = await request(`/rest/v1/worldforge_guilds?select=id,owner_id,name,description,created_at&order=created_at.desc&limit=100`, { requireAuth: true });
+      const guilds = await request(`/rest/v1/worldforge_guilds?select=id,owner_id,name,description,visibility,created_at&order=created_at.desc&limit=100`, { requireAuth: true });
+      if (!current()) return;
+      state.guilds = guilds;
       if (!Array.isArray(state.guilds)) throw new Error('Resposta inválida das guildas.');
       if (state.selectedGuild && !state.guilds.some(guild => guild.id === state.selectedGuild.id)) state.selectedGuild = null;
       if (state.selectedGuild) {
         state.selectedGuild = state.guilds.find(guild => guild.id === state.selectedGuild.id);
         const filter = `guild_id=eq.${encodeURIComponent(state.selectedGuild.id)}`;
-        [state.members, state.messages] = await Promise.all([
+        const [members, messages] = await Promise.all([
           request(`/rest/v1/worldforge_guild_members?select=user_id,role,joined_at&${filter}&order=joined_at.asc`, { requireAuth: true }),
           request(`/rest/v1/worldforge_guild_messages?select=id,author_id,author_name,body,created_at,updated_at&${filter}&order=created_at.asc&limit=100`, { requireAuth: true })
         ]);
+        if (!current()) return;
+        state.members = members; state.messages = messages;
         if (!Array.isArray(state.members) || !Array.isArray(state.messages)) throw new Error('Resposta inválida do mural privado.');
       }
+      try {
+        const directory = await request('/rest/v1/rpc/worldforge_guild_directory', { requireAuth: true, method: 'POST', body: JSON.stringify({p_search:state.directorySearch,p_offset:state.directoryOffset}) });
+        if (!current()) return;
+        state.directory = directory;
+        if(!Array.isArray(state.directory))throw new Error('Resposta inválida do diretório.');
+        state.directoryError='';
+      } catch(error){if (!current()) return;state.directory=[];state.directoryError=error.message||'Diretório indisponível.';}
       renderGuildContent();
     } catch (error) {
+      if (!current()) return;
       setRoot('guilda', heading('JORNADA EM EQUIPE', 'Guilda de Criadores', 'Espaços privados para organizar campanhas e ideias em grupo.') + errorPanel(error, 'guilda'));
     }
+  }
+  function visibilityOptions(value='private') {
+    return `<option value="private" ${value==='private'?'selected':''}>Oculta / privada</option><option value="listed" ${value==='listed'?'selected':''}>Visível no diretório</option>`;
+  }
+  function directoryMarkup() {
+    const cards=state.directory.map(guild=>`<article class="community-card guild-directory-card"><span class="entity-tag">ENTRADA POR CONVITE</span><h3>${esc(guild.name)}</h3><p>${esc(guild.description||'Uma guilda preparando novas histórias.')}</p>${state.guilds.some(own=>own.id===guild.id)?`<button type="button" class="button button-quiet button-small" data-community-action="open-guild" data-record-id="${esc(guild.id)}">Abrir minha guilda</button>`:'<small>Peça um convite ao organizador para participar.</small>'}</article>`).join('');
+    return `<section class="guild-directory"><div class="community-section-heading"><div><div class="eyebrow">ENCONTRE SUA PRÓXIMA MESA</div><h2>Diretório de guildas</h2><p>Somente nome e descrição são compartilhados entre contas. Mural e participantes continuam privados.</p></div></div><form class="community-form guild-directory-search" data-community-form="guild-directory"><label class="field-label">Buscar guildas<input class="text-field" name="search" maxlength="60" value="${esc(state.directorySearch)}" placeholder="Nome ou tema da campanha"></label><button class="button button-quiet" type="submit">Buscar</button></form>${state.directoryError?`<p class="community-error" role="status">${esc(state.directoryError)}</p>`:''}<div class="community-grid">${cards||'<p class="community-empty">Nenhuma guilda visível nesta página. As guildas ocultas não aparecem aqui.</p>'}</div><div class="community-form-actions"><button class="button button-quiet button-small" type="button" data-community-action="directory-prev" ${state.directoryOffset===0?'disabled':''}>Anterior</button><span>Página ${Math.floor(state.directoryOffset/24)+1}</span><button class="button button-quiet button-small" type="button" data-community-action="directory-next" ${state.directory.length<24||state.directoryOffset>=9984?'disabled':''}>Próxima</button></div></section>`;
   }
   function renderGuildContent() {
     const selected = state.selectedGuild;
     const isOwner = selected?.owner_id === app.user.id;
-    const create = `<section class="community-card"><h2>Criar guilda</h2><form class="community-form community-inline-form" data-community-form="create-guild"><label class="field-label">Nome<input class="text-field" name="name" required minlength="3" maxlength="60"></label><label class="field-label">Descrição (opcional)<input class="text-field" name="description" maxlength="500"></label><button class="button button-primary button-small" type="submit">Criar</button></form></section>`;
+    const create = `<section class="community-card"><h2>Criar guilda</h2><form class="community-form community-inline-form" data-community-form="create-guild"><label class="field-label">Nome<input class="text-field" name="name" required minlength="3" maxlength="60"></label><label class="field-label">Descrição (opcional)<input class="text-field" name="description" maxlength="500"></label><label class="field-label">Visibilidade<select name="visibility" class="text-field">${visibilityOptions()}</select></label><p class="guild-privacy-note">Oculta: apenas convidados. Visível: nome e descrição aparecem no diretório; a entrada ainda exige convite.</p><button class="button button-primary button-small" type="submit">Criar guilda</button></form></section>`;
     const join = `<section class="community-card"><h2>Entrar com convite</h2><form class="community-form community-inline-form" data-community-form="join-guild"><label class="field-label">Código de convite<input class="text-field" name="invite" required placeholder="id.token" autocomplete="off"></label><button class="button button-quiet button-small" type="submit">Entrar na guilda</button></form></section>`;
-    const guildList = state.guilds.map(guild => `<button class="community-guild-item ${selected?.id === guild.id ? 'active' : ''}" data-community-action="open-guild" data-record-id="${esc(guild.id)}"><strong>${esc(guild.name)}</strong><small>${esc(guild.description || 'Sem descrição')}</small><span>${guild.owner_id === app.user.id ? 'Sua guilda' : 'Participante'}</span></button>`).join('') || '<p class="community-empty">Você ainda não participa de uma guilda.</p>';
+    const guildList = state.guilds.map(guild => `<button class="community-guild-item ${selected?.id === guild.id ? 'active' : ''}" data-community-action="open-guild" data-record-id="${esc(guild.id)}"><strong>${esc(guild.name)}</strong><small>${esc(guild.description || 'Sem descrição')}</small><span>${guild.owner_id === app.user.id ? 'Sua guilda' : 'Participante'} · ${guild.visibility==='listed'?'Visível no diretório':'Oculta / privada'}</span></button>`).join('') || '<p class="community-empty">Você ainda não participa de uma guilda.</p>';
     let detail = '<div class="community-card community-empty">Selecione uma guilda ou crie uma nova. O acesso é privado por convite.</div>';
     if (selected) {
       const roster = state.members.map(member => `<div class="community-member"><span>${member.role === 'owner' ? 'Proprietário' : 'Membro'}</span>${isOwner && member.user_id !== app.user.id ? `<button type="button" data-community-action="remove-member" data-member-id="${esc(member.user_id)}" data-record-id="${esc(selected.id)}">Remover</button>` : ''}</div>`).join('');
@@ -197,10 +220,10 @@
       const ownerActions = isOwner
         ? `<button class="button button-quiet button-small" data-community-action="create-invite" data-record-id="${esc(selected.id)}">Gerar convite de 7 dias</button><button class="button button-quiet button-small" data-community-action="delete-guild" data-record-id="${esc(selected.id)}">Excluir guilda</button>`
         : `<button class="button button-quiet button-small" data-community-action="leave-guild" data-record-id="${esc(selected.id)}">Sair da guilda</button>`;
-      detail = `<section class="community-card guild-detail"><div class="community-section-heading"><div><h2>${esc(selected.name)}</h2><p>${esc(selected.description)}</p></div><div class="community-form-actions">${ownerActions}</div></div>${state.inviteCode ? `<div class="community-invite" role="status"><strong>Convite válido por 7 dias (até 20 usos)</strong><code>${esc(state.inviteCode)}</code><button class="button button-quiet button-small" data-community-action="copy-invite">Copiar convite</button><button class="community-record-actions" data-community-action="dismiss-invite">Fechar</button></div>` : ''}<h3>Participantes (${state.members.length})</h3><div class="community-roster">${roster}</div><h3>Mural privado</h3><div class="community-messages">${messages}</div><form class="community-form" data-community-form="guild-message"><label class="field-label">Mensagem<textarea class="text-field community-textarea" name="body" required maxlength="2000" placeholder="Compartilhe um próximo passo ou uma ideia."></textarea></label><button class="button button-primary button-small" type="submit">Publicar no mural</button></form></section>`;
+      detail = `<section class="community-card guild-detail"><div class="community-section-heading"><div><h2>${esc(selected.name)}</h2><p>${esc(selected.description)}</p></div><div class="community-form-actions">${ownerActions}</div></div><div class="guild-privacy-panel"><span class="entity-tag">${selected.visibility==='listed'?'VISÍVEL NO DIRETÓRIO':'OCULTA / PRIVADA'}</span><p>${selected.visibility==='listed'?'Outras contas podem encontrar nome e descrição. Mural e participantes são exclusivos dos membros.':'Somente membros convidados podem encontrar esta guilda e acessar seu conteúdo.'}</p>${isOwner?`<form class="community-form" data-community-form="guild-visibility" data-record-id="${esc(selected.id)}"><label class="field-label">Visibilidade da guilda<select class="text-field" name="visibility">${visibilityOptions(selected.visibility)}</select></label><button class="button button-quiet button-small" type="submit">Salvar visibilidade</button></form>`:''}</div>${state.inviteCode ? `<div class="community-invite" role="status"><strong>Convite válido por 7 dias (até 20 usos)</strong><code>${esc(state.inviteCode)}</code><button class="button button-quiet button-small" data-community-action="copy-invite">Copiar convite</button><button class="community-record-actions" data-community-action="dismiss-invite">Fechar</button></div>` : ''}<h3>Participantes (${state.members.length})</h3><div class="community-roster">${roster}</div><h3>Mural privado</h3><div class="community-messages">${messages}</div><form class="community-form" data-community-form="guild-message"><label class="field-label">Mensagem<textarea class="text-field community-textarea" name="body" required maxlength="2000" placeholder="Compartilhe um próximo passo ou uma ideia."></textarea></label><button class="button button-primary button-small" type="submit">Publicar no mural</button></form></section>`;
     }
     setRoot('guilda', heading('JORNADA EM EQUIPE', 'Guilda de Criadores', 'Conteúdo privado visível apenas a participantes convidados.')
-      + `<div class="community-grid guild-create-grid">${create}${join}</div><div class="community-guild-layout"><section class="community-card"><h2>Suas guildas (${state.guilds.length})</h2><div class="community-guild-list">${guildList}</div></section>${detail}</div>`);
+      + `<div class="community-grid guild-create-grid">${create}${join}</div><div class="community-guild-layout"><section class="community-card"><h2>Suas guildas (${state.guilds.length})</h2><div class="community-guild-list">${guildList}</div></section>${detail}</div>` + directoryMarkup());
   }
 
   async function refresh(view = state.view) {
@@ -280,10 +303,23 @@
       window.alert('Resumo publicado. Você pode retirá-lo da vitrine quando quiser.');
       return refresh('vitrine');
     }
+    if (type === 'guild-directory') {
+      state.directorySearch=String(fields.search||'').trim().slice(0,60);state.directoryOffset=0;
+      return refresh('guilda');
+    }
+    if (type === 'guild-visibility') {
+      const guild=state.guilds.find(item=>item.id===form.dataset.recordId);
+      if(!guild||guild.owner_id!==app.user.id)throw new Error('Somente o dono pode alterar a visibilidade.');
+      const visibility=fields.visibility==='listed'?'listed':'private';
+      if(visibility==='listed'&&guild.visibility!=='listed'&&!window.confirm('Mostrar o nome e a descrição desta guilda no diretório para outras contas? O mural e os participantes continuam privados.'))return;
+      const updated=await request(`/rest/v1/worldforge_guilds?id=eq.${encodeURIComponent(guild.id)}&owner_id=eq.${encodeURIComponent(app.user.id)}&select=id`, {requireAuth:true,method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({visibility})});
+      if(!Array.isArray(updated)||updated.length!==1)throw new Error('Não foi possível alterar a visibilidade. Reabra a guilda e tente novamente.');
+      return refresh('guilda');
+    }
     if (type === 'create-guild') {
       const details = validate.guild(fields);
       await request('/rest/v1/rpc/worldforge_create_guild', {
-        requireAuth: true, method: 'POST', body: JSON.stringify({ p_name: details.name, p_description: details.description })
+        requireAuth: true, method: 'POST', body: JSON.stringify({ p_name: details.name, p_description: details.description, p_visibility: fields.visibility==='listed'?'listed':'private' })
       });
       return refresh('guilda');
     }
@@ -316,6 +352,7 @@
   async function handleAction(button) {
     const action = button.dataset.communityAction;
     const id = button.dataset.recordId;
+    if (action === 'directory-prev' || action === 'directory-next') {state.directoryOffset=Math.max(0,Math.min(9984,state.directoryOffset+(action==='directory-next'?24:-24)));return refresh('guilda');}
     if (action === 'retry') return refresh(button.dataset.viewName);
     if (action === 'new-post') { state.editing = { kind: 'new-post' }; return renderForumContent(); }
     if (action === 'cancel-edit') { state.editing = null; return renderForumContent(); }
@@ -408,14 +445,25 @@
     const button = event.target.closest('[data-community-action]');
     if (!button) return;
     event.preventDefault();
-    handleAction(button).catch(error => window.alert(error.message || 'A ação não foi concluída.'));
+    if (button.disabled) return;
+    button.disabled = true;
+    return handleAction(button).catch(error => window.alert(error.message || 'A ação não foi concluída.'))
+      .finally(() => { button.disabled = false; });
   });
   document.addEventListener('submit', event => {
     if (!app?.hasWorkspaceAccess) return;
     const form = event.target.closest('[data-community-form]');
     if (!form) return;
     event.preventDefault();
-    submitForm(form).catch(error => window.alert(error.message || 'A ação não foi concluída.'));
+    if (form.dataset.submitting === 'true') return;
+    form.dataset.submitting = 'true';
+    const buttons = [...form.querySelectorAll('button[type="submit"]')];
+    buttons.forEach(button => { button.disabled = true; });
+    return submitForm(form).catch(error => window.alert(error.message || 'A ação não foi concluída.'))
+      .finally(() => {
+        delete form.dataset.submitting;
+        buttons.forEach(button => { button.disabled = false; });
+      });
   });
 
   window.WORLDFORGE_COMMUNITY = Object.freeze({ render: refresh });

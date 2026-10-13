@@ -7,6 +7,30 @@
   const MAX_ID_LENGTH = 120;
   const MAX_TURN = 1000000000;
 
+  function validateSheet(sheet) {
+    if (!sheet || typeof sheet !== 'object' || Array.isArray(sheet) || sheet.version !== 1) throw new Error('Formato de ficha inválido.');
+    for (const key of ['sistema','jogador','ancestralidade','classe','origem','alinhamento']) {
+      if (typeof sheet[key] !== 'string' || sheet[key].length > 120) throw new Error(`Campo ${key} inválido na ficha.`);
+    }
+    for (const key of ['aparencia','historia','ideais','vinculos','defeitos','equipamentos','habilidades','magias','anotacoes']) {
+      if (typeof sheet[key] !== 'string' || sheet[key].length > 6000) throw new Error(`Campo ${key} inválido na ficha.`);
+    }
+    for (const key of ['nivel','experiencia','vida_atual','vida_maxima','vida_temporaria','defesa','iniciativa','deslocamento','moedas']) {
+      const min = key === 'iniciativa' || key === 'vida_atual' ? -9999 : key === 'nivel' ? 1 : 0;
+      if (!Number.isSafeInteger(sheet[key]) || sheet[key] < min || sheet[key] > 999999) throw new Error(`Valor ${key} inválido na ficha.`);
+    }
+    if (sheet.vida_atual > sheet.vida_maxima) throw new Error('A vida atual não pode ultrapassar a vida máxima. Use vida temporária para bônus.');
+    if (!Array.isArray(sheet.atributos) || sheet.atributos.length > 12) throw new Error('Use até 12 atributos na ficha.');
+    const names = new Set();
+    for (const attribute of sheet.atributos) {
+      if (!attribute || typeof attribute.nome !== 'string' || !attribute.nome.trim() || attribute.nome.length > 40
+        || names.has(attribute.nome.trim().toLocaleLowerCase('pt-BR')) || !Number.isSafeInteger(attribute.valor)
+        || attribute.valor < -999 || attribute.valor > 999) throw new Error('Revise os nomes e valores dos atributos; os nomes devem ser únicos.');
+      names.add(attribute.nome.trim().toLocaleLowerCase('pt-BR'));
+    }
+    return sheet;
+  }
+
   function validateWorld(data) {
     const keys = ['metadata', 'estado_mundo', 'reinos', 'cidades', 'npcs', 'monstros', 'missoes', 'relacoes', 'eventos'];
     if (!data || typeof data !== 'object' || Array.isArray(data) || keys.some(key => !(key in data))) {
@@ -106,6 +130,7 @@
     if (listedNpcs.size !== npcs.size) throw new Error('Há personagens sem cidade ou vinculados mais de uma vez.');
 
     for (const npc of npcs.values()) {
+      if (npc.ficha !== undefined) validateSheet(npc.ficha);
       for (const field of ['nome', 'papel', 'traco', 'cidade_id', 'reino_id', 'objetivo_pessoal']) assertString(npc, field, 'npcs');
       if (!npc.nome.trim()) throw new Error(`O personagem ${npc.id} não tem nome.`);
       assertInteger(npc, 'idade', 'npcs');
@@ -192,5 +217,6 @@
   }
 
   root.WORLDFORGE_VALIDATE_WORLD = validateWorld;
+  root.WORLDFORGE_VALIDATE_SHEET = validateSheet;
   if (typeof module === 'object' && module.exports) module.exports = validateWorld;
 })(globalThis);

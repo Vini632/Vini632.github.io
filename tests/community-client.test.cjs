@@ -55,7 +55,8 @@ function createClient({ enabled = true, workspaceAccess = true, user = null, wor
   });
   return {
     client: window.WORLDFORGE_COMMUNITY,
-    roots, requests, alerts,
+    roots, requests, alerts, app,
+    dispatchSubmit: form => listeners.get('submit')({preventDefault() {},target:form}),
     get sessionChecks() { return sessionChecks; },
     click(action, recordId = '') {
       const handler = listeners.get('click');
@@ -73,6 +74,7 @@ function createClient({ enabled = true, workspaceAccess = true, user = null, wor
         dataset: { communityForm: type, ...extras },
         values,
         elements: { confirm_public: { checked: extras.confirmed === true } },
+        querySelectorAll: () => [],
         closest: selector => selector === '[data-community-form]' ? form : null
       };
       await listeners.get('submit')({ preventDefault() {}, target: form });
@@ -86,6 +88,58 @@ test('community feature flag shows an in-development card without backend reques
   assert.match(roots.get('foruns').innerHTML, /EM DESENVOLVIMENTO/);
   assert.match(roots.get('foruns').innerHTML, /Vitrine de Mundos/);
   assert.equal(requests.length, 0);
+});
+
+test('listed guild creation shares only selected visibility and requires the same authenticated RPC', async () => {
+  const h=createClient({user:{id:'owner-id'}});
+  await h.submit('create-guild',{name:'Cartógrafos',description:'Mapas',visibility:'listed'});
+  const req=h.requests.find(r=>r.path.endsWith('/rpc/worldforge_create_guild'));
+  assert.equal(JSON.parse(req.options.body).p_visibility,'listed');
+});
+
+test('directory uses search RPC, escapes metadata and never renders private directory fields', async () => {
+  const h=createClient({user:{id:'owner-id'},response:path=>path.includes('/rpc/worldforge_guild_directory')
+    ? [{id:'listed-id',name:'<img src=x>',description:'<script>bad</script>',owner_id:'secret-owner',members:['secret-member']}]:[]});
+  await h.submit('guild-directory',{search:'  coral  '});
+  const req=h.requests.find(r=>r.path.endsWith('/rpc/worldforge_guild_directory'));
+  assert.deepEqual(JSON.parse(req.options.body),{p_search:'coral',p_offset:0});
+  const html=h.roots.get('guilda').innerHTML;
+  assert.match(html,/&lt;img src=x&gt;/);assert.doesNotMatch(html,/secret-owner|secret-member|<script>bad/);
+  assert.match(html,/ENTRADA POR CONVITE/);
+});
+
+test('only the owner can change visibility and the update must return one affected guild', async () => {
+  const h=createClient({user:{id:'owner-id'},response:(path,options)=>{
+    if(options.method==='PATCH')return [];
+    if(path.includes('/rpc/'))return [];
+    return [{id:'guild-id',owner_id:'owner-id',name:'Guilda',description:'',visibility:'private'}];
+  }});
+  await h.client.render('guilda');
+  await h.submit('guild-visibility',{visibility:'listed'},{recordId:'guild-id'});
+  assert.match(h.alerts.at(-1),/Não foi possível alterar/);
+  h.app.user={id:'member-id'};
+  const before=h.requests.length;
+  await h.submit('guild-visibility',{visibility:'listed'},{recordId:'guild-id'});
+  assert.equal(h.requests.length,before);assert.match(h.alerts.at(-1),/Somente o dono/);
+});
+
+test('repeated form submissions while the request is pending create just one guild', async () => {
+  let release;const pending=new Promise(resolve=>{release=resolve;});
+  const h=createClient({user:{id:'owner-id'},response:path=>path.endsWith('/rpc/worldforge_create_guild')?pending:[]});
+  const form={dataset:{communityForm:'create-guild'},values:{name:'Guilda de teste'},querySelectorAll:()=>[],
+    closest:selector=>selector==='[data-community-form]'?form:null};
+  const first=h.dispatchSubmit(form);const second=h.dispatchSubmit(form);
+  await Promise.resolve();release('guild-id');await Promise.all([first,second]);
+  assert.equal(h.requests.filter(r=>r.path.endsWith('/rpc/worldforge_create_guild')).length,1);
+  assert.equal(form.dataset.submitting,undefined);
+});
+
+test('a late guild response cannot populate the screen after an account change', async () => {
+  let release;const pending=new Promise(resolve=>{release=resolve;});
+  const h=createClient({user:{id:'old-account'},response:()=>pending});
+  const render=h.client.render('guilda');await Promise.resolve();h.app.user={id:'new-account'};
+  release([{id:'old-private',name:'Private old account',description:'Secret',owner_id:'old-account'}]);await render;
+  assert.doesNotMatch(h.roots.get('guilda').innerHTML,/Private old account|Secret/);
 });
 
 test('community cannot render data or make requests before workspace authentication', async () => {
@@ -154,7 +208,8 @@ test('guild creation uses the authenticated RPC rather than direct table inserti
   assert.equal(createRequest.options.method, 'POST');
   assert.deepEqual(JSON.parse(createRequest.options.body), {
     p_name: 'Cartógrafos',
-    p_description: 'Mapas e campanhas'
+    p_description: 'Mapas e campanhas',
+    p_visibility: 'private'
   });
 });
 

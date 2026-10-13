@@ -8,10 +8,11 @@ from contextlib import closing
 
 ROOT=Path(__file__).resolve().parent
 parser=argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--host',choices=('squarecloud','discloud'),default='squarecloud')
+parser.add_argument('--host',choices=('squarecloud','discloud','pterodactyl'),default='squarecloud')
 args=parser.parse_args()
 files=['main.py','dashboard.py','server.py','server_ui.py','store.py','bridge.py','catalog.json','requirements.txt','requirements.lock','.env.example']
-files+=['squarecloud.app' if args.host=='squarecloud' else 'discloud.config']
+if args.host in ('squarecloud','discloud'):
+    files+=['squarecloud.app' if args.host=='squarecloud' else 'discloud.config']
 files+=[str(path.relative_to(ROOT)) for path in (ROOT/'assets').iterdir() if path.suffix in ('.png','.gif')]
 output=ROOT/'.data'/('worldforge-'+args.host+'.zip');output.parent.mkdir(exist_ok=True)
 with tempfile.TemporaryDirectory() as temp:

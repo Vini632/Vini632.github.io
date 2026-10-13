@@ -64,12 +64,13 @@ test('release config enables the world catalog and community features', () => {
   assert.equal(window.WORLDFORGE_CLOUD_CONFIG.communityEnabled, true);
 });
 
-test('catalog page lists the three worlds and filters fields are available', () => {
+test('catalog page lists all ten worlds and filters fields are available', () => {
   const { library, target } = createLibrary();
   library.render('biblioteca-mundos');
   assert.match(target.innerHTML, /O Reino das Cinzas/);
   assert.match(target.innerHTML, /As Terras Desconhecidas/);
   assert.match(target.innerHTML, /A Floresta Esquecida/);
+  for (const entry of catalog) assert.ok(target.innerHTML.includes(entry.name));
   assert.match(target.innerHTML, /data-library-search/);
   assert.match(target.innerHTML, /data-library-genre/);
   assert.match(target.innerHTML, /data-library-type/);

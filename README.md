@@ -2,9 +2,87 @@
 
 **Gerador procedural de mundos de RPG com interface web**
 
+## Estado para retomar o trabalho — 13/10/2026
+
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v43**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+
+### Entrega desta retomada
+
+| Área | Estado |
+| --- | --- |
+| Site | Endereço oficial: [vini632.github.io](https://vini632.github.io/), repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. Assets integrados na versão v43. |
+| Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
+| Mural | Grant de leitura de `author_id` preservado. Testes remotos de leitura, autoria, escrita, exclusão e isolamento passaram novamente. Falta conferência do mantenedor com sua conta real na interface. |
+| Menu lateral | Barra nativa oculta mantendo rolagem; item ativo e foco de teclado revisados. Foco no tema claro recebeu cor de maior contraste. |
+| Fichas | Editor livre integrado ao HTML e ao precache: salvar, importar/exportar JSON, imprimir/PDF pelo navegador e avisar sobre alterações não salvas. Ficha acompanha `npc.ficha` nos backups do mundo. |
+| Biblioteca | **10 cenários**: os 3 anteriores, mais **3 mundos completos e 4 pontos de partida**. Todas as referências passaram no validador. |
+| Discord / 2FA / vínculo | Implementados; funcionamento confirmado pelo mantenedor na sessão anterior. |
+| Google | Provedor implementado e ativo; teste completo pelo mantenedor ainda pendente. |
+| Painel do bot | Publicado em [/bot/](https://vini632.github.io/bot/); exige conta, 2FA e identidade Discord verificável. |
+| Bot local | Árvore do PID registrado observada ativa nesta retomada. Não presumir que continuará rodando: consultar `.data/bot.pid` e o processo filho. Nenhuma instância extra foi iniciada. |
+| Hospedagem | **Escolhida: HostSquare, plano mensal de 512 MB por R$ 2,50 anunciado.** Pacote privado preparado; contratação e implantação ainda pendentes. Teto original: R$ 15/mês. |
+| E-mails | Investigação Brevo encerrada por decisão do mantenedor. Discord e Google são prioritários. Não retomar testes de e-mail sem novo pedido. |
+
+### Fichas e catálogo
+
+- `character-sheet.js` e `character-sheet.css` são carregados antes de `app.js`, com o validador já disponível. Sistema livre; nenhum cálculo automático de regras de RPG foi acrescentado.
+- Campos de identidade, vida/combate/progressão, moedas, até 12 atributos com nomes editáveis e 9 campos narrativos. A importação aceita apenas o formato WorldForge v1, com até 128 KB, tipos e limites válidos e atributos de nomes únicos.
+- Importar prepara um rascunho: só **Salvar ficha** altera o mundo. Cancelar o fechamento mantém o rascunho; fechar a aba com alterações também dispara o aviso do navegador. Exportar e imprimir não salvam automaticamente.
+- Salvamento verifica acesso, mundo ativo e existência do personagem. Falha de armazenamento restaura mundo e biblioteca. Mundos antigos sem ficha continuam válidos; o backup de nuvem permanece manual em Dados & backup.
+- Mundos completos novos: **Os Mares da Lua Partida**, **O Inverno das Engrenagens** e **Os Jardins da Estrela Caída**. Cada um tem 2 reinos, 4 cidades, 6 personagens, 3 criaturas, 4 missões, 4 relações, 3 eventos, facções, crônica e caminhos de resolução.
+- Pontos de partida novos: **A Porta de Amanhã**, **As Ilhas que Seguem o Vento**, **A Cidade sob o Lago** e **A Estrada das Máscaras**. Cada um oferece lugares, personagens e um problema inicial, com perguntas e decisões explicitamente abertas ao mestre.
+- Textos novos com acentos perdidos foram corrigidos em `community.js` e `app.js`, incluindo a informação de privacidade Discord. Use UTF-8 explícito ou patches; não substitua `?` globalmente em JavaScript.
+
+### Banco: histórico e isolamento conferidos nesta retomada
+
+- A migration de visibilidade já estava aplicada remotamente: `20261013130231_guild_visibility_directory`. O arquivo local foi alinhado para `20261013130231_guild_visibility_directory.sql`; **não foi reaplicada**.
+- Advisors e consulta dos objetos encontraram cópias públicas dos helpers de participação/propriedade, além das privadas, com políticas e RPCs ainda referenciando as cópias públicas. A causa não foi atribuída sem evidência; o estado observado divergia do registro anterior.
+- Nova migration aplicada: **`20261013155403_restore_private_guild_policy_helpers.sql`**. Políticas e RPCs de convite/entrada voltaram a usar os helpers privados. Cópias públicas removidas **sem CASCADE**, preservando MFA, limites, assinaturas e bloqueio de convites. Um ensaio transacional descartado passou antes da aplicação.
+- `supabase/tests/guild-directory-access.sql` foi executado no remoto com identidades sintéticas e rollback: visibilidade padrão e assinatura antiga, busca/paginação, apenas três campos no diretório, dados privados inacessíveis a não membros, alteração somente pelo dono, convites válidos/inválidos, MFA AAL1 negado para conta com fator confirmado, AAL2 permitido e acesso anônimo negado.
+- `supabase/tests/community-access.sql` passou novamente: mural, autoria, exclusão, RLS, quotas e tentativas de convite inválido. Nenhuma conta ou conteúdo de teste ficou persistido.
+- Advisors depois da correção: os dois avisos dos helpers públicos desapareceram. Permanecem avisos dos **3 RPCs intencionalmente SECURITY DEFINER**, que exigem autenticação/autorização internas, e [proteção de senhas vazadas desativada](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). Os avisos informativos de índices sem uso e FKs sem índice continuam como revisão conforme volume.
+- A interface bloqueia submissões repetidas durante o pedido e descarta respostas atrasadas das guildas quando a conta muda. Dados do diretório são escapados antes de renderizar.
+- Não usar `db push` sem comparar `list_migrations` e os arquivos locais. O histórico remoto inclui baseline, comunidade, Discord, MFA, exclusão OAuth, mural, visibilidade e a nova reconciliação. `supabase/schema.sql` continua sendo referência antiga: **não reaplicar em produção**.
+
+### Verificações e limites da conferência
+
+- `node --test tests/*.test.cjs`: **66 testes passaram**. Incluem catálogo completo, compatibilidade com mundos antigos, validação das fichas, salvamento/rollback, proteção contra troca de mundo/conta, duplicação de pedidos, escape do diretório e alinhamento dos assets entre HTML/Service Worker.
+- Checagem de sintaxe dos JavaScripts alterados passou. `python worldforge_rpg.py --testar` passou.
+- Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
+- Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
+- A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
+- Versões: cache **v43**, `app.js?v=41`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+
+### Próximas pendências
+
+1. Mantenedor conferir login Google, mural/visibilidade de suas guildas e criar/editar/importar/imprimir uma ficha no site atualizado.
+2. Concluir a contratação **mensal** da HostSquare 512 MB, confirmar preço de R$ 2,50 no checkout e obter acesso ao painel. A escolha substitui a recomendação anterior de Square Cloud; são provedores diferentes.
+3. Implantar o pacote privado `discord-bot/.data/worldforge-pterodactyl.zip`, com Python 3.12+, dependências fixadas e segredos no painel. **Parar a instância local antes de iniciar a hospedada.** Conferir persistência de SQLite, reinício e memória sob uso real. Consulte [HOSPEDAGEM.md](discord-bot/HOSPEDAGEM.md).
+4. Reconfirmar o processo local sempre que necessário. Os ZIPs privados incluem configuração SQLite: nunca publicar no GitHub. Não sobrescrever um SQLite hospedado mais novo com cópia local antiga.
+
+### Decisões e referências que continuam válidas
+
+- OAuth Discord/Google via PKCE. `@supabase/supabase-js` fixado em `2.117.3`, bundle com esbuild `0.28.2`; manutenção: `npm run build:auth`.
+- TOTP em Configurações → Conta e acesso. Não há códigos próprios de recuperação: conservar o autenticador e a chave de configuração. Dados protegidos exigem AAL2 quando a conta possui fator confirmado.
+- `mailDeliveryAvailable: false`: cadastro, recuperação e reenvio por e-mail suspensos na interface; e-mail/senha continuam para contas já confirmadas. Confirmação de e-mail no Supabase permanece ativa. HTTP 200 não prova entrega. Brevo `#5613937` foi encerrado como investigação por escolha do mantenedor; último teste sem entrega às 09:28 BRT de 13/10/2026.
+- Supabase: projeto `urvtkpqpguxthjznmtyu`, região `us-east-1`; URL `https://urvtkpqpguxthjznmtyu.supabase.co`; callback OAuth `/auth/v1/callback`.
+- Discord: aplicação `1559439222308601897`, servidor `1559443784255803464` (IDs públicos). Comandos públicos: `/ajuda`, `/ping`, `/vincular`, `/mundos`, `/perfil`, `/desvincular`, `/tickets` e `/comunidade`.
+- Administração em `bot/`, fila privada Supabase e execução Python; `DASHBOARD_STAFF=true`. Bot verifica permissões e hierarquia reais. Jobs incertos não são repetidos automaticamente; histórico por até 14 dias.
+- Edge Functions confirmadas anteriormente: `discord-bridge` v4 e `delete-account` v3. `verify_jwt=false` no gateway depende da autenticação e validação de sessão dentro dos handlers; não removê-las. Usar `import_map_path: "deno.json"` quando requerido no deploy.
+- Exclusão de conta: senha para contas com senha; 2FA recente para contas exclusivamente OAuth; revogação de sessões e cascatas do banco. Nenhuma conta real foi excluída nesta retomada.
+- Não havia Git nem Docker no PATH. Publicação usa `gh api` com blobs/tree/commit e atualização de ref **sem force**, preservando arquivos remotos não relacionados. Base anterior desta entrega: `8aab4f4b9de0a59cbdf7eb76e2bbbf038e78bf57`; não tratá-la como HEAD depois de novos commits.
+- Token do bot e chave da ponte somente em `discord-bot/.env`; segredos OAuth/SMTP somente nos serviços. Nunca imprimir seus valores nem incluí-los em documentação, GitHub ou ZIP. `.env.example` deve continuar sem tokens. A rotação mencionada na sessão anterior não foi executada.
+- `discord-bot/.data/published-commit.json` é um registro local auxiliar; consultar o HEAD remoto como fonte de verdade.
+
+Documentos complementares: [bot Discord](discord-bot/README.md), [painel web](bot/README.md), [hospedagem](discord-bot/HOSPEDAGEM.md).
+
+
+
+---
+
 O WorldForge RPG cria mundos de fantasia com reinos, cidades, NPCs, monstros, missões, relações sociais e eventos dinâmicos. O projeto inclui um gerador em Python e uma interface web estática, que também funciona no GitHub Pages.
 
-O gerador Python utiliza apenas a biblioteca padrão. A interface web não exige servidor nem dependências: pode ser hospedada como site estático e também instalada como aplicativo web progressivo (PWA) em navegadores compatíveis.
+O gerador Python utiliza apenas a biblioteca padrão. A interface web é hospedada como site estático no GitHub Pages e pode ser instalada como aplicativo web progressivo (PWA) em navegadores compatíveis. O login e os recursos em nuvem usam Supabase; a manutenção do bundle de autenticação usa dependências Node, e o bot Discord exige um processo Python separado.
 
 ## Índice
 

@@ -5,11 +5,13 @@ const test = require('node:test');
 const catalog = require('../world-catalog.js');
 const validateWorld = require('../world-validation.js');
 
-test('starter catalog has three distinct complete and template worlds', () => {
-  assert.equal(catalog.length, 3);
+test('catalog preserves original scenarios and adds three complete worlds and four starting points', () => {
+  assert.equal(catalog.length, 10);
   assert.equal(new Set(catalog.map(world => world.id)).size, catalog.length);
   assert.equal(new Set(catalog.map(world => world.slug)).size, catalog.length);
-  assert.deepEqual(catalog.map(world => world.type), ['complete', 'template', 'template']);
+  assert.deepEqual(catalog.slice(0,3).map(world => world.type), ['complete', 'template', 'template']);
+  assert.equal(catalog.filter(world => world.type === 'complete').length, 4);
+  assert.equal(catalog.filter(world => world.type === 'template').length, 6);
   for (const entry of catalog) {
     assert.ok(entry.name);
     assert.ok(entry.description);
@@ -24,13 +26,17 @@ test('starter catalog has three distinct complete and template worlds', () => {
 });
 
 test('complete scenario contains campaign-ready entities while templates remain expandable', () => {
-  const complete = catalog.find(world => world.type === 'complete').world;
-  assert.ok(complete.reinos.length >= 2);
-  assert.ok(complete.cidades.length >= 3);
-  assert.ok(complete.npcs.length >= 3);
-  assert.ok(complete.monstros.length);
-  assert.ok(complete.missoes.length);
-  assert.ok(complete.eventos.length);
+  for (const entry of catalog.filter(world => world.type === 'complete')) {
+    const complete = entry.world;
+    assert.ok(complete.reinos.length >= 2);
+    assert.ok(complete.cidades.length >= 3);
+    assert.ok(complete.npcs.length >= 3);
+    assert.ok(complete.monstros.length);
+    assert.ok(complete.missoes.length);
+    assert.ok(complete.eventos.length);
+    assert.ok(complete.relacoes.length);
+    assert.ok(complete.faccoes.length);
+  }
 
   const templates = catalog.filter(world => world.type === 'template');
   for (const template of templates) {
