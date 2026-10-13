@@ -16,6 +16,10 @@
       const result=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(result.error||'O serviço não confirmou esta solicitação.');
       return result;
+    }catch(error){
+      if(error.name==='AbortError')throw new Error('O serviço demorou para responder. Confira o histórico antes de repetir uma ação.');
+      if(error instanceof TypeError)throw new Error('Não foi possível acessar o serviço. Abra o painel com HTTPS e confira sua conexão.');
+      throw error;
     }finally{clearTimeout(timer);}
   }
   function pending(){try{const value=JSON.parse(sessionStorage.getItem(pendingKey));return value?.owner===currentOwner?value:null;}catch{return null;}}
@@ -36,7 +40,7 @@
   async function request(command,payload={},resume=false){
     let stored=resume?pending():null;
     if(command!=='status'&&!resume&&pending())throw new Error('Existe uma ação aguardando resultado. Retome a consulta antes de enviar outra.');
-    const job=stored||{owner:currentOwner,command,payload,request_id:command==='status'?undefined:createRequestId(),createdAt:Date.now()};
+    const job=stored||{owner:currentOwner,command,payload,request_id:createRequestId(),createdAt:Date.now()};
     if(command!=='status')savePending(job);
     if(!job.id){
       if(resume && Date.now()-job.createdAt>120000)throw new Error('A conexão caiu antes de confirmar o pedido. Confira o histórico antes de iniciar outra ação.');

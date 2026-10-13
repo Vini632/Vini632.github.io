@@ -4,18 +4,19 @@
 
 ## Estado para retomar o trabalho — 13/10/2026
 
-**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v44**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v47**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
 
 ### Entrega desta retomada
 
 | Área | Estado |
 | --- | --- |
-| Site | Domínio configurado: [www.worldforge.site](https://www.worldforge.site/), no repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. O DNS da Hostinger ainda precisa apontar para o GitHub Pages; até então use [vini632.github.io](https://vini632.github.io/). Assets integrados na versão v44. |
+| Site | [www.worldforge.site](https://www.worldforge.site/) no GitHub Pages, repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. DNS conferido, certificado aprovado e HTTPS obrigatório. Domínio raiz e HTTP redirecionam para HTTPS com www. Assets v47. |
+| Persistência | Mundos, fichas, anotações, perfil/foto/banner e preferências carregados da conta Supabase e salvos automaticamente. O navegador não grava mais mundos/perfil como fonte de dados; sessão, consentimento e pequenos metadados de retomada permanecem locais. |
 | Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
 | Mural | Grant de leitura de `author_id` preservado. Testes remotos de leitura, autoria, escrita, exclusão e isolamento passaram novamente. Falta conferência do mantenedor com sua conta real na interface. |
 | Menu lateral | Barra nativa oculta mantendo rolagem; item ativo e foco de teclado revisados. Foco no tema claro recebeu cor de maior contraste. |
-| Fichas | Editor livre integrado ao HTML e ao precache: salvar, importar/exportar JSON, imprimir/PDF pelo navegador e avisar sobre alterações não salvas. Ficha acompanha `npc.ficha` nos backups do mundo. |
+| Fichas | Editor livre integrado ao HTML e ao precache: salvar, importar/exportar JSON, imprimir/PDF pelo navegador e avisar sobre alterações não salvas. Ficha acompanha `npc.ficha` nos backups do mundo e no salvamento automático da conta. |
 | Biblioteca | **10 cenários**: os 3 anteriores, mais **3 mundos completos e 4 pontos de partida**. Todas as referências passaram no validador. |
 | Discord / 2FA / vínculo | Implementados; funcionamento confirmado pelo mantenedor na sessão anterior. |
 | Google | Login completo testado e confirmado pelo mantenedor em 13/10/2026. |
@@ -24,26 +25,24 @@
 | Hospedagem | **Implantado na HostSquare**, serviço Python 512 MB no Canadá, plano mensal de R$ 2,50, em 13/10/2026. Console confirmou conexão ao Discord e comandos disponíveis. Consumo inicial observado: aproximadamente 47 MiB / 512 MiB. Teto original: R$ 15/mês. |
 | E-mails | Investigação Brevo encerrada por decisão do mantenedor. Discord e Google são prioritários. Não retomar testes de e-mail sem novo pedido. |
 
-### Domínio personalizado — `www.worldforge.site`
+### Domínio, painel e persistência online — revisão de 13/10/2026
 
-O `CNAME` do repositório e o domínio personalizado do GitHub Pages estão configurados como `www.worldforge.site`. As Edge Functions `discord-bridge` e `delete-account` também foram publicadas com essa origem no CORS, mantendo os domínios anteriores. O build do Pages concluiu (`built`), mas HTTPS forçado continua desativado e o DNS da Hostinger ainda não aponta para o Pages: `www` é CNAME do domínio raiz e o A do domínio raiz resolve para `2.57.91.91` (verificado em 13/10/2026). O DNS e a configuração de URLs do Supabase Auth continuam pendentes; não considere o endereço pronto até concluir os passos abaixo e verificar HTTPS.
-
-Na zona DNS da Hostinger:
-
-1. Altere o registro **CNAME** do host `www` para `vini632.github.io` (sem protocolo, barra ou caminho); remova o CNAME atual de `www` que aponta para `worldforge.site`.
-2. Para que o domínio raiz também redirecione ao `www`, remova os registros A/AAAA conflitantes do host `@` e crie os quatro registros A do GitHub Pages: `185.199.108.153`, `185.199.109.153`, `185.199.110.153` e `185.199.111.153`. O atual `2.57.91.91` deve ser removido/substituído. Os registros AAAA oficiais do GitHub Pages são opcionais; se optar por IPv6, configure todos os quatro: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153` e `2606:50c0:8003::153`.
-3. No GitHub Pages, o domínio personalizado já está definido como `www.worldforge.site`. Depois de corrigir o DNS, aguarde a validação e a emissão do certificado; só então habilite **Enforce HTTPS**. Não configure o proxy de terceiros para o CNAME.
-4. No Supabase: **Authentication → URL Configuration**, defina Site URL como `https://www.worldforge.site/`. Em Redirect URLs, permita `https://www.worldforge.site/**`, `https://worldforge.site/**` e `https://vini632.github.io/**`, mantendo localhost apenas se necessário para desenvolvimento. OAuth, confirmação e recuperação usam o domínio atual com `location.origin`; URLs ausentes nessa lista impedem que o Auth retorne corretamente ao site.
-5. Aguarde a propagação e confira `Resolve-DnsName www.worldforge.site` (CNAME para `vini632.github.io`) e `Resolve-DnsName worldforge.site -Type A` (os quatro IPs do Pages). Teste `https://www.worldforge.site/`, login externo, retorno de Auth e operações das Edge Functions. O certificado/redirect do GitHub Pages pode levar algum tempo após o DNS correto.
-
-Não coloque credenciais da Hostinger, tokens de acesso ou chaves Supabase em arquivos do repositório ou no chat. O endereço `https://vini632.github.io/` continuará como alternativa e está preservado no CORS.
+- DNS conferido: `www` aponta por CNAME a `vini632.github.io`; raiz resolve para os quatro IPs oficiais `185.199.108.153`, `185.199.109.153`, `185.199.110.153` e `185.199.111.153`. A emissão do certificado foi reiniciada reaplicando o domínio no Pages; certificado aprovado para raiz e www, HTTPS obrigatório habilitado e redirects verificados.
+- Supabase Auth: Site URL corrigido para `https://www.worldforge.site/`, com retorno exato desse endereço autorizado, preservando os anteriores. Callbacks dos provedores continuam sendo `/auth/v1/callback` do Supabase. As APIs aceitam as origens HTTPS exatas do site; HTTP não foi liberado.
+- Painel em `bot/admin/botp/`, sem link nas Configurações. O `Failed to fetch` coincidiu com o uso de HTTP enquanto as APIs aceitam HTTPS. Outro erro foi corrigido: consulta inicial de status também precisa enviar um UUID; a fila `worldforge_discord_jobs.request_id` exige esse campo. Erros de conexão agora exibem orientação legível; 2FA e autorização Discord permanecem.
+- Migration **`20261013220630_online_account_workspace.sql`** aplicada. `worldforge_account_state` guarda preferências, mundo ativo e revisão. `worldforge_worlds` continua sendo a biblioteca da conta e mantém compatibilidade de leitura com o bot. Saves passam por `wf_save_workspace`, em uma transação com controle de revisão e UUID idempotente; `wf_load_workspace` devolve a biblioteca/perfil. Escrita direta de clientes antigos na tabela foi revogada para impedir contornar o controle de revisão. Helper privilegiado fica no schema privado, deriva o proprietário da sessão e exige MFA quando ativo. RLS permanece habilitado.
+- `account-workspace.js` serializa/coalesce saves; confirmação visual só mostra “salvas” após resposta do servidor. Falha preserva o rascunho em memória e oferece nova tentativa, exportação e recarga. Conflitos entre abas não sobrescrevem uma versão mais nova. Fechar a página com alterações pendentes dispara aviso. Sem rede, o rascunho precisa ser salvo/exportado antes de fechar; não há biblioteca offline persistida.
+- A biblioteca e o perfil são carregados **antes** de liberar o espaço de trabalho. Troca de conta descarta respostas antigas e não mostra os dados de outra pessoa. Dados locais antigos são oferecidos para importação explícita, sem substituição silenciosa; um backup JSON antigo pode ser importado para a conta. Backups de rascunho da conta também incluem preferências/perfil e podem ser restaurados. Limites de envio: 100 mundos, 20 MB por workspace e 4 MB para preferências/fotos/banner.
+- Termos/privacidade e interface atualizados para o salvamento automático. Novas versões de consentimento: termos `2026-10-13.11`, privacidade `2026-10-13.14`. O mantenedor precisa aceitar os avisos atualizados na interface; o agente não aceita termos por ele.
+- Configurações SQLite do bot permanecem na HostSquare por escolha explícita do mantenedor (**só dados do site migrados**). Não iniciar o bot local nem sobrescrever o SQLite ativo com snapshot antigo.
+- Testes SQL sintéticos, com rollback, passaram antes e depois da migration: recarga, replay sem duplicação, conflito de revisão, validação de entrada, exclusão atômica, isolamento, bloqueio de escrita direta, MFA AAL1/AAL2 e acesso anônimo negado. Advisors sem novos avisos; permanecem os avisos previamente documentados.
 
 ### Fichas e catálogo
 
 - `character-sheet.js` e `character-sheet.css` são carregados antes de `app.js`, com o validador já disponível. Sistema livre; nenhum cálculo automático de regras de RPG foi acrescentado.
 - Campos de identidade, vida/combate/progressão, moedas, até 12 atributos com nomes editáveis e 9 campos narrativos. A importação aceita apenas o formato WorldForge v1, com até 128 KB, tipos e limites válidos e atributos de nomes únicos.
 - Importar prepara um rascunho: só **Salvar ficha** altera o mundo. Cancelar o fechamento mantém o rascunho; fechar a aba com alterações também dispara o aviso do navegador. Exportar e imprimir não salvam automaticamente.
-- Salvamento verifica acesso, mundo ativo e existência do personagem. Falha de armazenamento restaura mundo e biblioteca. Mundos antigos sem ficha continuam válidos; o backup de nuvem permanece manual em Dados & backup.
+- Salvamento verifica acesso, mundo ativo e existência do personagem. Falha de armazenamento restaura mundo e biblioteca. Mundos antigos sem ficha continuam válidos; o salvamento da conta agora é automático; JSON continua disponível em Dados & backup.
 - Mundos completos novos: **Os Mares da Lua Partida**, **O Inverno das Engrenagens** e **Os Jardins da Estrela Caída**. Cada um tem 2 reinos, 4 cidades, 6 personagens, 3 criaturas, 4 missões, 4 relações, 3 eventos, facções, crônica e caminhos de resolução.
 - Pontos de partida novos: **A Porta de Amanhã**, **As Ilhas que Seguem o Vento**, **A Cidade sob o Lago** e **A Estrada das Máscaras**. Cada um oferece lugares, personagens e um problema inicial, com perguntas e decisões explicitamente abertas ao mestre.
 - Textos novos com acentos perdidos foram corrigidos em `community.js` e `app.js`, incluindo a informação de privacidade Discord. Use UTF-8 explícito ou patches; não substitua `?` globalmente em JavaScript.
@@ -66,7 +65,7 @@ Não coloque credenciais da Hostinger, tokens de acesso ou chaves Supabase em ar
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v46**, `app.js?v=43`, `styles.css?v=14`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v47**, `app.js?v=44`, `account-workspace.js?v=1`, `auth-bundle.js?v=2`, `styles.css?v=15`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
 
 ### Próximas pendências
 

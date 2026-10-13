@@ -23,11 +23,13 @@ async function settings() {
   return providers;
 }
 async function oauth(provider) {
+  if(!window.isSecureContext)throw new Error('Abra o WorldForge com HTTPS para entrar na sua conta.');
   if(!['discord','google'].includes(provider) || !(await settings())[provider]) throw new Error('Este provedor ainda precisa ser ativado pelo responsável do WorldForge.');
   checked(await client.auth.signInWithOAuth({provider,options:{redirectTo:location.origin+'/', scopes:provider==='discord'?'identify email':undefined}}));
 }
 async function callback(code) { return checked(await client.auth.exchangeCodeForSession(code)).session; }
 async function session() {
+  if(!window.isSecureContext)throw new Error('Abra o WorldForge com HTTPS para acessar sua conta.');
   const current=checked(await client.auth.getSession()).session;
   if(!current) throw new Error('Entre na sua conta para continuar.');
   checked(await client.auth.getUser());

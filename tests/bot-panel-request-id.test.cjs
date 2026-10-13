@@ -43,7 +43,17 @@ test('request ID does not fall back to non-cryptographic randomness', () => {
   assert.throws(generate, /geração criptográfica/);
 });
 
-test('status checks do not create mutation request IDs', () => {
+test('status checks send the UUID required by the bridge without persisting a mutation', async () => {
   const panel = fs.readFileSync(path.join(route, 'panel.js'), 'utf8');
-  assert.match(panel, /command==='status'\?undefined:createRequestId\(\)/);
+  const source=panel.slice(panel.indexOf('  async function request('),panel.indexOf('  async function connect('));
+  let submitted;
+  const context={currentOwner:'account-a',pending:()=>null,
+    createRequestId:()=> '91a8d250-15a6-45c0-86de-20db971a3d31',
+    savePending(){throw new Error('Status must not persist a mutation');},
+    sessionStorage:{removeItem(){throw new Error('Status must not clear a mutation');}},
+    api:async body=>{submitted=body;assert.match(body.request_id,/^[a-f0-9-]{36}$/);return {id:'status-job'};},
+    waitFor:async id=>{assert.equal(id,'status-job');return {online:true};}};
+  vm.runInNewContext(source,context);
+  const result=await context.request('status');
+  assert.equal(submitted.command,'status');assert.equal(result.online,true);
 });
