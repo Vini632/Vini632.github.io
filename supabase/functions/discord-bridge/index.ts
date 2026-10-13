@@ -38,7 +38,7 @@ async function boundedBody(req: Request) {
 }
 Deno.serve(async req => {
   const origin=req.headers.get('Origin');
-  const allowed=!origin || origin==='https://vini632.github.io' || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+  const allowed=!origin || origin==='https://worldforge.site' || origin==='https://vini632.github.io' || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
   const headers: Record<string,string> = {'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
   if(origin && allowed) headers['Access-Control-Allow-Origin']=origin;
   headers['Access-Control-Allow-Headers']='authorization,apikey,content-type';
