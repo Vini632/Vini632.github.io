@@ -39,6 +39,8 @@
 
 - Navegador com conta/servidor sintéticos: perfil e nome do mundo alterados pela interface real, confirmação de salvamento aguardada e recarga conferida. Nenhum erro de console. O mantenedor concluiu seu login/2FA e os avisos; espaço de trabalho real carregado. Painel real conferido com nova consulta: Bot conectado, permissões atualizadas, 3 membros, 40 canais, 12 painéis e nenhum ticket aberto. A biblioteca real estava vazia; restauração do backup antigo aguarda seleção manual de `C:\Users\vpers\Downloads\worldforge-biblioteca.json`, pois a extensão bloqueou o upload automatizado. Não alterar permissões para contornar o bloqueio. Mesclar, aguardar confirmação do servidor e conferir após recarga.
 
+- Preferências da conta real conferidas no Supabase: tema alterado temporariamente para claro, confirmação aguardada e preferência carregada corretamente em uma nova aba. Tema escuro original restaurado e confirmado; consulta agregada mostrou 1 estado de conta, revisão 2 e 0 mundos. A restauração de Eldoria continua pendente: ao retomar, as abas anteriores estavam fechadas e nenhum mundo havia sido importado. Novo seletor aberto; mantenedor orientado a escolher o JSON e manter a aba aberta. Não afirmar que o mundo foi recuperado antes de mesclar, salvar e recarregar.
+
 ### Fichas e catálogo
 
 - `character-sheet.js` e `character-sheet.css` são carregados antes de `app.js`, com o validador já disponível. Sistema livre; nenhum cálculo automático de regras de RPG foi acrescentado.
