@@ -4,13 +4,14 @@
 
 ## Estado para retomar o trabalho — 13/10/2026
 
-**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v43**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
+**Leia esta seção primeiro em uma nova conversa.** Este registro substitui o estado anterior da retomada; as notas abaixo são históricas. A versão desta entrega é **v44**. Preserve o workspace e consulte o HEAD remoto antes de publicar novas alterações.
 
 ### Entrega desta retomada
 
 | Área | Estado |
 | --- | --- |
-| Site | Endereço oficial: [vini632.github.io](https://vini632.github.io/), repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. Assets integrados na versão v43. |
+| Site | Endereço oficial: [vini632.github.io](https://vini632.github.io/), repositório `Vini632/Vini632.github.io`, branch `main`, raiz `/`. Assets integrados na versão v44. |
+| Doações | Chave Pix aleatória atualizada em 13/10/2026; exibição e botão de copiar usam a mesma chave. Texto pode quebrar linha em telas pequenas. |
 | Guildas | Visibilidade oculta por padrão, escolha do dono, diretório autenticado, busca e paginação integrados. Nome e descrição são os únicos dados compartilhados pelo diretório; entrada exige convite. |
 | Mural | Grant de leitura de `author_id` preservado. Testes remotos de leitura, autoria, escrita, exclusão e isolamento passaram novamente. Falta conferência do mantenedor com sua conta real na interface. |
 | Menu lateral | Barra nativa oculta mantendo rolagem; item ativo e foco de teclado revisados. Foco no tema claro recebeu cor de maior contraste. |
@@ -51,7 +52,7 @@
 - Navegador: conferência local com dados sintéticos, componentes reais de Biblioteca/Guildas/Fichas e CSS do projeto; temas escuro/claro, desktop e largura de celular. Não foi um login real Google ou teste autenticado do mantenedor.
 - Exportação JSON baixada e conteúdo conferido. Importação válida e rejeição de arquivo inválido exercitadas pelo evento real do input em fixture local. O seletor de arquivos da extensão foi bloqueado pela configuração de acesso a arquivos; nenhum ajuste de permissão do navegador foi feito.
 - A automação travou ao lidar com confirmações nativas e impressão. As decisões de confirmação foram exercitadas com um controle da fixture; a prévia nativa de impressão/PDF ainda requer conferência pelo mantenedor. Fixtures e arquivos de QA não fazem parte da publicação.
-- Versões: cache **v43**, `app.js?v=41`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
+- Versões: cache **v44**, `app.js?v=42`, `styles.css?v=14`, `community.js?v=5`, `world-catalog.js?v=2`, `world-validation.js?v=2`, `theme-black.css?v=13`, `character-sheet.js?v=1` e `character-sheet.css?v=1`. Demais assets preservados. A atualização do cache não apaga mundos, perfil ou sessão e não recarrega formulários automaticamente.
 
 ### Próximas pendências
 
