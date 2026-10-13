@@ -450,7 +450,7 @@
   function scrollToSettings(id){const section=$('#settings-'+id);if(section instanceof HTMLDetailsElement)section.open=true;section?.scrollIntoView({behavior:'smooth',block:'start'});}
   function accountPanel(){return`<section class="settings-panel" id="settings-account"><h3>Conta e acesso</h3><p>Gerencie o acesso à sua conta ${escapeHtml(cloudSession?.user?.email||'')}.</p><div class="setting-row"><span class="setting-row-copy"><strong>Resetar senha</strong><small>Receba um link no e-mail da conta e escolha uma nova senha.</small></span><button class="button button-quiet button-small" type="button" data-action="account-reset-password">Resetar senha</button></div><p class="account-feedback" id="account-reset-feedback" role="status" aria-live="polite"></p><div class="setting-row"><span class="setting-row-copy"><strong>Deletar conta</strong><small>Remova sua conta e dados ativos na nuvem. Exige sua senha e confirmação.</small></span><button class="button button-danger button-small" type="button" data-action="account-delete">Deletar conta</button></div></section>`;}
   function forgetRecoverySession(){recoverySession=null;try{sessionStorage.removeItem(RECOVERY_SESSION_KEY);}catch{}}
-  function saveRecoverySession(){try{sessionStorage.setItem(RECOVERY_SESSION_KEY,JSON.stringify({...recoverySession,saved_at:Date.now()}));}catch{}}
+  function saveRecoverySession(){if(!recoverySession)return;recoverySession.saved_at=recoverySession.saved_at||Date.now();try{sessionStorage.setItem(RECOVERY_SESSION_KEY,JSON.stringify(recoverySession));}catch{}}
   async function requestAccountReset(email){
     if(!cloudReady)throw new Error('O serviço de conta não está disponível.');
     if(accountEmailBusy)throw new Error('Aguarde o pedido em andamento.');
@@ -468,6 +468,7 @@
     try{
       if(mode==='recover'){setLandingFeedback(await requestAccountReset(form.elements.email.value.trim()));return;}
       if(mode==='reset'){
+        if(!recoverySession?.saved_at||Date.now()-recoverySession.saved_at>=3600000){forgetRecoverySession();setLandingAuthMode('recover');throw new Error('O acesso de recuperação expirou. Solicite um novo link.');}
         window.WORLDFORGE_ACCOUNT_API.validatePassword(form.elements.password.value,form.elements.password_confirmation.value);
         const result=await accountApi.updatePassword(recoverySession,form.elements.password.value,form.elements.password_confirmation.value);
         forgetRecoverySession();cloudSession=null;saveCloudSession();showLanding();setLandingAuthMode('login');
