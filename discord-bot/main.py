@@ -165,8 +165,14 @@ class WorldForgeBot(discord.Client):
                     commands=await response.json()
                 for command in commands:
                     if command['name'] in STAFF_COMMANDS:
-                        async with session.delete(endpoint+'/'+command['id'],headers=headers) as response:
-                            if response.status!=204: raise RuntimeError('Não foi possível transferir um comando da staff para o painel.')
+                        for attempt in range(3):
+                            async with session.delete(endpoint+'/'+command['id'],headers=headers) as response:
+                                if response.status in (204,404): break
+                                if response.status==429:
+                                    delay=min(30,max(1,float((await response.json()).get('retry_after',2))))
+                                else: raise RuntimeError(f'Não foi possível transferir /{command["name"]} para o painel (HTTP {response.status}).')
+                            if attempt==2: raise RuntimeError('O Discord limitou a transferência dos comandos. Reinicie o bot em alguns minutos.')
+                            await asyncio.sleep(delay)
 
     async def close(self):
         await self.dashboard.close()
