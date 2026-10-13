@@ -36,7 +36,7 @@
     return '<a class="button button-quiet button-small" href="#configuracoes" data-view="configuracoes" data-open-settings="data">Entrar ou criar conta</a>';
   }
   function disabledPanel() {
-    return '<div class="community-notice"><strong>Comunidade indisponível no momento</strong><p>Os recursos comunitários aguardam a instalação e ativação do esquema seguro no Supabase.</p></div>';
+    return '<div class="community-notice world-library-coming-soon"><span class="entity-tag">EM DESENVOLVIMENTO</span><h2>Comunidade</h2><p>Estamos preparando o Fórum da Forja, a Vitrine de Mundos e a Guilda de Criadores para você compartilhar ideias, apresentar seus mundos e se conectar com outros criadores.</p></div>';
   }
   function authNotice(copy = 'Entre na sua conta para participar.') {
     return `<div class="community-notice"><strong>Conta necessária</strong><p>${copy}</p>${accountLink()}</div>`;

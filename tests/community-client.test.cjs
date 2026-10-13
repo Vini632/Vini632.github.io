@@ -79,10 +79,11 @@ function createClient({ enabled = true, user = null, world = null, activeWorldId
   };
 }
 
-test('community feature flag disables access before any backend request', async () => {
+test('community feature flag shows an in-development card without backend requests', async () => {
   const { client, roots, requests } = createClient({ enabled: false });
   await client.render('foruns');
-  assert.match(roots.get('foruns').innerHTML, /Comunidade indisponível/);
+  assert.match(roots.get('foruns').innerHTML, /EM DESENVOLVIMENTO/);
+  assert.match(roots.get('foruns').innerHTML, /Vitrine de Mundos/);
   assert.equal(requests.length, 0);
 });
 
