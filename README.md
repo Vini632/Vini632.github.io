@@ -557,12 +557,12 @@ O login inclui **Esqueci a senha**. Em **Configurações → Conta e acesso**, h
 
 O link de recuperação retorna à raiz do site, permitida nas URLs de redirecionamento do Auth. O aplicativo valida os tokens com `/auth/v1/user`, remove-os do endereço e abre o formulário de nova senha com confirmação. A sessão de recuperação fica apenas no armazenamento desta aba por até uma hora e não libera a área de trabalho. Ao concluir, solicita o encerramento global de sessões e pede novo login. Links inválidos/expirados permitem solicitar outro. Links de confirmação de cadastro também são processados e validados.
 
-**Envio de e-mails:** o SMTP é o serviço responsável pela entrega. O mantenedor ainda não confirmou uma configuração própria. O envio padrão do Supabase é limitado aos endereços da equipe e não atende ao público geral. Para liberar a recuperação a todos:
+**Envio de e-mails:** o SMTP é o serviço responsável pela entrega. Em 13/10/2026, o SMTP próprio da Brevo foi salvo e conferido como ativo após recarregar o painel do Supabase. Site URL e Redirect URLs foram conferidos com `https://vini632.github.io/`. Um pedido autorizado de recuperação foi aceito pelo Auth (HTTP 200); a entrega na caixa de e-mail ainda precisa ser confirmada. Para manter a recuperação funcionando:
 
 1. Escolha um serviço de envio de e-mails e configure o remetente conforme suas instruções.
 2. Configure host, porta, usuário, senha e remetente em [Supabase → Authentication → SMTP](https://supabase.com/dashboard/project/urvtkpqpguxthjznmtyu/auth/smtp). Credenciais ficam nesse painel, nunca no site, GitHub ou chat.
 3. Confira Site URL e Redirect URLs com `https://vini632.github.io/`, os limites de envio e o modelo de e-mail de recuperação. O fluxo implementado usa o link padrão `ConfirmationURL`; também aceita `token_hash` e `type=recovery` em modelos personalizados.
-4. Valide a entrega, inclusive spam, com uma conta controlada pelo mantenedor. Não foi disparado um e-mail nem alterada a senha de uma conta real nesta implementação.
+4. Valide a entrega, inclusive spam, com uma conta controlada pelo mantenedor. Foi enviado um único pedido de recuperação autorizado em 13/10/2026 às 03:37 (America/Sao_Paulo); nenhuma senha foi alterada.
 
 Referência: [documentação oficial de SMTP do Supabase](https://supabase.com/docs/guides/auth/auth-smtp).
 
@@ -571,3 +571,15 @@ A Edge Function `delete-account` está instalada no Supabase e usa credenciais a
 As chaves estrangeiras remotas foram conferidas: os registros ativos do WorldForge ligados à conta são removidos por `ON DELETE CASCADE`. Isso inclui tópicos e Guildas criados pela pessoa, com suas respostas/murais. O diálogo explica esse alcance. Há uma opção explícita para remover também mundos e perfil deste navegador. Backups baixados, dados de outros dispositivos e retenções técnicas do provedor não são removidos por esse controle. Tokens de acesso já emitidos podem permanecer válidos até expirar; refresh sessions são revogadas, a sessão local é removida e as demais abas são avisadas.
 
 O endpoint remoto foi verificado para preflight permitido, método inválido, ausência de sessão, token inválido e origem não permitida. Nenhuma conta real foi excluída. O frontend continua estático e compatível com GitHub Pages; somente a operação administrativa é executada no Supabase. Cache atual: `v39`, `app.js?v=37`, `account-api.js?v=2` e `landing.css?v=2`.
+
+#### Configuração SMTP salva (entrega pendente de verificação)
+
+O mantenedor criou uma chave SMTP ativa na Brevo e salvou as credenciais no Supabase. Foram corrigidos o endereço do servidor, o login SMTP e o remetente: host `smtp-relay.brevo.com`, porta `587`, intervalo por usuário de `60` segundos, nome `World Forge RPG`, login apresentado em Fazer login na Brevo e e-mail verificado na lista de remetentes. O SMTP próprio permaneceu ativo após recarregar o painel; a chave armazenada não foi lida nem incluída no projeto. O limite remoto de envio foi conferido em `30` e-mails por hora e mantido nesse valor.
+
+A Brevo foi encontrada com o bloqueio de IPs não autorizados ativado para chaves SMTP e nenhum IP autorizado. Com autorização expressa do mantenedor, o bloqueio foi desativado apenas para SMTP e a interface confirmou o novo estado. Quem possuir a chave poderá usá-la de qualquer IP; mantenha-a exclusivamente no Supabase. Em seguida, um único pedido de recuperação autorizado retornou HTTP 200, também confirmado nos logs de Auth. Isso confirma que o pedido foi aceito, mas não comprova a entrega na caixa de e-mail.
+
+O mantenedor informou que o e-mail não chegou. A Brevo registrou utilização da chave nesta data, mas o painel transacional continuava sem logs e a verificação inicial mostrava `Aguardando log`. Há créditos disponíveis e nenhum Auth Hook de envio instalado. A documentação da Brevo informa que contas novas podem precisar de ativação do envio transacional pelo suporte; essa pendência é uma hipótese a ser conferida pelo provedor, não uma ativação confirmada. Foi preparado um pedido de verificação/ativação, sem envio ao suporte. Nenhuma senha foi alterada, nenhum segundo e-mail de teste foi solicitado e nenhuma conta foi excluída.
+
+O campo Username deve usar o valor apresentado em Fazer login na aba SMTP da Brevo, e não o nome do projeto. Não use uma chave de API no campo de senha SMTP. O site pode continuar em `vini632.github.io`; o domínio de envio é separado da hospedagem. Para remetentes de provedores gratuitos, a Brevo informa que pode substituir o domínio do remetente por `brevosend.com`; a autenticação de um domínio próprio permanece recomendada.
+
+Referências: [integração Brevo/Supabase](https://developers.brevo.com/docs/supabase-smtp-integration), [remetentes sem domínio autenticado](https://help.brevo.com/hc/en-us/articles/16045394674066-Troubleshooting-Domain-authentication), [problemas de SMTP e ativação transacional](https://help.brevo.com/hc/en-us/articles/115000188150-Troubleshooting-Issues-with-Brevo-SMTP).
