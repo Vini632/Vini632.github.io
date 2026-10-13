@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Crie, organize e explore mundos de fantasia com o WorldForge RPG.">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://urvtkpqpguxthjznmtyu.supabase.co; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://urvtkpqpguxthjznmtyu.supabase.co; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
     <title>WorldForge RPG — seu mundo, em construção</title>
     <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
     <link rel="manifest" href="./manifest.webmanifest">
-    <link rel="stylesheet" href="./styles.css?v=9">
+    <link rel="stylesheet" href="./styles.css?v=12">
     <link rel="stylesheet" href="./animations.css">
     <link rel="stylesheet" href="./theme-black.css?v=12">
   </head>
@@ -40,9 +40,11 @@
           <a class="nav-link" href="#eventos" data-view="eventos"><span class="nav-icon" data-icon="spark"></span>Eventos <span class="nav-count" data-count="eventos">0</span></a>
           <a class="nav-link" href="#monstros" data-view="monstros"><span class="nav-icon" data-icon="paw"></span>Bestiário</a>
           <div class="sidebar-label nav-secondary-label">COMUNIDADE</div>
-          <a class="nav-link" href="#foruns" data-view="foruns"><span class="nav-icon" data-icon="users"></span>Fórum da Forja <span class="nav-coming-badge">BREVE</span></a>
-          <a class="nav-link" href="#vitrine" data-view="vitrine"><span class="nav-icon" data-icon="globe"></span>Vitrine de Mundos <span class="nav-coming-badge">BREVE</span></a>
-          <a class="nav-link" href="#guilda" data-view="guilda"><span class="nav-icon" data-icon="spark"></span>Guilda de Criadores <span class="nav-coming-badge">BREVE</span></a>
+          <a class="nav-link" href="#foruns" data-view="foruns"><span class="nav-icon" data-icon="users"></span>Fórum da Forja</a>
+          <a class="nav-link" href="#vitrine" data-view="vitrine"><span class="nav-icon" data-icon="globe"></span>Vitrine de Mundos</a>
+          <a class="nav-link" href="#guilda" data-view="guilda"><span class="nav-icon" data-icon="spark"></span>Guilda de Criadores</a>
+          <div class="sidebar-label nav-secondary-label">DESCOBRIR</div>
+          <a class="nav-link" href="#biblioteca-mundos" data-view="biblioteca-mundos"><span class="nav-icon" data-icon="globe"></span>Biblioteca de Mundos <span class="nav-count">Em breve</span></a>
           <div class="sidebar-label nav-secondary-label">PREFERÊNCIAS</div>
           <a class="nav-link" href="#configuracoes" data-view="configuracoes"><span class="nav-icon" data-icon="settings"></span>Configurações</a>
         </nav>
@@ -75,29 +77,12 @@
           <section class="view hidden" id="view-missoes" data-view-panel="missoes"></section>
           <section class="view hidden" id="view-eventos" data-view-panel="eventos"></section>
           <section class="view hidden" id="view-monstros" data-view-panel="monstros"></section>
-          <section class="view hidden" id="view-foruns" data-view-panel="foruns">
-            <div class="coming-page">
-              <div class="coming-hero"><span class="coming-orbit coming-orbit-one"></span><span class="coming-orbit coming-orbit-two"></span><div class="coming-hero-copy"><span class="coming-kicker">PORTAL DA COMUNIDADE</span><span class="coming-status"><i></i>Ainda está em desenvolvimento</span><h1>Fórum da Forja</h1><p>Ideias ganham força quando são compartilhadas. Estamos preparando um espaço para conversar sobre campanhas, trocar inspiração e encontrar sua próxima mesa.</p></div><span class="coming-hero-icon" data-icon="users"></span></div>
-              <div class="coming-section-head"><div><span class="coming-kicker">O QUE ESTAMOS PREPARANDO</span><h2>Uma comunidade para suas histórias</h2></div><span class="coming-hint">Novidades em breve</span></div>
-              <div class="coming-feature-grid"><article class="coming-feature"><span class="coming-feature-icon" data-icon="book"></span><h3>Conversas por tema</h3><p>Canais para RPG, construção de mundo, sistemas e narrativas.</p><span>PLANEJADO</span></article><article class="coming-feature"><span class="coming-feature-icon" data-icon="users"></span><h3>Encontre uma mesa</h3><p>Conheça jogadores e mestres que combinam com seu estilo.</p><span>PLANEJADO</span></article><article class="coming-feature"><span class="coming-feature-icon" data-icon="spark"></span><h3>Compartilhe ideias</h3><p>Peça sugestões e mostre os detalhes que tornam seu mundo único.</p><span>PLANEJADO</span></article></div>
-            </div>
-          </section>
-          <section class="view hidden" id="view-vitrine" data-view-panel="vitrine">
-            <div class="coming-page">
-              <div class="coming-hero"><span class="coming-orbit coming-orbit-one"></span><span class="coming-orbit coming-orbit-two"></span><div class="coming-hero-copy"><span class="coming-kicker">MUNDOS DA COMUNIDADE</span><span class="coming-status"><i></i>Ainda está em desenvolvimento</span><h1>Vitrine de Mundos</h1><p>Um salão para explorar universos, descobrir novas ideias e compartilhar suas criações com outros exploradores.</p></div><span class="coming-hero-icon" data-icon="globe"></span></div>
-              <div class="coming-section-head"><div><span class="coming-kicker">UM UNIVERSO DE POSSIBILIDADES</span><h2>Descubra o que outros criadores estão fazendo</h2></div><span class="coming-hint">Novidades em breve</span></div>
-              <div class="coming-feature-grid"><article class="coming-feature"><span class="coming-feature-icon" data-icon="globe"></span><h3>Explore universos</h3><p>Encontre cenários, mapas e conceitos para inspirar sua próxima aventura.</p><span>PLANEJADO</span></article><article class="coming-feature"><span class="coming-feature-icon" data-icon="spark"></span><h3>Destaques da comunidade</h3><p>Uma seleção de mundos originais feitos por jogadores e mestres.</p><span>PLANEJADO</span></article><article class="coming-feature"><span class="coming-feature-icon" data-icon="download"></span><h3>Compartilhe com cuidado</h3><p>Controles para decidir o que mostrar e como distribuir suas criações.</p><span>PLANEJADO</span></article></div>
-            </div>
-          </section>
-          <section class="view hidden" id="view-guilda" data-view-panel="guilda">
-            <div class="coming-page">
-              <div class="coming-hero"><span class="coming-orbit coming-orbit-one"></span><span class="coming-orbit coming-orbit-two"></span><div class="coming-hero-copy"><span class="coming-kicker">JORNADA EM EQUIPE</span><span class="coming-status"><i></i>Ainda está em desenvolvimento</span><h1>Guilda de Criadores</h1><p>Planeje campanhas em conjunto, reúna colaboradores e construa histórias maiores, mantendo cada projeto organizado.</p></div><span class="coming-hero-icon" data-icon="spark"></span></div>
-              <div class="coming-section-head"><div><span class="coming-kicker">CRIAR TAMBÉM É COLABORAR</span><h2>Ferramentas para tirar projetos do papel</h2></div><span class="coming-hint">Novidades em breve</span></div>
-              <div class="coming-feature-grid"><article class="coming-feature"><span class="coming-feature-icon" data-icon="users"></span><h3>Equipes e convites</h3><p>Reúna mestres, escritores e artistas em torno de uma campanha.</p><span>PLANEJADO</span></article><article class="coming-feature"><span class="coming-feature-icon" data-icon="scroll"></span><h3>Projetos compartilhados</h3><p>Organize notas, referências e objetivos do grupo em um só lugar.</p><span>PLANEJADO</span></article><article class="coming-feature"><span class="coming-feature-icon" data-icon="clock"></span><h3>Criação no seu ritmo</h3><p>Acompanhe ideias e próximos passos sem perder o fio da história.</p><span>PLANEJADO</span></article></div>
-            </div>
-          </section>
+          <section class="view hidden" id="view-foruns" data-view-panel="foruns"><div id="community-foruns"></div></section>
+          <section class="view hidden" id="view-vitrine" data-view-panel="vitrine"><div id="community-vitrine"></div></section>
+          <section class="view hidden" id="view-guilda" data-view-panel="guilda"><div id="community-guilda"></div></section>
+          <section class="view hidden" id="view-biblioteca-mundos" data-view-panel="biblioteca-mundos"><div id="world-library"><div class="community-loading" role="status">Carregando catálogo de mundos…</div></div></section>
           <section class="view hidden" id="view-configuracoes" data-view-panel="configuracoes"></section>
-          <footer class="app-footer"><span>WorldForge RPG <span id="app-version">· 1.0</span></span><span>Seu próximo mundo começa com uma ideia.</span><span class="footer-legal-links"><button type="button" data-view="configuracoes" data-open-settings="privacy">Privacidade</button><button type="button" data-view="configuracoes" data-open-settings="terms">Termos de uso</button></span></footer>
+          <footer class="app-footer"><span>WorldForge RPG <button id="app-version" class="app-version-trigger" type="button" data-action="show-updates" aria-label="Abrir histórico de atualizações">· 1.1</button></span><span>Seu próximo mundo começa com uma ideia.</span><span class="footer-legal-links"><button type="button" data-view="configuracoes" data-open-settings="privacy">Privacidade</button><button type="button" data-view="configuracoes" data-open-settings="terms">Termos de uso</button></span></footer>
         </div>
       </main>
     </div>
@@ -108,8 +93,8 @@
         <h2 id="terms-consent-title">Voc&ecirc; aceita os Termos de Uso?</h2>
         <p class="modal-intro">Antes de entrar, leia os termos e o aviso de privacidade. O WorldForge s&oacute; ser&aacute; liberado depois da sua confirma&ccedil;&atilde;o.</p>
         <div class="consent-documents">
-          <details><summary>Termos de Uso (resumo)</summary><div class="consent-document-copy"><h3>Serviço e aceite</h3><p>WorldForge é um app estático para criar mundos. O aceite fica neste navegador. Conta e cópia na nuvem são opcionais e dependem de configuração.</p><h3>Conteúdo e uso</h3><p>Você mantém os direitos sobre suas criações e responde pelo conteúdo, autorizações e respeito à lei e terceiros. Não use para fins ilegais, violar privacidade, inserir material malicioso ou atacar o site. Não armazene senhas ou dados sensíveis.</p><h3>Dados e recursos</h3><p>Mundos ficam no navegador até você solicitar envio à sua conta na nuvem. A cópia é manual e usa Supabase em us-east-1 (N. Virginia, EUA); exporte também backups JSON. A Oficina de ideias é local, não IA. Não há IA conectada, créditos, assinatura ou checkout.</p><h3>Doações e disponibilidade</h3><p>Pix é opcional, externo, não libera recursos e não é processado pelo app. O site depende do GitHub Pages e pode ficar indisponível. Veja termos completos em Configurações. Direitos legais obrigatórios permanecem garantidos.</p></div></details>
-          <details><summary>Aviso de Privacidade (resumo)</summary><div class="consent-document-copy"><h3>Dados e cookies</h3><p>Mundos, anotações, preferências e aceite ficam localmente. Se criar conta, o Supabase processará seu e-mail e os mundos que você enviar. O projeto fica em us-east-1 (N. Virginia, EUA); processamentos auxiliares, como logs operacionais e suporte, podem ocorrer fora dela. O armazenamento de arquivos do Supabase não é usado. Consulte Privacidade nas Configurações. Cookie essencial lembra sua escolha por até 180 dias. Não há analytics, publicidade, IA conectada ou pagamentos.</p><h3>Hospedagem</h3><p>GitHub Pages registra e armazena IPs por segurança, conforme sua <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages" target="_blank" rel="noopener noreferrer">documentação</a> e <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">política</a>; o mantenedor não controla esses registros.</p><h3>Seus controles</h3><p>Exporte/apague dados em Dados &amp; backup, limpe o navegador ou revogue o aceite nas Configurações. Direitos LGPD aplicam-se nos limites legais. Detalhes e contato em Configurações &gt; Privacidade. Issues podem ser públicas.</p><p><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">LGPD</a> · <a href="https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia_orientativo_cookies_e_protecao_de_dados_pessoais" target="_blank" rel="noopener noreferrer">Guia da ANPD</a>.</p></div></details>
+          <details><summary>Termos de Uso (resumo)</summary><div class="consent-document-copy"><h3>Serviço e aceite</h3><p>WorldForge é um app estático para criar mundos. O aceite fica neste navegador. Conta e cópia na nuvem são opcionais e dependem de configuração.</p><h3>Conteúdo e uso</h3><p>Você mantém os direitos sobre suas criações e responde pelo conteúdo, autorizações e respeito à lei e terceiros. Não use para fins ilegais, violar privacidade, inserir material malicioso ou atacar o site. Não armazene senhas ou dados sensíveis.</p><h3>Dados e recursos</h3><p>Mundos ficam no navegador até você solicitar envio à sua conta na nuvem. A cópia é manual e usa Supabase em us-east-1 (N. Virginia, EUA); exporte também backups JSON. Quando ativados, tópicos e resumos publicados na comunidade ficam públicos; guildas e seus murais são privados por convite. Você responde pelo conteúdo publicado. A Oficina de ideias é local, não IA. Não há IA conectada, créditos, assinatura ou checkout.</p><h3>Doações e disponibilidade</h3><p>Pix é opcional, externo, não libera recursos e não é processado pelo app. O site depende do GitHub Pages e pode ficar indisponível. Veja termos completos em Configurações. Direitos legais obrigatórios permanecem garantidos.</p></div></details>
+          <details><summary>Aviso de Privacidade (resumo)</summary><div class="consent-document-copy"><h3>Dados e cookies</h3><p>Mundos, anotações, preferências e aceite ficam localmente. Se criar conta, o Supabase processará seu e-mail e os mundos que você enviar. Quando ativados, conteúdos de fórum e resumos de mundos publicados ficam públicos; guildas são privadas para participantes convidados. Denúncias são armazenadas para triagem manual. O resumo da Vitrine não inclui o arquivo completo, personagens, missões, eventos ou anotações. O projeto fica em us-east-1 (N. Virginia, EUA); processamentos auxiliares, como logs operacionais e suporte, podem ocorrer fora dela. O armazenamento de arquivos do Supabase não é usado. Consulte Privacidade nas Configurações. Cookie essencial lembra sua escolha por até 180 dias. Não há analytics, publicidade, IA conectada ou pagamentos.</p><h3>Hospedagem</h3><p>GitHub Pages registra e armazena IPs por segurança, conforme sua <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages" target="_blank" rel="noopener noreferrer">documentação</a> e <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">política</a>; o mantenedor não controla esses registros.</p><h3>Seus controles</h3><p>Exporte/apague dados em Dados &amp; backup, limpe o navegador ou revogue o aceite nas Configurações. Direitos LGPD aplicam-se nos limites legais. Detalhes e contato em Configurações &gt; Privacidade. Issues podem ser públicas.</p><p><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" rel="noopener noreferrer">LGPD</a> · <a href="https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia_orientativo_cookies_e_protecao_de_dados_pessoais" target="_blank" rel="noopener noreferrer">Guia da ANPD</a>.</p></div></details>
           <a class="consent-policy-link" href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">Políticas do GitHub <span aria-hidden="true">&#8599;</span></a>
         </div>
         <label class="consent-check"><input type="checkbox" id="terms-consent-checkbox"><span>Li e aceito os Termos de Uso e confirmo que li o Aviso de Privacidade.</span></label>
@@ -217,7 +202,11 @@
     <input id="library-import-file" type="file" accept=".json,application/json" hidden>
     <div class="toast-region" id="toast-region" aria-live="polite"></div>
     <script src="./world-validation.js?v=1" defer></script>
-    <script src="./cloud-config.js?v=3" defer></script>
-    <script src="./app.js?v=24" defer></script>
+    <script src="./community-validation.js?v=1" defer></script>
+    <script src="./cloud-config.js?v=4" defer></script>
+    <script src="./app.js?v=30" defer></script>
+    <script src="./world-catalog.js?v=1" defer></script>
+    <script src="./world-library.js?v=3" defer></script>
+    <script src="./community.js?v=2" defer></script>
   </body>
 </html>

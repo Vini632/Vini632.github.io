@@ -47,6 +47,8 @@ O WorldForge RPG reúne os seguintes sistemas:
 - **Relações entre personagens:** busque e filtre vínculos, crie e edite relações e ajuste sua intensidade, sem permitir pares duplicados.
 - **Backup completo:** exporte ou restaure a biblioteca inteira em um arquivo JSON.
 - **Seed de geração:** permite reproduzir mundos e simulações com os mesmos parâmetros.
+- **Biblioteca de Mundos:** seção planejada, atualmente marcada como **Em Breve**.
+- **Atualizações:** abra o histórico pela versão exibida no rodapé; as notas fazem parte do app, sem baixar scripts de um endereço arbitrário.
 
 O projeto funciona como uma base para campanhas de RPG, ferramentas de criação de cenários ou futuros sistemas de simulação.
 
@@ -153,9 +155,13 @@ python -m http.server 8000
 
 Depois acesse `http://localhost:8000`. Selecione **Novo mundo** para gerar um universo e navegue pelas seções da barra lateral para abrir reinos, cidades, personagens, missões, eventos e criaturas. Avance os turnos pelos controles no cabeçalho da seção **Eventos**.
 
-Em **Configurações**, escolha o tema escuro ou claro, os widgets exibidos, ajuste sons/notificações, renomeie o mundo e gerencie a biblioteca local. A preferência visual e os vários mundos são salvos por navegador e dispositivo. O seletor de mundo na barra lateral abre a biblioteca; nela, você pode alternar, duplicar, exportar ou excluir mundos. Na seção **Relações**, crie vínculos entre dois personagens, classifique o tipo e defina a intensidade de 1 a 5. Um mesmo par só pode ter uma relação, e relações de personagens excluídos são removidas automaticamente. Em cada seção do mundo, use **Adicionar** para criar registros; clique em um registro para abrir detalhes, editar ou excluir. Na seção **Eventos**, a linha do tempo reúne eventos e anotações organizados por turno. Os campos de busca e filtros ajudam a localizar registros. Em **Configurações → Dados & backup**, use **Backup completo** para baixar a biblioteca inteira; ao restaurar, confirme a substituição ou escolha mesclar os mundos. A importação de um mundo individual continua adicionando uma cópia sem substituir os mundos existentes. Se uma versão anterior já tiver salvo um mundo no navegador, ele será migrado automaticamente para a biblioteca na primeira abertura.
+Em **Configurações**, escolha o tema escuro ou claro, os widgets exibidos, ajuste sons/notificações, renomeie o mundo e gerencie a biblioteca local. A preferência visual e os vários mundos são salvos por navegador e dispositivo. O seletor de mundo na barra lateral abre a biblioteca; nela, você pode alternar, duplicar, exportar ou excluir mundos. Na seção **Relações**, crie vínculos entre dois personagens, classifique o tipo e defina a intensidade de 1 a 5. Um mesmo par só pode ter uma relação, e relações de personagens excluídos são removidas automaticamente. Em cada seção do mundo, use **Adicionar** para criar registros; clique em um registro para abrir detalhes, editar ou excluir. Na seção **Eventos**, a linha do tempo reúne eventos e anotações organizados por turno. Os campos de busca e filtros ajudam a localizar registros. Em **Configurações → Dados & backup**, use **Backup completo** para baixar a biblioteca inteira; ao restaurar, confirme a substituição ou escolha mesclar os mundos. A importação de um mundo individual continua adicionando uma cópia sem substituir os mundos existentes. Se uma versão anterior já tiver salvo um mundo no navegador, ele será migrado automaticamente para a biblioteca na primeira abertura. Para abrir o histórico discreto de atualizações, clique no número da versão no rodapé.
 
 Ao criar um mundo, a tela de forja mostra o progresso por um período aleatório entre 12 e 23 segundos. O app toca um breve sinal sonoro e mostra avisos temporários em vermelho; o navegador solicita permissão para enviar também notificações do sistema. Se a permissão for recusada, os avisos continuam visíveis no painel.
+
+### Biblioteca de Mundos
+
+**Biblioteca de Mundos** aparece na navegação como **Em Breve**. O catálogo demonstrativo e a criação de cópias estão temporariamente desativados; entrar na seção não envia nem salva dados.
 
 Os argumentos opcionais devem corresponder aos aceitos pela versão instalada. Use `--help` para consultar as opções efetivamente disponíveis.
 
@@ -296,10 +302,10 @@ Os testes ajudam a encontrar defeitos antes que novas funcionalidades sejam adic
 Os testes de segurança JavaScript usam apenas módulos nativos do Node.js e não adicionam dependências ao site:
 
 ```bash
-node --test tests/world-validation.test.cjs tests/service-worker.test.cjs
+node --test tests/*.test.cjs
 ```
 
-Eles cobrem compatibilidade com mundos sem anotações, referências entre entidades, tipos/limites de dados importados e isolamento de cache/rede do service worker. O gerador Python também tem verificações rápidas:
+Eles cobrem compatibilidade com mundos antigos, validação dos três cenários oficiais, filtros/estados da Biblioteca, preservação da intenção de cópia durante login, validação comunitária, permissões RLS esperadas e cache/rede do service worker. O gerador Python também tem verificações rápidas:
 
 Se a versão instalada implementar a opção `--testar`, execute:
 
@@ -462,6 +468,12 @@ Cookie essencial lembra a escolha por até 180 dias; se bloqueado, a preferênci
 Termos, privacidade, cookies e segurança estão nas Configurações. Contato: [GitHub Issues](https://github.com/Vini632/Vini632.github.io/issues); issues podem ser públicas, não envie dados confidenciais. Consulte [LGPD](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm) e [guia da ANPD](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia_orientativo_cookies_e_protecao_de_dados_pessoais).
 
 Pix é voluntário e externo, sem processamento ou registro pelo app. Se novos recursos mudarem o tratamento de dados, revise estes avisos antes de ativá-los.
+
+### Recursos comunitários
+
+O Fórum da Forja permite ler tópicos publicamente e, com conta autenticada, publicar, responder, editar, excluir e denunciar conteúdo. A Vitrine mostra apenas resumos compartilhados voluntariamente: nome do mundo, nomes de até 12 reinos e 12 cidades e o resumo/nome público escolhidos. O arquivo completo, personagens, missões, eventos e anotações não são enviados à Vitrine. Guildas são privadas por convite; apenas participantes veem o grupo, a lista de membros e o mural. Convites expiram em sete dias e podem ser usados até 20 vezes. Denúncias são armazenadas para triagem manual no Supabase; ainda não há painel de moderação nem proteção de taxa no aplicativo.
+
+Os recursos comunitários ficam desativados por padrão em `cloud-config.js`. Para ativá-los, aplique e revise o arquivo completo `supabase/schema.sql` no projeto correto. Confirme no esquema REST a existência das oito tabelas comunitárias e das RPCs `worldforge_create_guild`, `worldforge_create_guild_invite` e `worldforge_join_guild`; depois teste em staging leitura pública, permissões por autor, isolamento das guildas e remoção/retirada de conteúdo com contas de teste. Só então defina `communityEnabled: true`. A ativação envolve conteúdo público e dados comunitários no Supabase; não habilite em produção antes de revisar os textos legais e as políticas RLS. O arquivo de esquema concede leitura autenticada das guildas, mas a política restringe as linhas a participantes. Não há importação de snapshots comunitários para mundos locais nem compartilhamento de arquivos completos nesta versão.
 
 ### Limites e verificações de segurança
 
