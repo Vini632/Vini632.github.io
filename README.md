@@ -520,7 +520,7 @@ O projeto está configurado na região us-east-1 (N. Virginia, EUA). A cópia na
 - A migration `20261013050124_align_community_permissions_and_limits.sql` foi aplicada ao projeto remoto `urvtkpqpguxthjznmtyu`: concede a coluna necessária, instala os contadores e gatilhos de limites e mantém a entrada com convite usando o helper privado. Nenhum mundo ou conteúdo existente foi removido.
 - Limites por conta: 5 tópicos/hora, 30 respostas/hora, 5 denúncias/hora, 3 publicações na Vitrine/hora, 3 Guildas/dia, 10 convites/hora, 30 mensagens/hora e 10 tentativas de entrada/dia. Convites inválidos retornam `false` e consomem tentativas; exceder o limite retorna SQLSTATE `PT429`/HTTP 429. Esses limites não eliminam abuso com várias contas.
 - Corrigido o cancelamento da criação de mundos. Adicionar um reino agora também cria uma capital inicial editável, mantendo o mundo válido para exportação e reabertura; falha de armazenamento desfaz ambas as alterações.
-- Service Worker: cache `v38`, `app.js?v=37` e `landing.css?v=2`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
+- Service Worker: cache `v39`, `app.js?v=37` e `landing.css?v=2`. Mantenha os caminhos de assets alinhados entre `index.html`, `sw.js` e os testes.
 
 #### Banco remoto e histórico de migrations
 
@@ -551,6 +551,8 @@ A navegação agora consulta primeiro a rede e usa HTML do cache apenas em falha
 
 ### Recuperação de senha e exclusão de conta
 
+Os logs de Auth confirmaram `over_email_send_rate_limit` em pedidos de cadastro: esse limite é compartilhado pelos envios de e-mail do projeto, incluindo confirmação de cadastro e recuperação. Ele pode ocorrer na primeira tentativa de uma pessoa. A interface agora diferencia esse caso de outros HTTP 429 e informa que o limite é do serviço de e-mail. O bloqueio de envio só será resolvido de forma adequada com a configuração de SMTP próprio e seus limites; alterar a mensagem não amplia a quota.
+
 O login inclui **Esqueci a senha**. Em **Configurações → Conta e acesso**, há **Resetar senha** (envia o mesmo link ao e-mail da conta) e **Deletar conta**. Erros de cadastro/login são apresentados em português; o erro de chave duplicada do banco não é exibido diretamente.
 
 O link de recuperação retorna à raiz do site, permitida nas URLs de redirecionamento do Auth. O aplicativo valida os tokens com `/auth/v1/user`, remove-os do endereço e abre o formulário de nova senha com confirmação. A sessão de recuperação fica apenas no armazenamento desta aba por até uma hora e não libera a área de trabalho. Ao concluir, solicita o encerramento global de sessões e pede novo login. Links inválidos/expirados permitem solicitar outro. Links de confirmação de cadastro também são processados e validados.
@@ -568,4 +570,4 @@ A Edge Function `delete-account` está instalada no Supabase e usa credenciais a
 
 As chaves estrangeiras remotas foram conferidas: os registros ativos do WorldForge ligados à conta são removidos por `ON DELETE CASCADE`. Isso inclui tópicos e Guildas criados pela pessoa, com suas respostas/murais. O diálogo explica esse alcance. Há uma opção explícita para remover também mundos e perfil deste navegador. Backups baixados, dados de outros dispositivos e retenções técnicas do provedor não são removidos por esse controle. Tokens de acesso já emitidos podem permanecer válidos até expirar; refresh sessions são revogadas, a sessão local é removida e as demais abas são avisadas.
 
-O endpoint remoto foi verificado para preflight permitido, método inválido, ausência de sessão, token inválido e origem não permitida. Nenhuma conta real foi excluída. O frontend continua estático e compatível com GitHub Pages; somente a operação administrativa é executada no Supabase. Cache atual: `v38`, `app.js?v=37`, `account-api.js?v=1` e `landing.css?v=2`.
+O endpoint remoto foi verificado para preflight permitido, método inválido, ausência de sessão, token inválido e origem não permitida. Nenhuma conta real foi excluída. O frontend continua estático e compatível com GitHub Pages; somente a operação administrativa é executada no Supabase. Cache atual: `v39`, `app.js?v=37`, `account-api.js?v=2` e `landing.css?v=2`.

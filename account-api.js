@@ -3,7 +3,8 @@
   function authMessage(error, context = 'login') {
     const code = String(error?.code || '').toLowerCase();
     const text = String(error?.message || '').toLowerCase();
-    if (error?.status === 429 || /rate_limit|over_email_send_rate_limit/.test(code)) return 'Muitas tentativas. Aguarde antes de tentar novamente.';
+    if (code === 'over_email_send_rate_limit' || /email.*rate.*limit/.test(text)) return 'O serviço de e-mail atingiu o limite de envios do site. Aguarde e tente mais tarde.' + (context === 'signup' ? ' Se você já tem uma conta, use Entrar.' : '');
+    if (error?.status === 429 || /rate_limit/.test(code)) return 'O serviço de acesso está temporariamente limitado. Aguarde e tente novamente.';
     if (/email_address_not_authorized|email_address_invalid/.test(code) || /email address not authorized/.test(text)) return 'Não foi possível enviar o e-mail para este endereço. Tente novamente mais tarde.';
     if (context === 'signup' && (/user_already_exists|email_exists|23505/.test(code) || /already registered|duplicate key|users_email_partial_key/.test(text))) return 'Esse e-mail já possui uma conta. Use Entrar ou Esqueci a senha.';
     if (/email_not_confirmed/.test(code) || /email not confirmed/.test(text)) return 'Confirme seu e-mail antes de entrar. Confira também a pasta de spam.';
