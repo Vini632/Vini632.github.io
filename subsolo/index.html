@@ -27,7 +27,12 @@
     .download { display:inline-flex; align-items:center; justify-content:center; min-height:54px; padding:15px 26px; margin-top:18px; border-radius:6px; background:#dcc393; color:#101317; text-decoration:none; font-weight:650; }
     .download:hover { background:#f0d6a3; }
     .meta { color:#a6adb4; font-size:13px; line-height:1.7; }
-    .preview { display:block; width:100%; border:1px solid #30363d; border-radius:10px; margin:8px 0 38px; height:auto; }
+    .showcase { margin:8px 0 38px; }
+    .showcase h2 { font:clamp(24px,4vw,32px)/1.2 Georgia,serif; margin-bottom:10px; }
+    .showcase > p { color:#bec4c9; line-height:1.6; margin:0 0 20px; }
+    .showcase video { display:block; width:100%; aspect-ratio:16/9; background:#111a22; border:1px solid #30363d; border-radius:10px; }
+    .showcase video:focus-visible { outline:2px solid #e6cd9c; outline-offset:4px; }
+    .showcase .video-note { margin:12px 0 0; color:#a6adb4; font-size:13px; }
     .features { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
     article { background:#1a1f25; padding:24px; border:1px solid #30363d; border-radius:8px; }
     h2 { font-size:20px; margin:0 0 12px; font-weight:550; }
@@ -52,7 +57,16 @@
       <a class="download" href="https://github.com/vini632/subsolo-releases/releases/download/v0.13.1/Subsolo-Launcher-portable.zip">Baixar launcher para Windows</a>
       <p class="meta">Versão 0.13.1 · Windows 64 bits · ZIP portátil, 74 MB<br>Extraia a pasta inteira e abra <strong>SubsoloLauncher.exe</strong>.</p>
     </section>
-    <img class="preview" src="./launcher.png" width="1280" height="800" alt="Tela do launcher do Subsolo, com novidades, biblioteca e botão Jogar" loading="lazy">
+    <section class="showcase" aria-labelledby="video-title">
+      <h2 id="video-title">Conheça o Subsolo</h2>
+      <p>Construa sua dungeon, enfrente hordas e faça sua legião evoluir.</p>
+      <video controls playsinline preload="none" poster="./trailer-poster.jpg" width="1280" height="720" aria-label="Apresentação do Subsolo: construção, combate com dragões, talentos e runas">
+        <source src="./subsolo-trailer.mp4" type="video/mp4">
+        <track kind="captions" src="./trailer-pt.vtt" srclang="pt-BR" label="Português">
+        Seu navegador não reproduz este vídeo. <a href="./subsolo-trailer.mp4">Assista ou baixe a apresentação.</a>
+      </video>
+      <p class="video-note">36 segundos · Cenas de demonstração capturadas no jogo · Controles de som e tela cheia no player.</p>
+    </section>
     <section class="features" aria-label="Explore o jogo">
       <article><h2>Sua dungeon, suas regras</h2><p>Escave caminhos, construa defesas e prepare até quatro andares conectados por portais.</p></article>
       <article><h2>Uma legião à sua espera</h2><p>Tropas de suporte, especialistas antiaéreos, aliados invocados e três dragões com ataques próprios.</p></article>
