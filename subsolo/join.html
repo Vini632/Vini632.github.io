@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>Convite · Subsolo</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#111a22;color:#e4e9e8}*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;padding:22px}main{width:min(100%,480px);padding:30px;border:1px solid #3b505c;background:#192630;border-radius:14px}small{color:#e4c387;letter-spacing:.18em}h1{font-family:Georgia,serif;font-weight:400;font-size:32px;margin:18px 0 10px}p{color:#b7c4ca;line-height:1.55}#room{display:block;font-size:clamp(25px,7vw,38px);letter-spacing:.16em;text-align:center;color:#edcd92;padding:24px 8px;background:#111c25;border-radius:8px;margin:22px 0}button,a{display:block;text-align:center;width:100%;border:1px solid #526974;border-radius:7px;padding:14px;font:inherit;text-decoration:none;cursor:pointer}button{background:#e9c78c;color:#17212a;border-color:#e9c78c;font-weight:600}button:disabled{opacity:.45;cursor:default}a{color:#e4e9e8;margin-top:12px;background:#253744}button:focus-visible,a:focus-visible{outline:3px solid #9edbcb;outline-offset:4px}#status{min-height:48px;font-size:14px;color:#a5d9c5}#server{font-size:12px;overflow-wrap:anywhere}textarea{width:100%;height:90px;background:#111c25;color:#e9edef;border:1px solid #526974;border-radius:6px;padding:10px}footer{border-top:1px solid #344955;margin-top:24px;padding-top:16px;font-size:13px;color:#99aab4}
+</style>
+<main>
+<small>SUBSOLO · COOPERATIVO</small><h1>Uma dungeon. Dois guardiões.</h1>
+<p id="intro">Você recebeu um convite para defender uma dungeon.</p>
+<code id="room">—</code><p id="version"></p>
+<button id="copy" disabled>Copiar convite</button>
+<p id="status" role="status" aria-live="polite"></p><textarea id="fallback" readonly hidden aria-label="Convite para copiar"></textarea>
+<p>Abra <strong>Cooperativo</strong> no jogo, toque em <strong>Colar convite</strong> e depois em <strong>Entrar na sala online</strong>.</p>
+<a href="/subsolo/">Baixar ou atualizar o jogo</a><p id="server"></p>
+<footer>O anfitrião precisa manter a sala aberta. PC e Android devem usar a mesma versão do jogo.</footer>
+</main>
+<script>
+const params=new URLSearchParams(location.search),code=(params.get('room')||'').toUpperCase(),relay=params.get('relay')||'',version=params.get('v')||'';
+const endpointValid=/^wss:\/\/[a-zA-Z0-9.-]+(:[0-9]{1,5})?(\/relay)?$/.test(relay)||/^ws:\/\/(localhost|127\.0\.0\.1|10\.[0-9.]+|192\.168\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+)(:[0-9]{1,5})?(\/relay)?$/.test(relay);
+const valid=location.search.length<=1024&&params.getAll('room').length===1&&params.getAll('relay').length===1&&/^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/.test(code)&&endpointValid;
+const button=document.querySelector('#copy'),status=document.querySelector('#status');
+if(valid){
+ document.querySelector('#room').textContent=code;button.disabled=false;status.textContent='Convite pronto para copiar.';
+ if(/^\d+\.\d+\.\d+$/.test(version))document.querySelector('#version').textContent='Versão da sala: '+version;
+ if(relay!=='wss://subsolo-coop.onrender.com/relay')document.querySelector('#server').textContent='Servidor personalizado: '+relay;
+ button.addEventListener('click',async()=>{
+  const text='Subsolo | '+relay+' | '+code;
+  try{await navigator.clipboard.writeText(text);status.textContent='Convite copiado. Agora abra Cooperativo no jogo.';}
+  catch(error){const fallback=document.querySelector('#fallback');fallback.hidden=false;fallback.value=text;fallback.select();status.textContent=document.execCommand('copy')?'Convite copiado. Agora abra Cooperativo no jogo.':'Selecione e copie o convite acima.';}
+ });
+}else{document.querySelector('#intro').textContent='Este convite está incompleto ou é inválido.';status.textContent='Peça ao anfitrião para copiar um novo link pelo menu Sala.';}
+</script>
+</html>
