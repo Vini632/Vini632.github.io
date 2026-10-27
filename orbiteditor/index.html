@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#09090a" />
+  <title>Orbit Editor — Edição sem atrito</title>
+  <meta name="description" content="Orbit Editor: um editor de vídeo intuitivo, rápido e feito para o navegador no PC." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="Orbit Editor">
+        <span class="brand-mark"><i></i></span>
+        <span>ORBIT</span><small>EDITOR</small>
+      </div>
+      <div class="project-title">
+        <button class="icon-btn" id="homeBtn" title="Início">←</button>
+        <div><strong id="projectName">Meu primeiro filme</strong><span>Salvo agora</span></div>
+      </div>
+      <div class="top-actions">
+        <button class="ghost-btn" id="undoBtn" title="Desfazer">↶</button>
+        <button class="ghost-btn" id="redoBtn" title="Refazer">↷</button>
+        <button class="share-btn" id="shareBtn">Compartilhar</button>
+        <button class="export-btn" id="exportBtn"><span>Exportar</span><b>↗</b></button>
+        <button class="avatar" aria-label="Perfil">VF</button>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <nav class="tool-nav">
+        <button class="tool active" data-panel="media"><span>⊞</span><em>Mídia</em></button>
+        <button class="tool" data-panel="text"><span>T</span><em>Texto</em></button>
+        <button class="tool" data-panel="audio"><span>♫</span><em>Áudio</em></button>
+        <button class="tool" data-panel="captions"><span>CC</span><em>Legendas</em></button>
+        <button class="tool" data-panel="effects"><span>✦</span><em>Efeitos</em></button>
+        <button class="tool" data-panel="transitions"><span>◐</span><em>Transições</em></button>
+      </nav>
+
+      <section class="asset-panel">
+        <div class="panel-head"><h2 id="panelTitle">Sua mídia</h2><button class="close-panel" title="Fechar">×</button></div>
+        <label class="upload-zone" for="mediaInput">
+          <span class="upload-icon">＋</span>
+          <strong>Adicionar mídia</strong>
+          <small>Arraste ou escolha vídeos, imagens e áudio</small>
+          <input id="mediaInput" type="file" accept="video/*,image/*,audio/*" multiple hidden />
+        </label>
+        <div class="panel-row"><span>Arquivos do projeto</span><button id="sortBtn">Recentes⌄</button></div>
+        <div id="mediaGrid" class="media-grid">
+          <button class="media-card sample" data-sample="aurora">
+            <span class="thumb aurora"><i>00:08</i></span><b>Aurora.mp4</b><small>12,4 MB</small>
+          </button>
+          <button class="media-card sample" data-sample="city">
+            <span class="thumb city"><i>00:12</i></span><b>Cidade.mp4</b><small>18,1 MB</small>
+          </button>
+          <button class="media-card sample" data-sample="portrait">
+            <span class="thumb portrait"><i>IMG</i></span><b>Retrato.jpg</b><small>2,7 MB</small>
+          </button>
+        </div>
+        <div class="quick-tip"><span>⌘</span><p><b>Dica rápida</b>Arraste qualquer mídia para a timeline.</p><button>×</button></div>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <div class="preview-area">
+        <div class="canvas-toolbar">
+          <button id="fitBtn">Ajustar <span>⌄</span></button>
+          <div><button title="Anterior">‹</button><button title="Próximo">›</button></div>
+        </div>
+        <div class="video-stage" id="videoStage">
+          <div class="empty-preview" id="emptyPreview">
+            <span class="orbit-glyph"><i></i></span>
+            <h1>Seu universo começa aqui.</h1>
+            <p>Adicione um vídeo para começar a criar.</p>
+            <label for="mediaInput" class="stage-cta">Escolher mídia</label>
+          </div>
+          <video id="previewVideo" playsinline></video>
+          <img id="previewImage" alt="Prévia da mídia selecionada" />
+          <div class="sample-visual" id="sampleVisual"><span></span><div></div></div>
+        </div>
+        <div class="player-bar">
+          <div class="player-left"><button id="muteBtn">⌕</button><button id="prevBtn">|‹</button><button class="play-btn" id="playBtn">▶</button><button id="nextBtn">›|</button></div>
+          <div class="timecode"><strong id="currentTime">00:00:00</strong><span>/</span><span id="duration">00:00:00</span></div>
+          <div class="player-right"><button id="loopBtn">↻</button><button id="fullscreenBtn">⛶</button></div>
+        </div>
+      </div>
+
+      <section class="timeline-wrap">
+        <div class="timeline-toolbar">
+          <div><button id="splitBtn" title="Dividir">✂</button><button id="deleteBtn" title="Excluir">⌫</button><span></span><button id="magnetBtn" class="active" title="Encaixe">⊂</button><button title="Vincular">⌁</button></div>
+          <div class="zoom"><button id="zoomOut">−</button><input id="zoomRange" type="range" min="60" max="160" value="100" /><button id="zoomIn">＋</button><button id="fitTimeline">⌗</button></div>
+        </div>
+        <div class="timeline-scroll" id="timelineScroll">
+          <div class="ruler" id="ruler"><span>00:00</span><span>00:05</span><span>00:10</span><span>00:15</span><span>00:20</span><span>00:25</span><span>00:30</span></div>
+          <div class="playhead" id="playhead"><span>00:00</span><i></i></div>
+          <div class="tracks">
+            <div class="track-label"><span>▣</span><span>◉</span><span>⌁</span></div>
+            <div class="track video-track" id="videoTrack">
+              <button class="clip sample-clip aurora-clip selected" data-title="Aurora.mp4" style="--start:0;--length:28"><span></span><b>Aurora.mp4</b><i>00:08</i></button>
+              <button class="clip city-clip" data-title="Cidade.mp4" style="--start:29;--length:42"><span></span><b>Cidade.mp4</b><i>00:12</i></button>
+            </div>
+            <div class="track-label audio-label"><span>♫</span><span>◉</span><span>⌁</span></div>
+            <div class="track audio-track"><button class="audio-clip" style="--length:71"><b>Ambient orbit</b><span class="waveform">▁▃▆▄▂▅▇▃▆▂▅▃▇▆▂▃▅▇▄▂▅▆▃▁▅▇▄▆▃</span></button></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="exportModal" hidden>
+    <section class="export-modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <button class="modal-close" id="closeModal">×</button>
+      <span class="export-orbit">↗</span><h2 id="exportTitle">Pronto para decolar?</h2><p>Seu vídeo será preparado com as configurações abaixo.</p>
+      <div class="export-options"><label>Resolução<select><option>1080p — Full HD</option><option>720p — HD</option><option>4K — Ultra HD</option></select></label><label>Formato<select><option>MP4</option><option>WebM</option></select></label></div>
+      <button class="export-confirm" id="exportConfirm">Exportar vídeo <span>↗</span></button>
+      <small>Estimativa: menos de 1 minuto</small>
+    </section>
+  </div>
+  <div class="toast" id="toast" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
