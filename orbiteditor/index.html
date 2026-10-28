@@ -43,25 +43,87 @@
 
       <section class="asset-panel">
         <div class="panel-head"><h2 id="panelTitle">Sua mídia</h2><button class="close-panel" title="Fechar">×</button></div>
-        <label class="upload-zone" for="mediaInput">
-          <span class="upload-icon">＋</span>
-          <strong>Adicionar mídia</strong>
-          <small>Arraste ou escolha vídeos, imagens e áudio</small>
-          <input id="mediaInput" type="file" accept="video/*,image/*,audio/*" multiple hidden />
-        </label>
-        <div class="panel-row"><span>Arquivos do projeto</span><button id="sortBtn">Recentes⌄</button></div>
-        <div id="mediaGrid" class="media-grid">
-          <button class="media-card sample" data-sample="aurora">
-            <span class="thumb aurora"><i>00:08</i></span><b>Aurora.mp4</b><small>12,4 MB</small>
-          </button>
-          <button class="media-card sample" data-sample="city">
-            <span class="thumb city"><i>00:12</i></span><b>Cidade.mp4</b><small>18,1 MB</small>
-          </button>
-          <button class="media-card sample" data-sample="portrait">
-            <span class="thumb portrait"><i>IMG</i></span><b>Retrato.jpg</b><small>2,7 MB</small>
-          </button>
+        <div class="panel-view active" data-view="media">
+          <label class="upload-zone" for="mediaInput">
+            <span class="upload-icon">＋</span>
+            <strong>Adicionar mídia</strong>
+            <small>Arraste ou escolha vídeos, imagens e áudio</small>
+            <input id="mediaInput" type="file" accept="video/*,image/*,audio/*" multiple hidden />
+          </label>
+          <div class="panel-row"><span>Arquivos do projeto</span><button id="sortBtn">Recentes⌄</button></div>
+          <div id="mediaGrid" class="media-grid">
+            <button class="media-card sample" data-sample="aurora">
+              <span class="thumb aurora"><i>00:08</i></span><b>Aurora.mp4</b><small>12,4 MB</small>
+            </button>
+            <button class="media-card sample" data-sample="city">
+              <span class="thumb city"><i>00:12</i></span><b>Cidade.mp4</b><small>18,1 MB</small>
+            </button>
+            <button class="media-card sample" data-sample="portrait">
+              <span class="thumb portrait"><i>IMG</i></span><b>Retrato.jpg</b><small>2,7 MB</small>
+            </button>
+          </div>
+          <div class="quick-tip"><span>⌘</span><p><b>Dica rápida</b>Duplo clique adiciona a mídia à timeline.</p><button>×</button></div>
         </div>
-        <div class="quick-tip"><span>⌘</span><p><b>Dica rápida</b>Arraste qualquer mídia para a timeline.</p><button>×</button></div>
+
+        <div class="panel-view" data-view="text">
+          <label class="field-label">Conteúdo<input id="textInput" class="dark-input" value="Seu título aqui" maxlength="80" /></label>
+          <div class="panel-row"><span>Estilos rápidos</span></div>
+          <div class="preset-grid text-presets">
+            <button class="text-preset active" data-size="42" data-weight="800"><b>Grande</b><small>Título</small></button>
+            <button class="text-preset" data-size="28" data-weight="700"><b>Médio</b><small>Subtítulo</small></button>
+            <button class="text-preset" data-size="18" data-weight="500"><b>Pequeno</b><small>Corpo</small></button>
+            <button class="text-preset outline" data-size="36" data-weight="800"><b>Orbit</b><small>Contorno</small></button>
+          </div>
+          <div class="control-row"><label>Cor<input id="textColor" type="color" value="#ffffff" /></label><label>Tamanho<input id="textSize" type="range" min="14" max="72" value="42" /></label></div>
+          <button class="primary-panel-btn" id="addTextBtn">＋ Adicionar texto à timeline</button>
+        </div>
+
+        <div class="panel-view" data-view="audio">
+          <label class="upload-zone compact" for="audioInput"><span class="upload-icon">♫</span><strong>Importar áudio</strong><small>MP3, WAV, M4A ou OGG</small><input id="audioInput" type="file" accept="audio/*" multiple hidden /></label>
+          <div class="panel-row"><span>Biblioteca Orbit</span><button>Todos⌄</button></div>
+          <div class="sound-list">
+            <button class="sound-card" data-track="Nebula Dreams"><span>▶</span><p><b>Nebula Dreams</b><small>Ambient · 02:14</small></p><i>＋</i></button>
+            <button class="sound-card" data-track="Pulse Drive"><span>▶</span><p><b>Pulse Drive</b><small>Electronic · 01:48</small></p><i>＋</i></button>
+            <button class="sound-card" data-track="Silent Horizon"><span>▶</span><p><b>Silent Horizon</b><small>Cinematic · 02:31</small></p><i>＋</i></button>
+          </div>
+          <label class="range-field">Volume do projeto <output id="volumeValue">100%</output><input id="volumeRange" type="range" min="0" max="100" value="100" /></label>
+        </div>
+
+        <div class="panel-view" data-view="captions">
+          <p class="panel-copy">Transforme a fala em legendas ou escreva as suas.</p>
+          <label class="field-label">Idioma<select id="captionLanguage" class="dark-input"><option>Português (Brasil)</option><option>English</option><option>Español</option></select></label>
+          <label class="field-label">Texto<textarea id="captionInput" class="dark-input" rows="6">Seu universo começa aqui.
+Edite sem limites.
+Crie na sua órbita.</textarea></label>
+          <button class="primary-panel-btn" id="generateCaptionsBtn">CC Gerar e adicionar legendas</button>
+          <div class="caption-status"><span>✓</span><p><b>Sincronização inteligente</b><small>Distribui as linhas ao longo do vídeo.</small></p></div>
+        </div>
+
+        <div class="panel-view" data-view="effects">
+          <div class="panel-row"><span>Filtros visuais</span><button id="resetEffect">Limpar</button></div>
+          <div class="effect-grid">
+            <button class="effect-card active" data-filter="none"><span class="fx-original"></span><b>Original</b></button>
+            <button class="effect-card" data-filter="saturate(1.55) contrast(1.08)"><span class="fx-vivid"></span><b>Vívido</b></button>
+            <button class="effect-card" data-filter="grayscale(1) contrast(1.15)"><span class="fx-mono"></span><b>Mono</b></button>
+            <button class="effect-card" data-filter="sepia(.55) saturate(1.25)"><span class="fx-warm"></span><b>Quente</b></button>
+            <button class="effect-card" data-filter="hue-rotate(55deg) saturate(1.35)"><span class="fx-cosmic"></span><b>Cósmico</b></button>
+            <button class="effect-card" data-filter="brightness(.82) contrast(1.35) saturate(.8)"><span class="fx-noir"></span><b>Noir</b></button>
+          </div>
+          <label class="range-field">Intensidade <output id="effectValue">100%</output><input id="effectRange" type="range" min="0" max="100" value="100" /></label>
+        </div>
+
+        <div class="panel-view" data-view="transitions">
+          <p class="panel-copy">Selecione um clipe e escolha como ele entra em cena.</p>
+          <div class="transition-grid">
+            <button class="transition-card" data-transition="fade"><span>◐</span><b>Dissolver</b></button>
+            <button class="transition-card" data-transition="slide"><span>→</span><b>Deslizar</b></button>
+            <button class="transition-card" data-transition="zoom"><span>⊕</span><b>Zoom</b></button>
+            <button class="transition-card" data-transition="wipe"><span>◩</span><b>Cortina</b></button>
+            <button class="transition-card" data-transition="flash"><span>✦</span><b>Flash</b></button>
+            <button class="transition-card" data-transition="spin"><span>↻</span><b>Órbita</b></button>
+          </div>
+          <div class="caption-status"><span>⌁</span><p><b id="transitionStatus">Nenhuma aplicada</b><small>A transição aparece no início do clipe.</small></p></div>
+        </div>
       </section>
     </aside>
 
@@ -81,6 +143,8 @@
           <video id="previewVideo" playsinline></video>
           <img id="previewImage" alt="Prévia da mídia selecionada" />
           <div class="sample-visual" id="sampleVisual"><span></span><div></div></div>
+          <div class="stage-text-overlay" id="textOverlay" hidden>Seu título aqui</div>
+          <div class="stage-caption-overlay" id="captionOverlay" hidden>Seu universo começa aqui.</div>
         </div>
         <div class="player-bar">
           <div class="player-left"><button id="muteBtn">⌕</button><button id="prevBtn">|‹</button><button class="play-btn" id="playBtn">▶</button><button id="nextBtn">›|</button></div>
