@@ -38,6 +38,11 @@ let state,
   reviewId = null,
   revealed = false,
   vocabFilter = "",
+  translatorText = "",
+  translatorResult = "",
+  translatorStatus = "Digite em português para traduzir automaticamente.",
+  translatorTimer,
+  translatorController,
   fileFilter = "",
   saveTimer,
   unsaved = false,
@@ -388,6 +393,55 @@ function updateClock() {
         : "UM PASSO DE CADA VEZ";
   }
 }
+function translationExample(portuguese, english) {
+  const kind = english.trim().includes(" ") ? "expression" : "word";
+  return `The English ${kind} for “${portuguese.trim()}” is “${english.trim()}”.`;
+}
+function updateTranslatorUI() {
+  const output = $("#translator-output"),
+    status = $("#translator-status"),
+    add = $("#translator-add");
+  if (output)
+    output.textContent = translatorResult || "A tradução aparecerá aqui.";
+  if (status) status.textContent = translatorStatus;
+  if (add) add.disabled = !translatorResult;
+}
+async function translateVocabulary(text) {
+  translatorController?.abort();
+  translatorResult = "";
+  if (!text.trim()) {
+    translatorStatus = "Digite em português para traduzir automaticamente.";
+    updateTranslatorUI();
+    return;
+  }
+  translatorController = new AbortController();
+  translatorStatus = "Traduzindo…";
+  updateTranslatorUI();
+  try {
+    const params = new URLSearchParams({ q: text.trim(), langpair: "pt-BR|en-US" });
+    const response = await fetch(
+      `https://api.mymemory.translated.net/get?${params}`,
+      { signal: translatorController.signal },
+    );
+    if (!response.ok) throw new Error("Serviço indisponível");
+    const data = await response.json();
+    let translated = data?.responseData?.translatedText?.trim();
+    if (!translated || data?.responseStatus >= 400)
+      throw new Error(data?.responseDetails || "Tradução não encontrada");
+    if (
+      text.trim() === text.trim().toLocaleLowerCase("pt-BR") &&
+      translated === translated.toLocaleUpperCase("en-US")
+    )
+      translated = translated.toLocaleLowerCase("en-US");
+    translatorResult = translated;
+    translatorStatus = "Pronto — revise a tradução antes de salvar.";
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    translatorResult = "";
+    translatorStatus = "Não foi possível traduzir agora. Tente novamente em instantes.";
+  }
+  updateTranslatorUI();
+}
 function renderVocabulary() {
   const today = dateKey(),
     due = state.cards.filter((c) => c.due <= today);
@@ -404,8 +458,27 @@ function renderVocabulary() {
       "Construa seu repertório com contexto e revisão espaçada.",
       `<button class="button" id="new-card">+ Nova palavra</button>`,
     ) +
-    `<div class="vocab-grid"><section class="panel review-panel"><div class="panel-heading"><h2>Revisão do dia</h2><span class="pill">${due.length} pendentes</span></div>${card ? `<div class="flashcard"><span class="eyebrow">COMO VOCÊ DIRIA ISSO EM PORTUGUÊS?</span><h2>${esc(card.word)}</h2><button class="text-button" id="speak-card">◖ Ouvir pronúncia</button>${revealed ? `<div class="card-answer"><strong>${esc(card.meaning)}</strong><p>${esc(card.example || "Adicione uma frase de exemplo para dar contexto.")}</p></div>` : '<p class="muted">Pense no significado e em uma frase de exemplo.</p>'}</div>${revealed ? `<div class="review-actions"><button class="button secondary" id="review-again">Rever hoje</button><button class="button" id="review-known">Lembrei ✓</button></div><p class="hint">Lembrei: próxima revisão em ${card.interval ? Math.min(180, card.interval * 2) : 1} dia(s). Rever hoje: retorna à fila.</p>` : '<button class="button full-width" id="reveal-card">Mostrar significado</button>'}` : empty("Tudo revisado por aqui!", "Adicione novas palavras ou volte na próxima data de revisão.")}</section><section class="panel vocab-library"><div class="panel-heading"><div><h2>Meu repertório <span class="count">${state.cards.length}</span></h2><p>Palavras, significados e suas próprias frases.</p></div></div><label class="search-label"><span>⌕</span><input id="vocab-search" type="search" aria-label="Buscar palavra ou significado" placeholder="Buscar uma palavra…" value="${esc(vocabFilter)}"></label><div id="vocab-list">${cards.length ? cards.map((c) => `<div class="vocab-row"><div><strong>${esc(c.word)}</strong><p>${esc(c.meaning)}</p><small>Revisão: ${new Date(c.due + "T12:00:00").toLocaleDateString("pt-BR")}</small></div><div><button class="icon-btn" data-edit-card="${c.id}" aria-label="Editar ${esc(c.word)}">↗</button><button class="icon-btn" data-delete-card="${c.id}" aria-label="Excluir ${esc(c.word)}">×</button></div></div>`).join("") : empty("Nenhuma palavra encontrada", "Adicione uma palavra ou tente outro termo.")}</div></section></div>`;
+    `<section class="panel translator-card"><div class="translator-heading"><div><span class="eyebrow">TRADUTOR INTEGRADO</span><h2>Do português para o inglês</h2><p>Digite uma palavra ou expressão. Nada é salvo até você confirmar.</p></div><span class="translator-online">● ONLINE</span></div><div class="translator-fields"><label><span>PORTUGUÊS (PT-BR)</span><textarea id="translator-input" rows="3" maxlength="200" placeholder="Ex.: transferência de calor">${esc(translatorText)}</textarea></label><div class="translator-arrow" aria-hidden="true">→</div><div class="translator-result"><span>INGLÊS (EN-US)</span><strong id="translator-output">${esc(translatorResult || "A tradução aparecerá aqui.")}</strong></div></div><div class="translator-footer"><p id="translator-status">${esc(translatorStatus)}</p><span>Tradução online via MyMemory</span><button class="button" id="translator-add" ${translatorResult ? "" : "disabled"}>+ Adicionar ao vocabulário</button></div></section><div class="vocab-grid"><section class="panel review-panel"><div class="panel-heading"><h2>Revisão do dia</h2><span class="pill">${due.length} pendentes</span></div>${card ? `<div class="flashcard"><span class="eyebrow">COMO VOCÊ DIRIA ISSO EM PORTUGUÊS?</span><h2>${esc(card.word)}</h2><button class="text-button" id="speak-card">◖ Ouvir pronúncia</button>${revealed ? `<div class="card-answer"><strong>${esc(card.meaning)}</strong><p>${esc(card.example || "Adicione uma frase de exemplo para dar contexto.")}</p></div>` : '<p class="muted">Pense no significado e em uma frase de exemplo.</p>'}</div>${revealed ? `<div class="review-actions"><button class="button secondary" id="review-again">Rever hoje</button><button class="button" id="review-known">Lembrei ✓</button></div><p class="hint">Lembrei: próxima revisão em ${card.interval ? Math.min(180, card.interval * 2) : 1} dia(s). Rever hoje: retorna à fila.</p>` : '<button class="button full-width" id="reveal-card">Mostrar significado</button>'}` : empty("Tudo revisado por aqui!", "Adicione novas palavras ou volte na próxima data de revisão.")}</section><section class="panel vocab-library"><div class="panel-heading"><div><h2>Meu repertório <span class="count">${state.cards.length}</span></h2><p>Palavras, significados e suas próprias frases.</p></div></div><label class="search-label"><span>⌕</span><input id="vocab-search" type="search" aria-label="Buscar palavra ou significado" placeholder="Buscar uma palavra…" value="${esc(vocabFilter)}"></label><div id="vocab-list">${cards.length ? cards.map((c) => `<div class="vocab-row"><div><strong>${esc(c.word)}</strong><p>${esc(c.meaning)}</p><small>Revisão: ${new Date(c.due + "T12:00:00").toLocaleDateString("pt-BR")}</small></div><div><button class="icon-btn" data-edit-card="${c.id}" aria-label="Editar ${esc(c.word)}">↗</button><button class="icon-btn" data-delete-card="${c.id}" aria-label="Excluir ${esc(c.word)}">×</button></div></div>`).join("") : empty("Nenhuma palavra encontrada", "Adicione uma palavra ou tente outro termo.")}</div></section></div>`;
   $("#new-card").onclick = () => cardDialog();
+  $("#translator-input").oninput = (event) => {
+    translatorText = event.target.value;
+    translatorResult = "";
+    translatorStatus = translatorText.trim()
+      ? "Aguardando você terminar de digitar…"
+      : "Digite em português para traduzir automaticamente.";
+    updateTranslatorUI();
+    clearTimeout(translatorTimer);
+    translatorTimer = setTimeout(
+      () => translateVocabulary(translatorText),
+      650,
+    );
+  };
+  $("#translator-add").onclick = () =>
+    cardDialog(undefined, {
+      word: translatorResult,
+      meaning: translatorText.trim(),
+      example: translationExample(translatorText, translatorResult),
+    });
   main
     .querySelectorAll("[data-edit-card]")
     .forEach(
@@ -462,22 +535,23 @@ function renderVocabulary() {
     speechSynthesis.speak(speech);
   });
 }
-async function cardDialog(card) {
+async function cardDialog(card, prefill = {}) {
+  const values = card || prefill;
   const r = await dialog(
     card ? "Editar palavra" : "Uma nova palavra",
-    `<label>Palavra ou expressão em inglês<input name="word" maxlength="200" required value="${esc(card?.word || "")}" placeholder="Ex.: figure out"></label><label>Significado<input name="meaning" maxlength="500" required value="${esc(card?.meaning || "")}" placeholder="Ex.: entender, descobrir"></label><label>Frase de exemplo<textarea name="example" maxlength="1000" rows="3" placeholder="I will figure it out.">${esc(card?.example || "")}</textarea></label>`,
+    `<label>Palavra ou expressão em inglês<input name="word" maxlength="200" required value="${esc(values.word || "")}" placeholder="Ex.: figure out"></label><label>Significado<input name="meaning" maxlength="500" required value="${esc(values.meaning || "")}" placeholder="Ex.: entender, descobrir"></label><label>Frase de exemplo<textarea name="example" maxlength="1000" rows="3" placeholder="I will figure it out.">${esc(values.example || "")}</textarea></label>`,
   );
   if (!r || !r.word.trim() || !r.meaning.trim()) return;
-  const values = {
+  const savedValues = {
     word: r.word.trim(),
     meaning: r.meaning.trim(),
     example: r.example.trim(),
   };
-  if (card) Object.assign(card, values);
+  if (card) Object.assign(card, savedValues);
   else
     state.cards.push({
       id: uid(),
-      ...values,
+      ...savedValues,
       due: dateKey(),
       interval: 0,
       reviews: 0,
