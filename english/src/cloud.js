@@ -1,6 +1,20 @@
 const PROJECT_URL = "https://urvtkpqpguxthjznmtyu.supabase.co";
 const PUBLISHABLE_KEY = "sb_publishable_A_UWfFS6GHU8c_0kiy8Aqg_DcBO6dCb";
 
+function readAuthTokens() {
+  const marker = "access_token=";
+  const hash = location.hash.slice(1);
+  const markerIndex = hash.indexOf(marker);
+  if (markerIndex < 0) return null;
+  const params = new URLSearchParams(hash.slice(markerIndex));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  if (!accessToken || !refreshToken) return null;
+  return { access_token: accessToken, refresh_token: refreshToken };
+}
+
+let pendingAuthTokens = readAuthTokens();
+
 const client = window.supabase?.createClient(PROJECT_URL, PUBLISHABLE_KEY, {
   auth: {
     persistSession: true,
@@ -16,6 +30,12 @@ function ready() {
 
 export async function initCloud(onAuthChange) {
   const api = ready();
+  if (pendingAuthTokens) {
+    const { error: sessionError } = await api.auth.setSession(pendingAuthTokens);
+    pendingAuthTokens = null;
+    if (sessionError) throw sessionError;
+    history.replaceState(null, "", `${location.pathname}${location.search}#settings`);
+  }
   const { data, error } = await api.auth.getSession();
   if (error) throw error;
   api.auth.onAuthStateChange((event, session) => {
@@ -28,7 +48,7 @@ export async function sendMagicLink(email) {
   const { error } = await ready().auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${location.origin}${location.pathname}#settings`,
+      emailRedirectTo: `${location.origin}${location.pathname}`,
     },
   });
   if (error) throw error;
