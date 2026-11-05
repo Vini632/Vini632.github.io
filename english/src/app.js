@@ -189,6 +189,7 @@ async function reconcileCloud() {
   await refreshCloudBackups();
 }
 async function handleCloudSession(session) {
+  if (session?.user?.id && cloudSession?.user?.id === session.user.id) return;
   cloudSession = session;
   if (!session?.user) {
     cloudMessage = "Entre com seu e-mail para sincronizar entre dispositivos.";
