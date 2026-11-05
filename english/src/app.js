@@ -11,6 +11,7 @@ import {
   descendants,
   parseBackup,
   validateState,
+  upgradeState,
 } from "./model.js";
 import {
   openStore,
@@ -20,6 +21,19 @@ import {
 } from "./storage.js";
 import { mathHTML, mathToolbar, markdown, insertText } from "./math.js";
 import { mountDesign } from "./design.js";
+import {
+  initCloud,
+  sendMagicLink,
+  signOutCloud,
+  getCloudState,
+  putCloudState,
+  createCloudBackup,
+  listCloudBackups,
+  getCloudBackup,
+  deleteCloudBackup,
+  pruneCloudBackups,
+  stateHash,
+} from "./cloud.js";
 const $ = (s) => document.querySelector(s),
   main = $("#main");
 const routes = {
@@ -41,6 +55,8 @@ let state,
   translatorText = "",
   translatorResult = "",
   translatorStatus = "Digite em português para traduzir automaticamente.",
+  translatorMode = "pt-en",
+  translatorDetails = null,
   translatorTimer,
   translatorController,
   fileFilter = "",
@@ -49,7 +65,14 @@ let state,
   failed = false,
   saveChain = Promise.resolve(),
   toastTimer,
-  saveRevision = 0;
+  saveRevision = 0,
+  cloudSaveTimer,
+  installPrompt;
+let cloudSession = null,
+  cloudBackups = [],
+  cloudMessage = "Verificando sua conta Worldforge…",
+  cloudConflict = false;
+const CLOUD_META = "worldforge-english-cloud-meta";
 const channel =
   "BroadcastChannel" in window
     ? new BroadcastChannel("worldforge-english")
@@ -64,6 +87,123 @@ function toast(message) {
 function setStatus(text, error = false) {
   $("#save-status").textContent = text;
   $("#save-status").classList.toggle("error", error);
+}
+function cloudMeta() {
+  try {
+    return JSON.parse(localStorage.getItem(CLOUD_META)) || null;
+  } catch {
+    return null;
+  }
+}
+function setCloudMeta(meta) {
+  localStorage.setItem(CLOUD_META, JSON.stringify(meta));
+}
+async function applyCloudPayload(payload, message) {
+  const next = validateState(upgradeState(payload));
+  clearTimeout(saveTimer);
+  await saveChain.catch(() => {});
+  await writeStore(next);
+  state = next;
+  activeFile = null;
+  folder = null;
+  reviewId = null;
+  unsaved = false;
+  failed = false;
+  cloudConflict = false;
+  channel?.postMessage("changed");
+  render();
+  setStatus(message);
+}
+async function pushToCloud({ backup = false, label = "Backup automático" } = {}) {
+  if (!cloudSession?.user || externalChange) return;
+  cloudMessage = "Enviando alterações para a nuvem…";
+  if (route === "settings") renderSettings();
+  const currentHash = await stateHash(state);
+  const meta = cloudMeta();
+  const revision = Math.max(Date.now(), (meta?.revision || 0) + 1);
+  const saved = await putCloudState(cloudSession.user.id, state, revision);
+  setCloudMeta({
+    userId: cloudSession.user.id,
+    hash: currentHash,
+    revision: saved.revision,
+    updatedAt: saved.updated_at,
+  });
+  const autoBackupKey = `worldforge-english-auto-backup-${cloudSession.user.id}`;
+  const automatic = !backup && localStorage.getItem(autoBackupKey) !== dateKey();
+  if (backup || automatic)
+    await createCloudBackup(cloudSession.user.id, state, label);
+  if (automatic) localStorage.setItem(autoBackupKey, dateKey());
+  if (backup || automatic) await pruneCloudBackups();
+  cloudConflict = false;
+  cloudMessage = `Sincronizado em ${new Date(saved.updated_at).toLocaleString("pt-BR")}`;
+  if (route === "settings") await refreshCloudBackups();
+}
+function scheduleCloudPush() {
+  if (!cloudSession?.user || cloudConflict) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(() => {
+    pushToCloud().catch((error) => {
+      cloudMessage = `Falha na nuvem: ${error.message}`;
+      if (route === "settings") renderSettings();
+    });
+  }, 1800);
+}
+async function refreshCloudBackups() {
+  if (!cloudSession?.user) {
+    cloudBackups = [];
+    return;
+  }
+  cloudBackups = await listCloudBackups();
+  if (route === "settings") renderSettings();
+}
+async function reconcileCloud() {
+  if (!cloudSession?.user) return;
+  const remote = await getCloudState();
+  const localHash = await stateHash(state);
+  const meta = cloudMeta();
+  if (!remote) {
+    await pushToCloud({ backup: true, label: "Primeiro backup na nuvem" });
+    return;
+  }
+  if (!meta || meta.userId !== cloudSession.user.id) {
+    cloudConflict = true;
+    cloudMessage = "Há dados neste dispositivo e na nuvem. Escolha qual versão manter.";
+    await refreshCloudBackups();
+    return;
+  }
+  if (remote.revision > meta.revision && localHash === meta.hash) {
+    await applyCloudPayload(remote.payload, "Atualizado pela nuvem");
+    setCloudMeta({
+      userId: cloudSession.user.id,
+      hash: await stateHash(remote.payload),
+      revision: remote.revision,
+      updatedAt: remote.updated_at,
+    });
+    cloudMessage = "Dados mais recentes baixados da nuvem.";
+  } else if (localHash !== meta.hash && remote.revision <= meta.revision) {
+    await pushToCloud();
+  } else if (localHash !== meta.hash && remote.revision > meta.revision) {
+    cloudConflict = true;
+    cloudMessage = "Este dispositivo e a nuvem foram alterados. Escolha uma versão.";
+  } else cloudMessage = "Este dispositivo está sincronizado.";
+  await refreshCloudBackups();
+}
+async function handleCloudSession(session) {
+  cloudSession = session;
+  if (!session?.user) {
+    cloudMessage = "Entre com seu e-mail para sincronizar entre dispositivos.";
+    cloudBackups = [];
+    cloudConflict = false;
+    if (route === "settings") renderSettings();
+    return;
+  }
+  cloudMessage = `Conectado como ${session.user.email}`;
+  try {
+    await reconcileCloud();
+  } catch (error) {
+    cloudMessage = `Nuvem indisponível: ${error.message}`;
+    if (route === "settings") renderSettings();
+  }
 }
 function persist() {
   clearTimeout(saveTimer);
@@ -86,6 +226,7 @@ function persist() {
         setStatus("Salvo neste navegador");
       }
       channel?.postMessage("changed");
+      scheduleCloudPush();
     })
     .catch((error) => {
       failed = true;
@@ -120,7 +261,7 @@ function taskRows(tasks, selectedDay) {
     ? tasks
         .map(
           (t) =>
-            `<div class="task-row ${t.done.includes(selectedDay) ? "is-done" : ""}"><input class="task-check" type="checkbox" data-task="${t.id}" aria-label="Concluir: ${esc(t.title)}" ${t.done.includes(selectedDay) ? "checked" : ""}><div class="task-details"><span class="task-title">${esc(t.title)}</span><div class="task-meta"><span class="category ${categoryClass(t.category)}">${t.category}</span><span>${t.minutes} min</span>${t.repeat ? '<span title="Repete todos os dias a partir da data inicial">↻ Diária</span>' : ""}</div></div><button class="icon-btn" data-edit-task="${t.id}" title="Editar tarefa" aria-label="Editar ${esc(t.title)}">↗</button><button class="icon-btn delete" data-delete-task="${t.id}" title="Excluir tarefa" aria-label="Excluir ${esc(t.title)}">×</button></div>`,
+            `<div class="task-row ${t.done.includes(selectedDay) ? "is-done" : ""}"><input class="task-check" type="checkbox" data-task="${t.id}" aria-label="Concluir: ${esc(t.title)}" ${t.done.includes(selectedDay) ? "checked" : ""}><div class="task-details"><span class="task-title">${esc(t.title)}</span><div class="task-meta"><span class="category ${categoryClass(t.category)}">${t.category}</span><span class="difficulty ${t.difficulty}">${({ beginner: "Iniciante", intermediate: "Intermediário", advanced: "Avançado" })[t.difficulty]}</span><span>${t.minutes} min</span>${t.repeat ? '<span title="Repete todos os dias a partir da data inicial">↻ Diária</span>' : ""}</div></div><button class="icon-btn" data-edit-task="${t.id}" title="Editar tarefa" aria-label="Editar ${esc(t.title)}">↗</button><button class="icon-btn delete" data-delete-task="${t.id}" title="Excluir tarefa" aria-label="Excluir ${esc(t.title)}">×</button></div>`,
         )
         .join("")
     : empty(
@@ -207,12 +348,13 @@ async function confirmDialog(title, copy) {
 async function taskDialog(task) {
   const result = await dialog(
     task ? "Editar tarefa" : "Um novo passo",
-    `<label>Tarefa<input name="title" required maxlength="300" placeholder="Ex.: ler um artigo em inglês" value="${esc(task?.title || "")}"></label><div class="field-grid"><label>Habilidade<select name="category">${["Listening", "Speaking", "Reading", "Writing", "Vocabulary", "Grammar"].map((c) => `<option ${task?.category === c ? "selected" : ""}>${c}</option>`).join("")}</select></label><label>Tempo estimado (min)<input name="minutes" type="number" min="1" max="600" value="${task?.minutes || 10}" required></label></div><label>Data inicial<input name="date" type="date" required value="${task?.date || day}"></label><label class="checkbox-label"><input name="repeat" type="checkbox" ${task?.repeat ? "checked" : ""}> Repetir todos os dias a partir desta data</label><p class="hint">Cada dia tem sua própria marcação. O tempo estudado é registrado nas sessões de foco.</p>`,
+    `<label>Tarefa<input name="title" required maxlength="300" placeholder="Ex.: ler um artigo em inglês" value="${esc(task?.title || "")}"></label><div class="field-grid"><label>Habilidade<select name="category">${["Listening", "Speaking", "Reading", "Writing", "Vocabulary", "Grammar"].map((c) => `<option ${task?.category === c ? "selected" : ""}>${c}</option>`).join("")}</select></label><label>Nível<select name="difficulty"><option value="beginner" ${task?.difficulty === "beginner" ? "selected" : ""}>Iniciante</option><option value="intermediate" ${task?.difficulty === "intermediate" ? "selected" : ""}>Intermediário</option><option value="advanced" ${task?.difficulty === "advanced" ? "selected" : ""}>Avançado</option></select></label></div><div class="field-grid"><label>Tempo estimado (min)<input name="minutes" type="number" min="1" max="600" value="${task?.minutes || 10}" required></label><label>Data inicial<input name="date" type="date" required value="${task?.date || day}"></label></div><label class="checkbox-label"><input name="repeat" type="checkbox" ${task?.repeat ? "checked" : ""}> Repetir todos os dias a partir desta data</label><p class="hint">Cada dia tem sua própria marcação. O tempo estudado é registrado nas sessões de foco.</p>`,
   );
   if (!result || !result.title.trim()) return;
   const values = {
     title: result.title.trim(),
     category: result.category,
+    difficulty: result.difficulty,
     minutes: Number(result.minutes),
     date: result.date,
     repeat: result.repeat === "on",
@@ -262,6 +404,17 @@ function renderToday() {
 }
 function renderTasks() {
   const tasks = tasksFor(state, day);
+  const today = dateKey();
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
+  const weekMinutes = weekDays.reduce((sum, value) => sum + minutesFor(state, value), 0);
+  const weekGoal = state.settings.weeklyGoal;
+  const calendar = Array.from({ length: 14 }, (_, i) => addDays(today, i - 7))
+    .map((value) => {
+      const available = tasksFor(state, value);
+      const completed = available.filter((task) => task.done.includes(value)).length;
+      return `<button class="calendar-day ${value === day ? "selected" : ""} ${value === today ? "today" : ""}" data-calendar-day="${value}"><span>${new Date(value + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "short" }).replace(".", "")}</span><strong>${new Date(value + "T12:00:00").getDate()}</strong><small>${completed}/${available.length}</small></button>`;
+    })
+    .join("");
   main.innerHTML =
     heading(
       "ENGLISH / ROTINA",
@@ -269,7 +422,7 @@ function renderTasks() {
       "Planeje suas habilidades, acompanhe seus dias e mantenha o ritmo.",
       `<button class="button" data-new-task>+ Nova tarefa</button>`,
     ) +
-    `<div class="toolbar panel"><label class="inline-label">Visualizar dia <input type="date" id="task-date" value="${day}" required></label><button class="button secondary small" id="today-date">Hoje</button><span class="muted">${tasks.filter((t) => t.done.includes(day)).length} de ${tasks.length} concluídas</span></div><section class="panel">${taskRows(tasks, day)}</section><section class="panel history"><div class="panel-heading"><div><h2>Histórico de estudo</h2><p>Sessões de foco e registros manuais de inglês.</p></div><button class="button secondary small" id="manual-session">+ Registrar tempo</button></div>${
+    `<section class="routine-overview"><div class="panel weekly-goal"><span class="eyebrow">META SEMANAL</span><strong>${weekMinutes}<small> / ${weekGoal} min</small></strong><div class="goal-track"><span style="width:${Math.min(100, (weekMinutes / weekGoal) * 100)}%"></span></div><p>${Math.max(0, weekGoal - weekMinutes)} minutos para alcançar sua meta.</p></div><div class="panel study-calendar"><div class="panel-heading"><div><h2>Calendário de consistência</h2><p>Selecione um dia para revisar suas tarefas.</p></div><span class="pill">${streak(state, today)} dias seguidos</span></div><div class="calendar-strip">${calendar}</div></div></section><div class="toolbar panel"><label class="inline-label">Visualizar dia <input type="date" id="task-date" value="${day}" required></label><button class="button secondary small" id="today-date">Hoje</button><span class="muted">${tasks.filter((t) => t.done.includes(day)).length} de ${tasks.length} concluídas</span></div><section class="panel">${taskRows(tasks, day)}</section><section class="panel history"><div class="panel-heading"><div><h2>Histórico de estudo</h2><p>Sessões de foco e registros manuais de inglês.</p></div><button class="button secondary small" id="manual-session">+ Registrar tempo</button></div>${
       state.sessions.length
         ? [...state.sessions]
             .reverse()
@@ -285,6 +438,13 @@ function renderTasks() {
           )
     }<p class="hint">Exibindo até 100 sessões recentes. O backup contém o histórico completo.</p></section>`;
   bindTasks(day);
+  main.querySelectorAll("[data-calendar-day]").forEach(
+    (button) =>
+      (button.onclick = () => {
+        day = button.dataset.calendarDay;
+        render();
+      }),
+  );
   $("#task-date").onchange = (e) => {
     if (e.target.value) {
       day = e.target.value;
@@ -405,10 +565,34 @@ function updateTranslatorUI() {
     output.textContent = translatorResult || "A tradução aparecerá aqui.";
   if (status) status.textContent = translatorStatus;
   if (add) add.disabled = !translatorResult;
+  const details = $("#translator-details");
+  if (details)
+    details.innerHTML = translatorDetails
+      ? `<span>${esc(translatorDetails.partOfSpeech || "vocabulário")}</span>${translatorDetails.phonetic ? `<strong>${esc(translatorDetails.phonetic)}</strong>` : ""}${translatorDetails.definition ? `<p>${esc(translatorDetails.definition)}</p>` : ""}${translatorDetails.synonyms.length ? `<small>Sinônimos: ${esc(translatorDetails.synonyms.join(", "))}</small>` : ""}`
+      : "";
+}
+async function dictionaryDetails(word, signal) {
+  if (!/^[a-zA-Z][a-zA-Z '-]{0,80}$/.test(word)) return null;
+  const response = await fetch(
+    `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.toLowerCase())}`,
+    { signal },
+  );
+  if (!response.ok) return null;
+  const [entry] = await response.json();
+  const meaning = entry?.meanings?.[0];
+  const definition = meaning?.definitions?.[0];
+  return {
+    phonetic: entry?.phonetic || entry?.phonetics?.find((item) => item.text)?.text || "",
+    partOfSpeech: meaning?.partOfSpeech || "",
+    definition: definition?.definition || "",
+    example: definition?.example || "",
+    synonyms: [...new Set([...(meaning?.synonyms || []), ...(definition?.synonyms || [])])].slice(0, 5),
+  };
 }
 async function translateVocabulary(text) {
   translatorController?.abort();
   translatorResult = "";
+  translatorDetails = null;
   if (!text.trim()) {
     translatorStatus = "Digite em português para traduzir automaticamente.";
     updateTranslatorUI();
@@ -418,7 +602,10 @@ async function translateVocabulary(text) {
   translatorStatus = "Traduzindo…";
   updateTranslatorUI();
   try {
-    const params = new URLSearchParams({ q: text.trim(), langpair: "pt-BR|en-US" });
+    const params = new URLSearchParams({
+      q: text.trim(),
+      langpair: translatorMode === "pt-en" ? "pt-BR|en-US" : "en-US|pt-BR",
+    });
     const response = await fetch(
       `https://api.mymemory.translated.net/get?${params}`,
       { signal: translatorController.signal },
@@ -434,6 +621,11 @@ async function translateVocabulary(text) {
     )
       translated = translated.toLocaleLowerCase("en-US");
     translatorResult = translated;
+    const english = translatorMode === "pt-en" ? translated : text.trim();
+    translatorDetails = await dictionaryDetails(
+      english,
+      translatorController.signal,
+    ).catch(() => null);
     translatorStatus = "Pronto — revise a tradução antes de salvar.";
   } catch (error) {
     if (error.name === "AbortError") return;
@@ -458,7 +650,7 @@ function renderVocabulary() {
       "Construa seu repertório com contexto e revisão espaçada.",
       `<button class="button" id="new-card">+ Nova palavra</button>`,
     ) +
-    `<section class="panel translator-card"><div class="translator-heading"><div><span class="eyebrow">TRADUTOR INTEGRADO</span><h2>Do português para o inglês</h2><p>Digite uma palavra ou expressão. Nada é salvo até você confirmar.</p></div><span class="translator-online">● ONLINE</span></div><div class="translator-fields"><label><span>PORTUGUÊS (PT-BR)</span><textarea id="translator-input" rows="3" maxlength="200" placeholder="Ex.: transferência de calor">${esc(translatorText)}</textarea></label><div class="translator-arrow" aria-hidden="true">→</div><div class="translator-result"><span>INGLÊS (EN-US)</span><strong id="translator-output">${esc(translatorResult || "A tradução aparecerá aqui.")}</strong></div></div><div class="translator-footer"><p id="translator-status">${esc(translatorStatus)}</p><span>Tradução online via MyMemory</span><button class="button" id="translator-add" ${translatorResult ? "" : "disabled"}>+ Adicionar ao vocabulário</button></div></section><div class="vocab-grid"><section class="panel review-panel"><div class="panel-heading"><h2>Revisão do dia</h2><span class="pill">${due.length} pendentes</span></div>${card ? `<div class="flashcard"><span class="eyebrow">COMO VOCÊ DIRIA ISSO EM PORTUGUÊS?</span><h2>${esc(card.word)}</h2><button class="text-button" id="speak-card">◖ Ouvir pronúncia</button>${revealed ? `<div class="card-answer"><strong>${esc(card.meaning)}</strong><p>${esc(card.example || "Adicione uma frase de exemplo para dar contexto.")}</p></div>` : '<p class="muted">Pense no significado e em uma frase de exemplo.</p>'}</div>${revealed ? `<div class="review-actions"><button class="button secondary" id="review-again">Rever hoje</button><button class="button" id="review-known">Lembrei ✓</button></div><p class="hint">Lembrei: próxima revisão em ${card.interval ? Math.min(180, card.interval * 2) : 1} dia(s). Rever hoje: retorna à fila.</p>` : '<button class="button full-width" id="reveal-card">Mostrar significado</button>'}` : empty("Tudo revisado por aqui!", "Adicione novas palavras ou volte na próxima data de revisão.")}</section><section class="panel vocab-library"><div class="panel-heading"><div><h2>Meu repertório <span class="count">${state.cards.length}</span></h2><p>Palavras, significados e suas próprias frases.</p></div></div><label class="search-label"><span>⌕</span><input id="vocab-search" type="search" aria-label="Buscar palavra ou significado" placeholder="Buscar uma palavra…" value="${esc(vocabFilter)}"></label><div id="vocab-list">${cards.length ? cards.map((c) => `<div class="vocab-row"><div><strong>${esc(c.word)}</strong><p>${esc(c.meaning)}</p><small>Revisão: ${new Date(c.due + "T12:00:00").toLocaleDateString("pt-BR")}</small></div><div><button class="icon-btn" data-edit-card="${c.id}" aria-label="Editar ${esc(c.word)}">↗</button><button class="icon-btn" data-delete-card="${c.id}" aria-label="Excluir ${esc(c.word)}">×</button></div></div>`).join("") : empty("Nenhuma palavra encontrada", "Adicione uma palavra ou tente outro termo.")}</div></section></div>`;
+    `<section class="panel translator-card"><div class="translator-heading"><div><span class="eyebrow">TRADUTOR INTEGRADO</span><h2>${translatorMode === "pt-en" ? "Do português para o inglês" : "Do inglês para o português"}</h2><p>Tradução, pronúncia e contexto sem sair do seu vocabulário.</p></div><div class="button-row"><button class="button secondary small" id="translator-swap">⇄ Inverter idiomas</button><span class="translator-online">● ONLINE</span></div></div><div class="translator-fields"><label><span>${translatorMode === "pt-en" ? "PORTUGUÊS (PT-BR)" : "INGLÊS (EN-US)"}</span><textarea id="translator-input" rows="3" maxlength="200" placeholder="${translatorMode === "pt-en" ? "Ex.: transferência de calor" : "Ex.: heat transfer"}">${esc(translatorText)}</textarea></label><div class="translator-arrow" aria-hidden="true">→</div><div class="translator-result"><span>${translatorMode === "pt-en" ? "INGLÊS (EN-US)" : "PORTUGUÊS (PT-BR)"}</span><strong id="translator-output">${esc(translatorResult || "A tradução aparecerá aqui.")}</strong><div id="translator-details" class="translator-details"></div><button class="text-button" id="translator-speak" ${translatorResult ? "" : "disabled"}>◖ Ouvir em inglês</button></div></div><div class="translator-footer"><p id="translator-status">${esc(translatorStatus)}</p><span>MyMemory + Free Dictionary</span><button class="button" id="translator-add" ${translatorResult ? "" : "disabled"}>+ Adicionar ao vocabulário</button></div></section><div class="vocab-grid"><section class="panel review-panel"><div class="panel-heading"><h2>Revisão do dia</h2><span class="pill">${due.length} pendentes</span></div>${card ? `<div class="flashcard"><span class="eyebrow">COMO VOCÊ DIRIA ISSO EM PORTUGUÊS?</span><h2>${esc(card.word)}</h2><button class="text-button" id="speak-card">◖ Ouvir pronúncia</button>${revealed ? `<div class="card-answer"><strong>${esc(card.meaning)}</strong><p>${esc(card.example || "Adicione uma frase de exemplo para dar contexto.")}</p></div>` : '<p class="muted">Pense no significado e em uma frase de exemplo.</p>'}</div>${revealed ? `<div class="review-actions"><button class="button secondary" id="review-again">Rever hoje</button><button class="button" id="review-known">Lembrei ✓</button></div><p class="hint">Lembrei: próxima revisão em ${card.interval ? Math.min(180, card.interval * 2) : 1} dia(s). Rever hoje: retorna à fila.</p>` : '<button class="button full-width" id="reveal-card">Mostrar significado</button>'}` : empty("Tudo revisado por aqui!", "Adicione novas palavras ou volte na próxima data de revisão.")}</section><section class="panel vocab-library"><div class="panel-heading"><div><h2>Meu repertório <span class="count">${state.cards.length}</span></h2><p>Palavras, significados e suas próprias frases.</p></div></div><label class="search-label"><span>⌕</span><input id="vocab-search" type="search" aria-label="Buscar palavra ou significado" placeholder="Buscar uma palavra…" value="${esc(vocabFilter)}"></label><div id="vocab-list">${cards.length ? cards.map((c) => `<div class="vocab-row"><div><strong>${esc(c.word)}</strong><p>${esc(c.meaning)}</p><small>Revisão: ${new Date(c.due + "T12:00:00").toLocaleDateString("pt-BR")}</small></div><div><button class="icon-btn" data-edit-card="${c.id}" aria-label="Editar ${esc(c.word)}">↗</button><button class="icon-btn" data-delete-card="${c.id}" aria-label="Excluir ${esc(c.word)}">×</button></div></div>`).join("") : empty("Nenhuma palavra encontrada", "Adicione uma palavra ou tente outro termo.")}</div></section></div>`;
   $("#new-card").onclick = () => cardDialog();
   $("#translator-input").oninput = (event) => {
     translatorText = event.target.value;
@@ -475,10 +667,33 @@ function renderVocabulary() {
   };
   $("#translator-add").onclick = () =>
     cardDialog(undefined, {
-      word: translatorResult,
-      meaning: translatorText.trim(),
-      example: translationExample(translatorText, translatorResult),
+      word: translatorMode === "pt-en" ? translatorResult : translatorText.trim(),
+      meaning: translatorMode === "pt-en" ? translatorText.trim() : translatorResult,
+      example:
+        translatorDetails?.example ||
+        translationExample(
+          translatorMode === "pt-en" ? translatorText : translatorResult,
+          translatorMode === "pt-en" ? translatorResult : translatorText,
+        ),
     });
+  $("#translator-swap").onclick = () => {
+    translatorMode = translatorMode === "pt-en" ? "en-pt" : "pt-en";
+    translatorText = translatorResult;
+    translatorResult = "";
+    translatorDetails = null;
+    translatorStatus = "Digite para traduzir automaticamente.";
+    renderVocabulary();
+  };
+  $("#translator-speak").onclick = () => {
+    const english = translatorMode === "pt-en" ? translatorResult : translatorText;
+    if (!english || !("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const speech = new SpeechSynthesisUtterance(english);
+    speech.lang = "en-US";
+    speech.rate = 0.85;
+    speechSynthesis.speak(speech);
+  };
+  updateTranslatorUI();
   main
     .querySelectorAll("[data-edit-card]")
     .forEach(
@@ -642,6 +857,94 @@ function folderPath(id) {
   }
   return path;
 }
+function thorMarkdown() {
+  const ordered = [...state.files].sort((a, b) =>
+    folderPath(a.parent).map((item) => item.name).join("/").localeCompare(
+      folderPath(b.parent).map((item) => item.name).join("/"),
+    ),
+  );
+  const sections = [
+    "# THOR — Thermonuclear Heat Optimization Reactor",
+    "",
+    `Exportado em ${new Date().toLocaleString("pt-BR")}.`,
+  ];
+  for (const file of ordered) {
+    if (file.kind === "folder" || file.kind === "attachment") continue;
+    const path = [...folderPath(file.parent).map((item) => item.name), file.name].join(" / ");
+    sections.push("", `## ${path}`, "");
+    if (file.kind === "formula") sections.push(`$$${file.content}$$`);
+    else if (file.kind === "design")
+      sections.push("_Design vetorial disponível no arquivo de backup do projeto._");
+    else sections.push(file.content || "_Sem conteúdo._");
+  }
+  return sections.join("\n");
+}
+function exportThor() {
+  download(
+    new Blob([thorMarkdown()], { type: "text/markdown;charset=utf-8" }),
+    `THOR-${dateKey()}.md`,
+  );
+  toast("Projeto THOR exportado em Markdown.");
+}
+function printThor() {
+  const base = new URL("./", location.href).href;
+  const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>THOR — Relatório</title><link rel="stylesheet" href="${base}vendor/katex/katex.min.css"><style>body{font:16px Arial,sans-serif;line-height:1.6;max-width:900px;margin:40px auto;padding:0 28px;color:#172019}h1,h2{color:#214a36}h2{border-bottom:1px solid #ccd6ce;padding-top:24px}pre{white-space:pre-wrap} @media print{body{margin:0;max-width:none}}</style></head><body>${markdown(thorMarkdown())}<script>addEventListener("load",()=>setTimeout(()=>print(),300))<\/script></body></html>`;
+  const url = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  const popup = window.open(url, "_blank");
+  if (popup) popup.opener = null;
+  else toast("Permita pop-ups para imprimir ou salvar o THOR em PDF.");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+async function createThorTemplate(type) {
+  const templates = {
+    report: {
+      kind: "doc",
+      name: "Relatório técnico.md",
+      content: "# Relatório técnico THOR\n\n## Resumo\n\n## Objetivo\n\n## Hipótese\n\n## Metodologia\n\n## Resultados esperados\n\n## Riscos e limitações\n\n## Próximos passos\n",
+    },
+    calculation: {
+      kind: "doc",
+      name: "Memória de cálculo.md",
+      content: "# Memória de cálculo\n\n## Variáveis\n\n- $T$: temperatura\n- $Q$: energia térmica\n- $t$: tempo\n\n## Equação\n\n$$Q = mc\\Delta T$$\n\n## Premissas\n\n## Cálculos\n\n## Verificação dimensional\n",
+    },
+    references: {
+      kind: "doc",
+      name: "Referências e fontes.md",
+      content: "# Referências e fontes\n\nRegistre autor, título, ano, link, data de acesso e como a fonte sustenta o THOR.\n\n## Livros e artigos\n\n## Dados experimentais\n\n## Normas técnicas\n",
+    },
+    diagram: {
+      kind: "design",
+      name: "Diagrama conceitual.design.json",
+      content: JSON.stringify([
+        { id: uid(), type: "rect", x: 70, y: 190, w: 180, h: 90, color: "#28523b", text: "" },
+        { id: uid(), type: "rect", x: 320, y: 190, w: 180, h: 90, color: "#446b4a", text: "" },
+        { id: uid(), type: "rect", x: 570, y: 190, w: 160, h: 90, color: "#68874a", text: "" },
+        { id: uid(), type: "line", x: 250, y: 235, w: 70, h: 0, color: "#d3ef91", text: "" },
+        { id: uid(), type: "line", x: 500, y: 235, w: 70, h: 0, color: "#d3ef91", text: "" },
+        { id: uid(), type: "text", x: 105, y: 220, w: 120, h: 30, color: "#ffffff", text: "Entrada térmica" },
+        { id: uid(), type: "text", x: 350, y: 220, w: 120, h: 30, color: "#ffffff", text: "Reator THOR" },
+        { id: uid(), type: "text", x: 590, y: 220, w: 120, h: 30, color: "#ffffff", text: "Otimização" },
+      ]),
+    },
+  };
+  const template = templates[type];
+  if (!template) return;
+  let name = template.name;
+  let suffix = 2;
+  while (state.files.some((file) => file.parent === folder && file.name === name))
+    name = template.name.replace(/(\.[^.]+(?:\.json)?)$/, ` ${suffix++}$1`);
+  const file = {
+    id: uid(),
+    parent: folder,
+    ...template,
+    name,
+    updated: new Date().toISOString(),
+  };
+  state.files.push(file);
+  activeFile = file.id;
+  await persist();
+  render();
+}
 function renderThor() {
   if (
     folder &&
@@ -667,9 +970,9 @@ function renderThor() {
       "WORLDFORGE / LABORATÓRIO DE IDEIAS",
       'THOR<span class="title-dot">✳</span>',
       "Thermonuclear Heat Optimization Reactor · Reator termonuclear conceitual",
-      `<button class="button" id="new-file">+ Criar</button>`,
+      `<div class="button-row"><button class="button secondary" id="print-thor">▤ Imprimir / PDF</button><button class="button secondary" id="export-thor">↓ Exportar Markdown</button><button class="button" id="new-file">+ Criar</button></div>`,
     ) +
-    `<div class="thor-context"><span class="status-dot"></span> PROJETO CONCEITUAL <span class="context-divider">/</span> ${state.files.filter((f) => f.kind !== "folder").length} arquivos <span class="context-divider">/</span> Documente hipóteses, referências e descobertas.</div><div class="workspace panel"><aside class="file-explorer"><div class="explorer-header"><h2>Explorador</h2><button class="icon-btn" id="upload-files" title="Importar arquivos" aria-label="Importar arquivos">↑</button></div><div class="file-breadcrumb"><button data-folder="root">THOR</button>${folderPath(
+    `<div class="thor-context"><span class="status-dot"></span> PROJETO CONCEITUAL <span class="context-divider">/</span> ${state.files.filter((f) => f.kind !== "folder").length} arquivos <span class="context-divider">/</span> Documente hipóteses, referências e descobertas.</div><div class="thor-templates panel"><span class="eyebrow">COMEÇAR COM UM MODELO</span><button data-thor-template="report">▤ Relatório técnico</button><button data-thor-template="calculation">ƒ Memória de cálculo</button><button data-thor-template="references">⌘ Referências</button><button data-thor-template="diagram">◈ Diagrama conceitual</button></div><div class="workspace panel"><aside class="file-explorer"><div class="explorer-header"><h2>Explorador</h2><button class="icon-btn" id="upload-files" title="Importar arquivos" aria-label="Importar arquivos">↑</button></div><div class="file-breadcrumb"><button data-folder="root">THOR</button>${folderPath(
       folder,
     )
       .map(
@@ -678,7 +981,7 @@ function renderThor() {
       )
       .join(
         "",
-      )}</div><input type="search" id="file-search" aria-label="Buscar na pasta atual" placeholder="Buscar nesta pasta…" value="${esc(fileFilter)}"><div class="file-list">${folder ? '<button class="file-item parent-folder" id="folder-up"><span>↰</span> Voltar uma pasta</button>' : ""}${children.map((f) => `<button class="file-item ${activeFile === f.id ? "selected" : ""}" data-file="${f.id}"><span class="file-type ${f.kind}">${fileIcons[f.kind]}</span><span class="file-name">${esc(f.name)}</span>${f.kind === "folder" ? "<span>›</span>" : ""}</button>`).join("") || '<p class="hint explorer-empty">Nenhum arquivo nesta pasta.</p>'}</div><div class="explorer-footer"><button class="text-button" id="new-folder">+ Nova pasta</button>${folder ? '<button class="text-button" id="rename-folder">Renomear pasta</button><button class="text-button delete" id="delete-folder">Excluir pasta</button>' : ""}</div></aside><section class="file-workspace" id="file-workspace">${current ? `<div class="file-topbar"><div><span class="file-type ${current.kind}">${fileIcons[current.kind]}</span><strong>${esc(current.name)}</strong></div><div class="button-row"><button class="icon-btn" id="rename-file" title="Renomear" aria-label="Renomear arquivo">✎</button><button class="icon-btn" id="move-file" title="Mover" aria-label="Mover arquivo">⇄</button><button class="icon-btn" id="download-file" title="Baixar arquivo" aria-label="Baixar arquivo">↓</button><button class="icon-btn delete" id="delete-file" title="Excluir" aria-label="Excluir arquivo">×</button></div></div><div id="file-editor"></div>` : `<div class="workspace-empty"><span class="workspace-star">✳</span><span class="eyebrow">IDEIAS PRECISAM DE ESPAÇO</span><h2>O próximo conceito<br>começa com uma página.</h2><p>Crie documentos, organize referências, desenhe<br>e dê forma às suas fórmulas matemáticas.</p><div class="creation-options"><button data-create="doc"><span>▤</span> Documento</button><button data-create="formula"><span>√</span> Fórmula</button><button data-create="design"><span>◈</span> Design gráfico</button></div><p class="hint">Tudo é salvo neste navegador. Faça backups em Preferências.</p></div>`}</section></div>`;
+      )}</div><input type="search" id="file-search" aria-label="Buscar na pasta atual" placeholder="Buscar nesta pasta…" value="${esc(fileFilter)}"><div class="file-list">${folder ? '<button class="file-item parent-folder" id="folder-up"><span>↰</span> Voltar uma pasta</button>' : ""}${children.map((f) => `<button class="file-item ${activeFile === f.id ? "selected" : ""}" data-file="${f.id}"><span class="file-type ${f.kind}">${fileIcons[f.kind]}</span><span class="file-name">${esc(f.name)}</span>${f.kind === "folder" ? "<span>›</span>" : ""}</button>`).join("") || '<p class="hint explorer-empty">Nenhum arquivo nesta pasta.</p>'}</div><div class="explorer-footer"><button class="text-button" id="new-folder">+ Nova pasta</button>${folder ? '<button class="text-button" id="rename-folder">Renomear pasta</button><button class="text-button delete" id="delete-folder">Excluir pasta</button>' : ""}</div></aside><section class="file-workspace" id="file-workspace">${current ? `<div class="file-topbar"><div><span class="file-type ${current.kind}">${fileIcons[current.kind]}</span><strong>${esc(current.name)}</strong></div><div class="button-row"><button class="icon-btn" id="rename-file" title="Renomear" aria-label="Renomear arquivo">✎</button><button class="icon-btn" id="move-file" title="Mover" aria-label="Mover arquivo">⇄</button><button class="icon-btn" id="download-file" title="Baixar arquivo" aria-label="Baixar arquivo">↓</button><button class="icon-btn delete" id="delete-file" title="Excluir" aria-label="Excluir arquivo">×</button></div></div><div id="file-editor"></div>` : `<div class="workspace-empty"><span class="workspace-star">✳</span><span class="eyebrow">IDEIAS PRECISAM DE ESPAÇO</span><h2>O próximo conceito<br>começa com uma página.</h2><p>Crie documentos, organize referências, desenhe<br>e dê forma às suas fórmulas matemáticas.</p><div class="creation-options"><button data-create="doc"><span>▤</span> Documento</button><button data-create="formula"><span>√</span> Fórmula</button><button data-create="design"><span>◈</span> Design gráfico</button></div><p class="hint">Salvo localmente e sincronizado com a nuvem quando você entrar.</p></div>`}</section></div>`;
   main.querySelectorAll("[data-file]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -714,6 +1017,12 @@ function renderThor() {
     $("#file-search").setSelectionRange(pos, pos);
   };
   $("#new-file").onclick = () => newFile();
+  $("#export-thor").onclick = exportThor;
+  $("#print-thor").onclick = printThor;
+  main.querySelectorAll("[data-thor-template]").forEach(
+    (button) =>
+      (button.onclick = () => createThorTemplate(button.dataset.thorTemplate)),
+  );
   $("#new-folder").onclick = () => newFile("folder");
   main
     .querySelectorAll("[data-create]")
@@ -998,26 +1307,133 @@ async function uploadFiles(event) {
     toast(`${count} arquivo(s) importado(s).`);
   }
 }
+async function downloadCloudVersion() {
+  const remote = await getCloudState();
+  if (!remote) {
+    toast("Ainda não há uma versão na nuvem.");
+    return;
+  }
+  if (
+    !(await confirmDialog(
+      "Usar a versão da nuvem?",
+      "Os dados deste navegador serão substituídos pela versão sincronizada.",
+    ))
+  )
+    return;
+  await applyCloudPayload(remote.payload, "Versão da nuvem restaurada");
+  setCloudMeta({
+    userId: cloudSession.user.id,
+    hash: await stateHash(remote.payload),
+    revision: remote.revision,
+    updatedAt: remote.updated_at,
+  });
+  cloudMessage = "Versão da nuvem aplicada neste dispositivo.";
+  toast("Dados baixados da nuvem.");
+}
+async function uploadLocalVersion() {
+  if (
+    !(await confirmDialog(
+      "Enviar este dispositivo?",
+      "A versão principal da nuvem será substituída por estes dados. Um backup será criado antes.",
+    ))
+  )
+    return;
+  const remote = await getCloudState();
+  if (remote)
+    await createCloudBackup(
+      cloudSession.user.id,
+      remote.payload,
+      "Antes de substituir pela versão local",
+    );
+  await pushToCloud({ backup: true, label: "Versão enviada manualmente" });
+  toast("Este dispositivo agora é a versão principal.");
+}
+function cloudBackupsHTML() {
+  return cloudBackups.length
+    ? `<div class="cloud-backups">${cloudBackups
+        .map(
+          (backup) =>
+            `<div><span><strong>${esc(backup.label)}</strong><small>${new Date(backup.created_at).toLocaleString("pt-BR")}</small></span><button class="text-button" data-restore-cloud="${backup.id}">Restaurar</button><button class="icon-btn delete" data-delete-cloud="${backup.id}" aria-label="Excluir backup">×</button></div>`,
+        )
+        .join("")}</div>`
+    : '<p class="hint">Os backups versionados aparecerão aqui.</p>';
+}
 function renderSettings() {
   const size = new Blob([JSON.stringify(state)]).size;
+  const cloudCard = cloudSession?.user
+    ? `<section class="panel settings-card cloud-card"><div class="panel-heading"><div><h2>Sincronização Worldforge</h2><p>${esc(cloudSession.user.email || "Conta conectada")}</p></div><span class="cloud-indicator ${cloudConflict ? "conflict" : ""}">${cloudConflict ? "ATENÇÃO" : "● CONECTADO"}</span></div><p>${esc(cloudMessage)}</p><div class="button-row"><button class="button" id="cloud-upload">↑ Enviar este dispositivo</button><button class="button secondary" id="cloud-download">↓ Baixar da nuvem</button><button class="button secondary" id="cloud-backup">+ Criar versão</button></div>${cloudBackupsHTML()}<button class="text-button" id="cloud-signout">Sair da sincronização</button></section>`
+    : `<section class="panel settings-card cloud-card"><div class="panel-heading"><div><h2>Sincronização Worldforge</h2><p>Use a mesma conta no celular e no computador.</p></div><span class="cloud-indicator">NUVEM</span></div><p>${esc(cloudMessage)}</p><form id="cloud-login"><label>Seu e-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@exemplo.com"></label><button class="button">Enviar link de acesso</button></form><p class="hint">Você receberá um link seguro. Somente sua conta poderá ler seus dados graças às políticas RLS.</p></section>`;
   main.innerHTML =
     heading(
       "WORLDFORGE / PREFERÊNCIAS",
       "Your space. Your pace.",
-      "Ajuste sua rotina e mantenha uma cópia do que você construiu.",
+      "Ajuste sua rotina, sincronize dispositivos e proteja seu progresso.",
     ) +
-    `<div class="settings-grid"><section class="panel settings-card"><div class="panel-heading"><div><h2>No seu ritmo</h2><p>Metas simples para continuar avançando.</p></div></div><form id="settings-form"><label>Como quer ser chamado?<input name="name" maxlength="80" value="${esc(state.settings.name)}" placeholder="Seu nome"></label><div class="field-grid"><label>Meta diária (min)<input type="number" min="1" max="600" name="goal" required value="${state.settings.goal}"></label><label>Sessão de foco (min)<input type="number" min="1" max="180" name="focus" required value="${state.settings.focus}"></label></div><p class="hint">A duração é aplicada à próxima sessão de foco.</p><button class="button">Salvar preferências</button></form></section><section class="panel settings-card"><div class="panel-heading"><div><h2>Uma cópia para levar</h2><p>Backup completo do English e do THOR.</p></div><span class="backup-icon">↓</span></div><p>Seus dados ficam neste navegador e neste dispositivo. Limpar os dados do site pode apagá-los. Não há sincronização automática com o GitHub ou entre dispositivos.</p><div class="storage-summary"><strong>${(size / 1024 / 1024).toFixed(2)} MB</strong><span>${state.files.length} itens THOR · ${state.cards.length} palavras · ${state.journals.length} páginas</span></div><div class="button-row"><button class="button" id="export-backup">↓ Exportar backup</button><button class="button secondary" id="import-backup">↑ Restaurar backup</button></div><p class="hint">A restauração substitui o espaço atual após validação e confirmação. Exporte uma cópia antes de restaurar.</p></section><section class="panel settings-card"><h2>Publicação em /english</h2><p>Este aplicativo é estático e usa caminhos relativos. O mesmo build funciona em GitHub Pages, em <strong>worldforge.site/english/</strong> ou em um subdomínio.</p><p>As instruções de publicação estão no README do projeto. A pasta do build é <code>dist/</code>.</p><p class="hint">A publicação contém o aplicativo. Seus estudos e arquivos permanecem no armazenamento do seu navegador.</p></section><section class="panel settings-card"><h2>Sobre este espaço</h2><p>Uma evolução da Central Pessoal, focada em inglês e na organização do projeto THOR.</p><p>Matemática renderizada com KaTeX. Editor gráfico vetorial com formas e textos. Pronúncia pela voz disponível no navegador.</p><span class="pill">ENGLISH · WORLDFORGE · v1.0</span></section></div>`;
-  $("#settings-form").onsubmit = (e) => {
-    e.preventDefault();
-    const r = Object.fromEntries(new FormData(e.target));
+    `<div class="settings-grid"><section class="panel settings-card"><div class="panel-heading"><div><h2>No seu ritmo</h2><p>Metas, foco e lembretes de estudo.</p></div></div><form id="settings-form"><label>Como quer ser chamado?<input name="name" maxlength="80" value="${esc(state.settings.name)}" placeholder="Seu nome"></label><div class="field-grid"><label>Meta diária (min)<input type="number" min="1" max="600" name="goal" required value="${state.settings.goal}"></label><label>Meta semanal (min)<input type="number" min="1" max="4200" name="weeklyGoal" required value="${state.settings.weeklyGoal}"></label></div><div class="field-grid"><label>Sessão de foco (min)<input type="number" min="1" max="180" name="focus" required value="${state.settings.focus}"></label><label>Horário do lembrete<input type="time" name="notificationTime" required value="${state.settings.notificationTime}"></label></div><label class="checkbox-label"><input name="notifications" type="checkbox" ${state.settings.notifications ? "checked" : ""}> Lembrar de estudar enquanto o aplicativo estiver aberto</label><button class="button">Salvar preferências</button></form></section>${cloudCard}<section class="panel settings-card"><div class="panel-heading"><div><h2>Backup portátil</h2><p>Uma cópia completa do English e do THOR.</p></div><span class="backup-icon">↓</span></div><div class="storage-summary"><strong>${(size / 1024 / 1024).toFixed(2)} MB</strong><span>${state.files.length} itens THOR · ${state.cards.length} palavras · ${state.journals.length} páginas</span></div><div class="button-row"><button class="button" id="export-backup">↓ Exportar arquivo</button><button class="button secondary" id="import-backup">↑ Restaurar arquivo</button></div><p class="hint">Backups na nuvem são versionados quando sua conta está conectada. Este arquivo também funciona sem internet.</p></section><section class="panel settings-card"><h2>Instalar como aplicativo</h2><p>O English funciona como PWA, abre em janela própria e mantém as telas principais disponíveis offline.</p><div class="connection-status"><span class="status-dot"></span>${navigator.onLine ? "Online" : "Offline — usando conteúdo salvo"}</div><button class="button secondary" id="install-app" ${installPrompt ? "" : "disabled"}>Instalar English</button><p class="hint">Se o botão estiver desativado, o aplicativo já pode estar instalado ou o navegador oferece a instalação no menu.</p></section><section class="panel settings-card"><h2>Sobre este espaço</h2><p>Estudos de inglês, revisão espaçada e laboratório conceitual THOR em um único espaço.</p><p>Matemática com KaTeX, editor vetorial, exportação Markdown e sincronização protegida por conta.</p><span class="pill">ENGLISH · WORLDFORGE · v2.0</span></section></div>`;
+  $("#settings-form").onsubmit = async (event) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(event.target));
+    const notifications = values.notifications === "on";
+    if (notifications && "Notification" in window && Notification.permission === "default")
+      await Notification.requestPermission();
     state.settings = {
-      name: r.name.trim(),
-      goal: Number(r.goal),
-      focus: Number(r.focus),
+      ...state.settings,
+      name: values.name.trim(),
+      goal: Number(values.goal),
+      weeklyGoal: Number(values.weeklyGoal),
+      focus: Number(values.focus),
+      notifications:
+        notifications &&
+        "Notification" in window &&
+        Notification.permission === "granted",
+      notificationTime: values.notificationTime,
     };
     persist()
       .then(() => toast("Preferências salvas."))
       .catch(() => {});
+  };
+  $("#cloud-login")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = new FormData(event.target).get("email").trim();
+    try {
+      await sendMagicLink(email);
+      cloudMessage = "Link enviado. Abra seu e-mail e volte para esta página.";
+      renderSettings();
+    } catch (error) {
+      toast(error.message || "Não foi possível enviar o link.");
+    }
+  });
+  $("#cloud-upload")?.addEventListener("click", () => uploadLocalVersion().catch((error) => toast(error.message)));
+  $("#cloud-download")?.addEventListener("click", () => downloadCloudVersion().catch((error) => toast(error.message)));
+  $("#cloud-backup")?.addEventListener("click", () =>
+    pushToCloud({ backup: true, label: `Versão manual · ${new Date().toLocaleString("pt-BR")}` })
+      .then(() => toast("Versão criada na nuvem."))
+      .catch((error) => toast(error.message)),
+  );
+  $("#cloud-signout")?.addEventListener("click", () => signOutCloud().catch((error) => toast(error.message)));
+  main.querySelectorAll("[data-restore-cloud]").forEach(
+    (button) =>
+      (button.onclick = async () => {
+        if (!(await confirmDialog("Restaurar esta versão?", "Os dados atuais deste navegador serão substituídos."))) return;
+        const payload = await getCloudBackup(button.dataset.restoreCloud);
+        await applyCloudPayload(payload, "Backup da nuvem restaurado");
+        await pushToCloud();
+        toast("Backup restaurado.");
+      }),
+  );
+  main.querySelectorAll("[data-delete-cloud]").forEach(
+    (button) =>
+      (button.onclick = async () => {
+        if (!(await confirmDialog("Excluir versão?", "Este backup versionado será removido da nuvem."))) return;
+        await deleteCloudBackup(button.dataset.deleteCloud);
+        await refreshCloudBackups();
+      }),
+  );
+  $("#install-app").onclick = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    installPrompt = null;
+    renderSettings();
   };
   $("#export-backup").onclick = exportBackup;
   $("#import-backup").onclick = () => $("#backup-input").click();
@@ -1128,10 +1544,35 @@ $("#conflict-reload").onclick = () => {
 };
 $("#backup-input").onchange = importBackup;
 $("#attachment-input").onchange = uploadFiles;
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  if (route === "settings") renderSettings();
+});
+window.addEventListener("online", () => route === "settings" && renderSettings());
+window.addEventListener("offline", () => route === "settings" && renderSettings());
+function checkStudyReminder() {
+  if (
+    !state?.settings.notifications ||
+    !("Notification" in window) ||
+    Notification.permission !== "granted"
+  )
+    return;
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const key = `worldforge-english-reminder-${dateKey(now)}`;
+  if (time !== state.settings.notificationTime || localStorage.getItem(key)) return;
+  localStorage.setItem(key, "sent");
+  new Notification("Hora do seu inglês", {
+    body: "Um pequeno passo hoje mantém sua sequência viva.",
+    icon: "./public/favicon.svg",
+    tag: "worldforge-english-daily",
+  });
+}
 async function boot() {
   try {
     const saved = await openStore();
-    state = saved ? validateState(saved) : seed();
+    state = saved ? validateState(upgradeState(saved)) : seed();
     if (!saved) await persist();
     else setStatus("Salvo neste navegador");
     navigate();
@@ -1141,8 +1582,16 @@ async function boot() {
     setInterval(() => {
       if (dateKey() !== day && route === "today") render();
     }, 60000);
+    setInterval(checkStudyReminder, 30000);
+    checkStudyReminder();
     if ("serviceWorker" in navigator && location.protocol !== "file:")
       navigator.serviceWorker.register("./sw.js").catch(() => {});
+    initCloud(handleCloudSession)
+      .then(handleCloudSession)
+      .catch((error) => {
+        cloudMessage = `Sincronização indisponível: ${error.message}`;
+        if (route === "settings") renderSettings();
+      });
   } catch (error) {
     main.innerHTML = `<section class="panel empty"><h1>Não foi possível abrir seu espaço.</h1><p>O armazenamento do navegador pode estar bloqueado ou conter dados incompatíveis. Tente recarregar ou usar outro navegador. Os dados existentes foram preservados.</p><pre>${esc(error.message)}</pre><button class="button" onclick="location.reload()">Recarregar</button></section>`;
     setStatus("Armazenamento indisponível", true);

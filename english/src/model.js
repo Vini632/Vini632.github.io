@@ -11,13 +11,21 @@ export function seed() {
   const today = dateKey();
   return {
     version: 1,
-    settings: { goal: 30, focus: 25, name: "" },
+    settings: {
+      goal: 30,
+      weeklyGoal: 150,
+      focus: 25,
+      name: "",
+      notifications: false,
+      notificationTime: "19:00",
+    },
     tasks: [
       {
         id: uid(),
         title: "Ouvir 10 minutos de inglês",
         category: "Listening",
         minutes: 10,
+        difficulty: "beginner",
         repeat: true,
         date: today,
         done: [],
@@ -27,6 +35,7 @@ export function seed() {
         title: "Revisar 5 palavras e falar em voz alta",
         category: "Vocabulary",
         minutes: 5,
+        difficulty: "beginner",
         repeat: true,
         date: today,
         done: [],
@@ -36,6 +45,7 @@ export function seed() {
         title: "Escrever sobre o meu dia em inglês",
         category: "Writing",
         minutes: 15,
+        difficulty: "beginner",
         repeat: true,
         date: today,
         done: [],
@@ -86,6 +96,18 @@ export function seed() {
       },
     ],
   };
+}
+export function upgradeState(input) {
+  const state = structuredClone(input);
+  state.settings = {
+    weeklyGoal: 150,
+    notifications: false,
+    notificationTime: "19:00",
+    ...state.settings,
+  };
+  for (const task of state.tasks || [])
+    task.difficulty ||= "beginner";
+  return state;
 }
 export function tasksFor(state, day) {
   return state.tasks.filter((t) => (t.repeat ? t.date <= day : t.date === day));
@@ -154,7 +176,11 @@ export function validateState(s) {
     !num(s.settings.goal, 600) ||
     s.settings.goal < 1 ||
     !num(s.settings.focus, 180) ||
-    s.settings.focus < 1
+    s.settings.focus < 1 ||
+    !num(s.settings.weeklyGoal, 4200) ||
+    s.settings.weeklyGoal < 1 ||
+    typeof s.settings.notifications !== "boolean" ||
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(s.settings.notificationTime)
   )
     fail();
   if (
@@ -177,6 +203,7 @@ export function validateState(s) {
         "Grammar",
       ].includes(t.category) ||
       !num(t.minutes, 600) ||
+      !["beginner", "intermediate", "advanced"].includes(t.difficulty) ||
       typeof t.repeat !== "boolean" ||
       !isDay(t.date) ||
       !list(t.done) ||
@@ -288,5 +315,5 @@ export function parseBackup(text) {
   }
   if (b.app !== "worldforge-english")
     throw new Error("Selecione um backup do English · Worldforge.");
-  return validateState(b.state);
+  return validateState(upgradeState(b.state));
 }

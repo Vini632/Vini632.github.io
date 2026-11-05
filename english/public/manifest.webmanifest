@@ -1,12 +1,30 @@
 {
   "name": "English · Worldforge",
   "short_name": "English",
+  "id": "../",
   "lang": "pt-BR",
   "start_url": "../",
   "scope": "../",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "categories": ["education", "productivity"],
   "background_color": "#060907",
   "theme_color": "#060907",
+  "shortcuts": [
+    {
+      "name": "Vocabulário",
+      "short_name": "Vocabulário",
+      "url": "../#vocabulary",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Projeto THOR",
+      "short_name": "THOR",
+      "url": "../#thor",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ],
   "icons": [
     {
       "src": "./favicon.svg",
