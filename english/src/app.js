@@ -6,6 +6,7 @@ import {
   tasksFor,
   toggleTask,
   reviewCard,
+  nextCardInterval,
   minutesFor,
   streak,
   descendants,
@@ -40,6 +41,7 @@ const routes = {
   today: "Meu dia",
   tasks: "Rotina de estudos",
   vocabulary: "Vocabulário",
+  flashcards: "Flashcards",
   journal: "Diário em inglês",
   thor: "Projeto THOR",
   settings: "Preferências e backup",
@@ -649,7 +651,7 @@ function renderVocabulary() {
       "ENGLISH / VOCABULÁRIO",
       "Words open worlds.",
       "Construa seu repertório com contexto e revisão espaçada.",
-      `<button class="button" id="new-card">+ Nova palavra</button>`,
+      `<button class="button" id="new-card">+ Novo flashcard</button>`,
     ) +
     `<section class="panel translator-card"><div class="translator-heading"><div><span class="eyebrow">TRADUTOR INTEGRADO</span><h2>${translatorMode === "pt-en" ? "Do português para o inglês" : "Do inglês para o português"}</h2><p>Tradução, pronúncia e contexto sem sair do seu vocabulário.</p></div><div class="button-row"><button class="button secondary small" id="translator-swap">⇄ Inverter idiomas</button><span class="translator-online">● ONLINE</span></div></div><div class="translator-fields"><label><span>${translatorMode === "pt-en" ? "PORTUGUÊS (PT-BR)" : "INGLÊS (EN-US)"}</span><textarea id="translator-input" rows="3" maxlength="200" placeholder="${translatorMode === "pt-en" ? "Ex.: transferência de calor" : "Ex.: heat transfer"}">${esc(translatorText)}</textarea></label><div class="translator-arrow" aria-hidden="true">→</div><div class="translator-result"><span>${translatorMode === "pt-en" ? "INGLÊS (EN-US)" : "PORTUGUÊS (PT-BR)"}</span><strong id="translator-output">${esc(translatorResult || "A tradução aparecerá aqui.")}</strong><div id="translator-details" class="translator-details"></div><button class="text-button" id="translator-speak" ${translatorResult ? "" : "disabled"}>◖ Ouvir em inglês</button></div></div><div class="translator-footer"><p id="translator-status">${esc(translatorStatus)}</p><span>MyMemory + Free Dictionary</span><button class="button" id="translator-add" ${translatorResult ? "" : "disabled"}>+ Adicionar ao vocabulário</button></div></section><div class="vocab-grid"><section class="panel review-panel"><div class="panel-heading"><h2>Revisão do dia</h2><span class="pill">${due.length} pendentes</span></div>${card ? `<div class="flashcard"><span class="eyebrow">COMO VOCÊ DIRIA ISSO EM PORTUGUÊS?</span><h2>${esc(card.word)}</h2><button class="text-button" id="speak-card">◖ Ouvir pronúncia</button>${revealed ? `<div class="card-answer"><strong>${esc(card.meaning)}</strong><p>${esc(card.example || "Adicione uma frase de exemplo para dar contexto.")}</p></div>` : '<p class="muted">Pense no significado e em uma frase de exemplo.</p>'}</div>${revealed ? `<div class="review-actions"><button class="button secondary" id="review-again">Rever hoje</button><button class="button" id="review-known">Lembrei ✓</button></div><p class="hint">Lembrei: próxima revisão em ${card.interval ? Math.min(180, card.interval * 2) : 1} dia(s). Rever hoje: retorna à fila.</p>` : '<button class="button full-width" id="reveal-card">Mostrar significado</button>'}` : empty("Tudo revisado por aqui!", "Adicione novas palavras ou volte na próxima data de revisão.")}</section><section class="panel vocab-library"><div class="panel-heading"><div><h2>Meu repertório <span class="count">${state.cards.length}</span></h2><p>Palavras, significados e suas próprias frases.</p></div></div><label class="search-label"><span>⌕</span><input id="vocab-search" type="search" aria-label="Buscar palavra ou significado" placeholder="Buscar uma palavra…" value="${esc(vocabFilter)}"></label><div id="vocab-list">${cards.length ? cards.map((c) => `<div class="vocab-row"><div><strong>${esc(c.word)}</strong><p>${esc(c.meaning)}</p><small>Revisão: ${new Date(c.due + "T12:00:00").toLocaleDateString("pt-BR")}</small></div><div><button class="icon-btn" data-edit-card="${c.id}" aria-label="Editar ${esc(c.word)}">↗</button><button class="icon-btn" data-delete-card="${c.id}" aria-label="Excluir ${esc(c.word)}">×</button></div></div>`).join("") : empty("Nenhuma palavra encontrada", "Adicione uma palavra ou tente outro termo.")}</div></section></div>`;
   $("#new-card").onclick = () => cardDialog();
@@ -751,17 +753,114 @@ function renderVocabulary() {
     speechSynthesis.speak(speech);
   });
 }
+function reviewIntervalLabel(days) {
+  if (days === 0) return "hoje";
+  if (days === 1) return "1 dia";
+  if (days < 30) return `${days} dias`;
+  if (days < 365) return `${Math.round(days / 30)} meses`;
+  return `${(days / 365).toFixed(days < 730 ? 1 : 0)} anos`;
+}
+function renderFlashcards() {
+  const today = dateKey();
+  const due = state.cards
+    .filter((item) => item.due <= today)
+    .sort((a, b) => a.due.localeCompare(b.due) || a.interval - b.interval || a.word.localeCompare(b.word));
+  let card = due.find((item) => item.id === reviewId) || due[0];
+  reviewId = card?.id;
+  const reviewedToday = state.cards.filter((item) => item.lastReviewed === today).length;
+  const newCount = due.filter((item) => item.reviews === 0).length;
+  const learningCount = due.filter((item) => item.reviews > 0 && item.interval <= 1).length;
+  const matureCount = state.cards.filter((item) => item.interval >= 21).length;
+  const dailyTotal = reviewedToday + due.length;
+  const progress = dailyTotal ? Math.round((reviewedToday / dailyTotal) * 100) : 100;
+  const front = card?.direction === "pt-en" ? card.meaning : card?.word;
+  const back = card?.direction === "pt-en" ? card.word : card?.meaning;
+  const prompt = card?.direction === "pt-en" ? "COMO VOCÊ DIRIA ISSO EM INGLÊS?" : "O QUE ISSO SIGNIFICA?";
+  const ratingButtons = card
+    ? [
+        ["again", "1", "Errei", nextCardInterval(card, "again")],
+        ["hard", "2", "Difícil", nextCardInterval(card, "hard")],
+        ["good", "3", "Bom", nextCardInterval(card, "good")],
+        ["easy", "4", "Fácil", nextCardInterval(card, "easy")],
+      ]
+    : [];
+  main.innerHTML =
+    heading(
+      "ENGLISH / FLASHCARDS",
+      "Remember what matters.",
+      "Revisão espaçada inspirada no Anki, ligada ao seu vocabulário.",
+      '<a class="button secondary" href="#vocabulary">Gerenciar cartões</a>',
+    ) +
+    `<section class="flash-stats" aria-label="Resumo dos flashcards"><div><span>PARA HOJE</span><strong>${due.length}</strong><small>cartões pendentes</small></div><div><span>NOVOS</span><strong>${newCount}</strong><small>primeiro contato</small></div><div><span>APRENDENDO</span><strong>${learningCount}</strong><small>intervalo curto</small></div><div><span>MADUROS</span><strong>${matureCount}</strong><small>21 dias ou mais</small></div></section>` +
+    `<section class="panel flash-study"><div class="flash-study-head"><div><span class="eyebrow">SESSÃO DE HOJE</span><h2>${reviewedToday} revisado${reviewedToday === 1 ? "" : "s"} · ${due.length} pendente${due.length === 1 ? "" : "s"}</h2></div><strong>${progress}%</strong></div><div class="study-progress"><span style="width:${progress}%"></span></div>${
+      card
+        ? `<div class="anki-card ${revealed ? "is-revealed" : ""}" id="study-card" role="button" tabindex="0" aria-label="${revealed ? "Resposta exibida" : "Mostrar resposta"}"><div class="anki-meta"><span>${esc(prompt)}</span><span>${card.direction === "pt-en" ? "PT → EN" : "EN → PT"}</span></div><div class="anki-front"><h2>${esc(front)}</h2>${card.direction === "en-pt" ? '<button class="text-button" id="study-speak">◖ Ouvir pronúncia</button>' : ""}</div>${revealed ? `<div class="anki-divider"></div><div class="anki-back"><strong>${esc(back)}</strong><p>${esc(card.example || "Adicione uma frase de exemplo para criar contexto.")}</p>${card.tags.length ? `<div class="tag-row">${card.tags.map((tag) => `<span>#${esc(tag)}</span>`).join("")}</div>` : ""}</div>` : '<p class="anki-hint">Clique no cartão ou pressione Espaço para revelar.</p>'}</div>${
+            revealed
+              ? `<div class="anki-ratings" aria-label="Avalie sua lembrança">${ratingButtons.map(([rating, key, label, interval]) => `<button class="rating ${rating}" data-rating="${rating}"><kbd>${key}</kbd><strong>${label}</strong><small>${reviewIntervalLabel(interval)}</small></button>`).join("")}</div><p class="keyboard-hint">Atalhos: 1 Errei · 2 Difícil · 3 Bom · 4 Fácil · Espaço revela</p>`
+              : '<button class="button full-width study-reveal" id="study-reveal">Mostrar resposta <kbd>Espaço</kbd></button>'
+          }`
+        : `<div class="flash-complete"><span>✓</span><h2>Fila concluída!</h2><p>Você terminou as revisões de hoje. Novos cartões aparecerão conforme os intervalos definidos.</p><a class="button" href="#vocabulary">+ Criar outro flashcard</a></div>`
+    }</section>` +
+    `<section class="panel flash-guide"><div><span class="eyebrow">COMO A FILA APRENDE</span><h2>Você avalia. O intervalo se adapta.</h2></div><div class="guide-grid"><p><strong>Errei</strong><span>Volta para hoje e reduz a facilidade.</span></p><p><strong>Difícil</strong><span>Avança pouco e aparece mais cedo.</span></p><p><strong>Bom</strong><span>Usa o intervalo ideal para consolidar.</span></p><p><strong>Fácil</strong><span>Avança mais e aumenta a facilidade.</span></p></div></section>`;
+  const reveal = () => {
+    if (!card || revealed) return;
+    revealed = true;
+    renderFlashcards();
+  };
+  $("#study-reveal")?.addEventListener("click", reveal);
+  $("#study-card")?.addEventListener("click", (event) => {
+    if (event.target.closest("button")) return;
+    reveal();
+  });
+  $("#study-card")?.addEventListener("keydown", (event) => {
+    if ((event.key === "Enter" || event.key === " ") && !revealed) {
+      event.preventDefault();
+      reveal();
+    }
+  });
+  $("#study-speak")?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (!("speechSynthesis" in window)) return toast("Pronúncia indisponível neste navegador.");
+    speechSynthesis.cancel();
+    const speech = new SpeechSynthesisUtterance(card.word);
+    speech.lang = "en-US";
+    speech.rate = 0.85;
+    speechSynthesis.speak(speech);
+  });
+  main.querySelectorAll("[data-rating]").forEach((button) => {
+    button.addEventListener("click", () => {
+      reviewCard(card, button.dataset.rating, today);
+      const next = due.find((item) => item.id !== card.id);
+      reviewId = next?.id || (card.due <= today ? card.id : null);
+      revealed = false;
+      persist();
+      render();
+    });
+  });
+}
+document.addEventListener("keydown", (event) => {
+  if (route !== "flashcards" || event.repeat || event.target.closest("input, textarea, select, dialog")) return;
+  if (event.key === " " && !revealed) {
+    event.preventDefault();
+    $("#study-reveal")?.click();
+  } else if (revealed && /^[1-4]$/.test(event.key)) {
+    const rating = ["again", "hard", "good", "easy"][Number(event.key) - 1];
+    main.querySelector(`[data-rating="${rating}"]`)?.click();
+  }
+});
 async function cardDialog(card, prefill = {}) {
   const values = card || prefill;
   const r = await dialog(
-    card ? "Editar palavra" : "Uma nova palavra",
-    `<label>Palavra ou expressão em inglês<input name="word" maxlength="200" required value="${esc(values.word || "")}" placeholder="Ex.: figure out"></label><label>Significado<input name="meaning" maxlength="500" required value="${esc(values.meaning || "")}" placeholder="Ex.: entender, descobrir"></label><label>Frase de exemplo<textarea name="example" maxlength="1000" rows="3" placeholder="I will figure it out.">${esc(values.example || "")}</textarea></label>`,
+    card ? "Editar flashcard" : "Um novo flashcard",
+    `<label>Frente em inglês<input name="word" maxlength="200" required value="${esc(values.word || "")}" placeholder="Ex.: figure out"></label><label>Verso em português<input name="meaning" maxlength="500" required value="${esc(values.meaning || "")}" placeholder="Ex.: entender, descobrir"></label><label>Frase de exemplo<textarea name="example" maxlength="1000" rows="3" placeholder="I will figure it out.">${esc(values.example || "")}</textarea></label><div class="field-grid"><label>Direção do estudo<select name="direction"><option value="en-pt" ${(values.direction || "en-pt") === "en-pt" ? "selected" : ""}>Inglês → Português</option><option value="pt-en" ${values.direction === "pt-en" ? "selected" : ""}>Português → Inglês</option></select></label><label>Tags, separadas por vírgula<input name="tags" maxlength="300" value="${esc((values.tags || []).join(", "))}" placeholder="verbo, trabalho"></label></div>`,
   );
   if (!r || !r.word.trim() || !r.meaning.trim()) return;
   const savedValues = {
     word: r.word.trim(),
     meaning: r.meaning.trim(),
     example: r.example.trim(),
+    direction: r.direction === "pt-en" ? "pt-en" : "en-pt",
+    tags: [...new Set(r.tags.split(",").map((tag) => tag.trim().toLocaleLowerCase("pt-BR")).filter(Boolean))].slice(0, 12),
   };
   if (card) Object.assign(card, savedValues);
   else
@@ -770,7 +869,11 @@ async function cardDialog(card, prefill = {}) {
       ...savedValues,
       due: dateKey(),
       interval: 0,
+      ease: 250,
       reviews: 0,
+      lapses: 0,
+      lastReviewed: null,
+      lastRating: null,
     });
   persist();
   render();
@@ -1508,6 +1611,7 @@ function render() {
     today: renderToday,
     tasks: renderTasks,
     vocabulary: renderVocabulary,
+    flashcards: renderFlashcards,
     journal: renderJournal,
     thor: renderThor,
     settings: renderSettings,

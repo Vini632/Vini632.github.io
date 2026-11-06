@@ -61,9 +61,15 @@ export function seed() {
       word,
       meaning,
       example,
+      direction: "en-pt",
+      tags: [],
       due: today,
       interval: 0,
+      ease: 250,
       reviews: 0,
+      lapses: 0,
+      lastReviewed: null,
+      lastRating: null,
     })),
     journals: [],
     sessions: [],
@@ -107,6 +113,14 @@ export function upgradeState(input) {
   };
   for (const task of state.tasks || [])
     task.difficulty ||= "beginner";
+  for (const card of state.cards || []) {
+    card.direction ||= "en-pt";
+    card.tags = Array.isArray(card.tags) ? card.tags : [];
+    card.ease = Number.isFinite(card.ease) ? card.ease : 250;
+    card.lapses = Number.isFinite(card.lapses) ? card.lapses : 0;
+    card.lastReviewed ||= null;
+    card.lastRating ||= null;
+  }
   return state;
 }
 export function tasksFor(state, day) {
@@ -117,12 +131,28 @@ export function toggleTask(task, day) {
     ? task.done.filter((d) => d !== day)
     : [...task.done, day];
 }
-export function reviewCard(card, known, day) {
-  card.interval = known
-    ? Math.min(180, card.interval ? card.interval * 2 : 1)
-    : 0;
+export function nextCardInterval(card, rating) {
+  const current = card.interval || 0;
+  const ease = Math.max(130, Math.min(350, card.ease || 250));
+  if (rating === "again") return 0;
+  if (rating === "hard") return Math.min(3650, current ? Math.max(1, Math.round(current * 1.2)) : 1);
+  if (rating === "easy") return Math.min(3650, current ? Math.max(current + 2, Math.round(current * (ease / 100) * 1.3)) : 4);
+  return Math.min(3650, current ? Math.max(current + 1, Math.round(current * (ease / 100))) : 1);
+}
+export function reviewCard(card, rating, day) {
+  if (typeof rating === "boolean") rating = rating ? "good" : "again";
+  if (!["again", "hard", "good", "easy"].includes(rating))
+    throw new Error("Avaliação de flashcard inválida.");
+  card.interval = nextCardInterval(card, rating);
+  card.ease = Math.max(
+    130,
+    Math.min(350, (card.ease || 250) + ({ again: -20, hard: -15, good: 0, easy: 15 })[rating]),
+  );
   card.due = addDays(day, card.interval);
   card.reviews += 1;
+  if (rating === "again") card.lapses += 1;
+  card.lastReviewed = day;
+  card.lastRating = rating;
 }
 export function minutesFor(state, day) {
   return state.sessions
@@ -217,9 +247,18 @@ export function validateState(s) {
       !str(c.word, 200) ||
       !str(c.meaning, 500) ||
       !str(c.example, 1000) ||
+      !["en-pt", "pt-en"].includes(c.direction) ||
+      !list(c.tags) ||
+      c.tags.length > 12 ||
+      !c.tags.every((tag) => str(tag, 40)) ||
       !isDay(c.due) ||
-      !num(c.interval, 180) ||
-      !num(c.reviews)
+      !num(c.interval, 3650) ||
+      !num(c.ease, 350) ||
+      c.ease < 130 ||
+      !num(c.reviews) ||
+      !num(c.lapses) ||
+      !(c.lastReviewed === null || isDay(c.lastReviewed)) ||
+      !(c.lastRating === null || ["again", "hard", "good", "easy"].includes(c.lastRating))
     )
       fail();
   for (const j of s.journals)

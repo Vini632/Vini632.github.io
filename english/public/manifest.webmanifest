@@ -13,6 +13,12 @@
   "theme_color": "#060907",
   "shortcuts": [
     {
+      "name": "Flashcards",
+      "short_name": "Flashcards",
+      "url": "../#flashcards",
+      "icons": [{ "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
       "name": "Vocabulário",
       "short_name": "Vocabulário",
       "url": "../#vocabulary",
